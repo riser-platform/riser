@@ -1,0 +1,7 @@
+name: echo
+expose:
+  containerPort: 5678
+stages:
+  dev:
+    environment:
+      testDev: "true"

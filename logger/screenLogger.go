@@ -1,0 +1,36 @@
+package logger
+
+import (
+	"fmt"
+)
+
+// ScreenLogger logs to a terminal
+type ScreenLogger struct {
+	VerboseMode bool
+}
+
+// NewScreenLogger creates a logger instance designed for printing messages to the screen for humans
+func NewScreenLogger(verbose bool) *ScreenLogger {
+	return &ScreenLogger{VerboseMode: verbose}
+}
+
+// Verbose logs a verbose message
+func (logger *ScreenLogger) Verbose(message string) {
+	if logger.VerboseMode {
+		fmt.Println(message)
+	}
+}
+
+// Info logs an information message to the screen
+func (logger *ScreenLogger) Info(message string) {
+	fmt.Println(message)
+}
+
+// Error logs an error to the screen
+func (logger *ScreenLogger) Error(message string, err error) {
+	fmt.Println(message)
+	if err != nil {
+		fmt.Println(err)
+		// TODO: Add error stack when verbose is on
+	}
+}
