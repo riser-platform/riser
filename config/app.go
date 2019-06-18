@@ -10,7 +10,9 @@ type App struct {
 }
 
 type AppCore struct {
-	Name        string            `yaml:"name"`
+	Name string `yaml:"name"`
+	// TODO: Remove Image in favor of convention based docker image names
+	Image       string            `json:"image"`
 	Deploy      *AppDeploy        `yaml:"deploy,omitempty"`
 	Environment map[string]string `yaml:"environment,omitempty"`
 	Expose      *AppExpose        `yaml:"expose,omitempty"`

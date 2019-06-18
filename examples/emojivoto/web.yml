@@ -1,0 +1,9 @@
+name: emojivoto
+image: buoyantio/emojivoto-web
+environment:
+  WEB_PORT: 80
+  EMOJISVC_HOST: TODO
+  VOTINGSVC_HOST: TODO
+  INDEX_BUNDLE: dist/index_bundle.js
+expose:
+  containerPort: 80
