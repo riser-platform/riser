@@ -1,5 +1,8 @@
 name: emojivoto
+# Docker image will be convention based and likely removed
 image: buoyantio/emojivoto-web
+deploy:
+  replicas: 3
 environment:
   WEB_PORT: 80
   EMOJISVC_HOST: TODO
@@ -7,3 +10,9 @@ environment:
   INDEX_BUNDLE: dist/index_bundle.js
 expose:
   containerPort: 80
+
+# Stage Overrides
+stages:
+  dev:
+    deploy:
+      replicas: 1
