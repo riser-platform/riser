@@ -21,7 +21,8 @@ func Execute(runtime *Runtime) {
 	}
 
 	cmd.AddCommand(newAppsCommand())
-	cmd.AddCommand(newDeploymentCommand())
+	cmd.AddCommand(newDeployCommand())
+	cmd.AddCommand(newStatusCommand())
 	cmd.AddCommand(newValidateCommand())
 	cmd.AddCommand(newVersionCmd(runtime.Version))
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")

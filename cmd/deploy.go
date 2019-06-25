@@ -10,35 +10,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newDeploymentCommand() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "deployment",
-		Short: "Commands for deployments",
-	}
-
-	cmd.AddCommand(newDeploymentStatusCommand())
-	cmd.AddCommand(newDeploymentNewCommand())
-
-	return cmd
-}
-
-func newDeploymentStatusCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "status (deployment or app name)",
-		Short: "Gets the status for a deployment.",
-	}
-}
-
-func newDeploymentNewCommand() *cobra.Command {
+func newDeployCommand() *cobra.Command {
 	var appFilePath string
 	var dryRun bool
+	var deploymentName string
 	cmd := &cobra.Command{
-		Use:   "new (stage) (dockerTag) [deployment name (appName)]",
+		Use:   "deploy (dockerTag) (stage)",
 		Short: "Creates a new deployment",
-		Args:  cobra.RangeArgs(2, 3),
+		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			stage := args[0]
-			dockerTag := args[1]
+			dockerTag := args[0]
+			stage := args[1]
 
 			app, err := config.LoadApp(appFilePath)
 			if err != nil {
@@ -70,8 +52,9 @@ func newDeploymentNewCommand() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().StringVarP(&deploymentName, "name", "n", "", "Optionally name the deployment. When specified the full deployment name will be <APP>-name (e.g. myapp-mydeployment).")
 	cmd.Flags().StringVarP(&appFilePath, "file", "f", "./app.yml", "Path to the application config file")
-	cmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "Prints the deployment but does not create it.")
+	cmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "Prints the deployment but does not create it")
 
 	return cmd
 }
