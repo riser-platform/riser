@@ -5,8 +5,8 @@ import (
 	"riser/config"
 
 	"github.com/sanity-io/litter"
-	"github.com/tshak/riser-server/sdk"
 	"github.com/tshak/riser-server/api/v1/model"
+	"github.com/tshak/riser-server/sdk"
 
 	"github.com/spf13/cobra"
 )
@@ -32,14 +32,14 @@ func newDeployCommand() *cobra.Command {
 				println("DRY RUN MODE")
 			}
 
-			deployment := model.RawDeployment{
-				DeploymentMeta: model.DeploymentMeta {
-				// TODO: Support optional deploymentName
-				Name:   app.Name,
-				Stage:  stage,
-				Docker: model.DeploymentDocker{Tag: dockerTag},
+			deployment := &model.RawDeployment{
+				DeploymentMeta: model.DeploymentMeta{
+					// TODO: Support optional deploymentName
+					Name:   app.Name,
+					Stage:  stage,
+					Docker: model.DeploymentDocker{Tag: dockerTag},
 				},
-				App:    *app,
+				App: *app,
 			}
 
 			fmt.Println(litter.Sdump(deployment))
