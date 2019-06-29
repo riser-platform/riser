@@ -1,9 +1,12 @@
 package cmd
 
 import (
-	"github.com/sanity-io/litter"
+	"fmt"
+
+	"github.com/alexeyco/simpletable"
 	"github.com/spf13/cobra"
 	"github.com/tshak/riser-server/sdk"
+	"github.com/wzshiming/ctc"
 )
 
 func newStatusCommand() *cobra.Command {
@@ -24,7 +27,43 @@ func newStatusCommand() *cobra.Command {
 				panic(err)
 			}
 
-			litter.Dump(statuses)
+			table := simpletable.New()
+			table.SetStyle(simpletable.StyleCompactLite)
+			table.Header = &simpletable.Header{
+				Cells: []*simpletable.Cell{
+					defaultCell("Deployment"),
+					defaultCell("Stage"),
+					defaultCell("Healthy?"),
+					defaultCell("Available Replicas"),
+				},
+			}
+
+			for _, status := range statuses {
+				row := []*simpletable.Cell{
+					defaultCell(status.DeploymentName),
+					defaultCell(status.StageName),
+					defaultCell(formatHealthStatus(status.Healthy)),
+					defaultCell(fmt.Sprintf("%d/%d", status.AvailableReplicas, status.DesiredReplicas)),
+				}
+				table.Body.Cells = append(table.Body.Cells, row)
+			}
+
+			fmt.Println(table.String())
 		},
 	}
+}
+
+func defaultCell(text string) *simpletable.Cell {
+	return &simpletable.Cell{Align: simpletable.AlignLeft, Text: text}
+}
+
+func formatHealthStatus(healthy string) string {
+	if healthy == "true" {
+		return fmt.Sprint(ctc.ForegroundBrightGreen, healthy, ctc.Reset)
+	}
+	if healthy == "false" {
+		return fmt.Sprint(ctc.ForegroundBrightRed, healthy, ctc.Reset)
+	}
+
+	return healthy
 }
