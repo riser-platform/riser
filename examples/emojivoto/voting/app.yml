@@ -1,0 +1,8 @@
+name: emojivoto-voting-svc
+image: buoyantio/emojivoto-voting-svc
+deploy:
+  replicas: 1
+environment:
+  GRPC_PORT: 8080
+expose:
+  containerPort: 8080

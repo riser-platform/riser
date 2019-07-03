@@ -1,0 +1,1 @@
+A microservice demo using three services. See https://github.com/BuoyantIO/emojivoto/tree/master/emojivoto-web for more information.

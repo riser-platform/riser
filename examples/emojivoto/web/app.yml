@@ -5,8 +5,8 @@ deploy:
   replicas: 3
 environment:
   WEB_PORT: 80
-  EMOJISVC_HOST: TODO
-  VOTINGSVC_HOST: TODO
+  EMOJISVC_HOST: emojivoto-emoji-svc.apps.svc.cluster.local:8080
+  VOTINGSVC_HOST: emojivoto-voting-svc.apps.svc.cluster.local:8080
   INDEX_BUNDLE: dist/index_bundle.js
 expose:
   containerPort: 80

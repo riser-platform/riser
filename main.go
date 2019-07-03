@@ -9,9 +9,6 @@ import (
 // versionString is a var because overwritten by the compiler using ldflags
 var versionString = "0.0.0-local"
 
-// TODO: Implement server config and context support
-const baseUri = "http://localhost:8000"
-
 func main() {
 	currentVersion, err := version.NewVersion(versionString)
 	if err != nil {
