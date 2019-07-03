@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/tshak/riser-server/api/v1/model"
+
 	"github.com/alexeyco/simpletable"
 	"github.com/spf13/cobra"
 	"github.com/tshak/riser-server/sdk"
@@ -33,8 +35,8 @@ func newStatusCommand() *cobra.Command {
 				Cells: []*simpletable.Cell{
 					defaultCell("Deployment"),
 					defaultCell("Stage"),
-					defaultCell("Healthy?"),
-					defaultCell("Available Replicas"),
+					defaultCell("Rollout"),
+					defaultCell("Healthy"),
 				},
 			}
 
@@ -42,8 +44,8 @@ func newStatusCommand() *cobra.Command {
 				row := []*simpletable.Cell{
 					defaultCell(status.DeploymentName),
 					defaultCell(status.StageName),
-					defaultCell(formatHealthStatus(status.Healthy)),
-					defaultCell(fmt.Sprintf("%d/%d", status.AvailableReplicas, status.DesiredReplicas)),
+					defaultCell(formatRolloutStatus(status.RolloutStatus)),
+					defaultCell(formatHealthStatus(status.HealthStatus)),
 				}
 				table.Body.Cells = append(table.Body.Cells, row)
 			}
@@ -57,13 +59,27 @@ func defaultCell(text string) *simpletable.Cell {
 	return &simpletable.Cell{Align: simpletable.AlignLeft, Text: text}
 }
 
-func formatHealthStatus(healthy string) string {
-	if healthy == "true" {
-		return fmt.Sprint(ctc.ForegroundBrightGreen, healthy, ctc.Reset)
+func formatHealthStatus(healthStatus string) string {
+	if healthStatus == model.HealthStatusTrue {
+		return fmt.Sprint(ctc.ForegroundBrightGreen, healthStatus, ctc.Reset)
 	}
-	if healthy == "false" {
-		return fmt.Sprint(ctc.ForegroundBrightRed, healthy, ctc.Reset)
+	if healthStatus == model.HealthStatusFalse {
+		return fmt.Sprint(ctc.ForegroundBrightRed, healthStatus, ctc.Reset)
+	}
+	if healthStatus == model.HealthStatusUnknown {
+		return fmt.Sprint(ctc.ForegroundBrightYellow, healthStatus, ctc.Reset)
 	}
 
-	return healthy
+	return healthStatus
+}
+
+func formatRolloutStatus(rolloutStatus string) string {
+	if rolloutStatus == model.RolloutStatusInProgress {
+		return fmt.Sprint(ctc.ForegroundBrightCyan, rolloutStatus, ctc.Reset)
+	}
+	if rolloutStatus == model.RolloutStatusFailed {
+		return fmt.Sprint(ctc.ForegroundBrightRed, rolloutStatus, ctc.Reset)
+	}
+
+	return rolloutStatus
 }
