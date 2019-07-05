@@ -42,15 +42,17 @@ func newDeployCommand() *cobra.Command {
 				App: *app,
 			}
 
-			fmt.Println(litter.Sdump(deployment))
-
-			apiClient, err := sdk.NewClient("http://localhost:8000")
-			if err != nil {
-				panic(err)
-			}
-			err = apiClient.PutDeployment(deployment, dryRun)
-			if err != nil {
-				panic(err)
+			if dryRun {
+				fmt.Println(litter.Sdump(deployment))
+			} else {
+				apiClient, err := sdk.NewClient("http://localhost:8000")
+				if err != nil {
+					panic(err)
+				}
+				err = apiClient.PutDeployment(deployment, dryRun)
+				if err != nil {
+					panic(err)
+				}
 			}
 		},
 	}

@@ -24,10 +24,11 @@ type Client struct {
 // HttpError provides the status code.
 type HttpError struct {
 	StatusCode int
+	Message    string
 }
 
 func (e *HttpError) Error() string {
-	return fmt.Sprintf("Received HTTP %d: %s", e.StatusCode, http.StatusText(e.StatusCode))
+	return fmt.Sprintf("Received HTTP %d (%s) %s", e.StatusCode, http.StatusText(e.StatusCode), e.Message)
 }
 
 func NewClient(baseURI string) (*Client, error) {
@@ -152,14 +153,23 @@ func doRequest(request *http.Request) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	} else {
+		defer response.Body.Close()
 		if isSuccess(response.StatusCode) {
-			defer response.Body.Close()
 			return ioutil.ReadAll(response.Body)
 		}
 		if response.StatusCode == 404 {
 			return nil, nil
 		}
-		return nil, &HttpError{StatusCode: response.StatusCode}
+		errorResponse := &model.Error{}
+		errorMessage := ""
+		responseBody, err := ioutil.ReadAll(response.Body)
+		if err == nil {
+			err = unmarshal(responseBody, errorResponse)
+			if err == nil {
+				errorMessage = errorResponse.Message
+			}
+		}
+		return nil, &HttpError{StatusCode: response.StatusCode, Message: errorMessage}
 	}
 }
 

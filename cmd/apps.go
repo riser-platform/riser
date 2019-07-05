@@ -47,7 +47,7 @@ func newAppsNewCommand() *cobra.Command {
 				panic(err)
 			}
 
-			fmt.Printf("App %s created. Please add the following id to your manifest: %s\n", app.Name, app.Id)
+			fmt.Printf("App %s created. Please add the following id to your manifest: %s", app.Name, app.Id)
 		},
 	}
 }
