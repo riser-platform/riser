@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"riser/logger"
 
@@ -28,7 +29,7 @@ func Execute(runtime *Runtime) {
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
 	err := cmd.Execute()
-	if err != nil {
-		panic(err)
+	if err != nil && verbose {
+		fmt.Printf("%#v\n", err)
 	}
 }

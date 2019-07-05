@@ -21,4 +21,9 @@ lint:
 watch:
 	filewatcher gotestsum
 
+# updates to the latest api models
+update-model:
+	go get -u github.com/tshak/riser-server/api/v1/model
+
+
 

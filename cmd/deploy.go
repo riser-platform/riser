@@ -6,7 +6,7 @@ import (
 
 	"github.com/sanity-io/litter"
 	"github.com/tshak/riser-server/api/v1/model"
-	"github.com/tshak/riser-server/sdk"
+	"github.com/tshak/riser/sdk"
 
 	"github.com/spf13/cobra"
 )
@@ -16,7 +16,7 @@ func newDeployCommand() *cobra.Command {
 	var dryRun bool
 	var deploymentName string
 	cmd := &cobra.Command{
-		Use:   "deploy (dockerTag) (stage)",
+		Use:   "deploy (docker tag) (stage)",
 		Short: "Creates a new deployment",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {

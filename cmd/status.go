@@ -7,7 +7,7 @@ import (
 
 	"github.com/alexeyco/simpletable"
 	"github.com/spf13/cobra"
-	"github.com/tshak/riser-server/sdk"
+	"github.com/tshak/riser/sdk"
 	"github.com/wzshiming/ctc"
 )
 
