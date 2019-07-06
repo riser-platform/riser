@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"os"
 
 	"github.com/tshak/riser-server/api/v1/model"
 
@@ -36,7 +37,7 @@ func SafeLoadAppName(pathToAppConfig string) string {
 }
 
 // SafeLoadDefaultAppName attempts to retrieve the name of the app in the default app config locations
-// An empty string is returned if the file does not exist, cannot be be parsed, or if any other error ocurrs.
+// Returns an empty string if the file does not exist, cannot be be parsed, or if any other error ocurrs.
 func SafeLoadDefaultAppName() string {
 	for _, pathToAppConfig := range DefaultAppConfigPaths {
 		appName := SafeLoadAppName(pathToAppConfig)
@@ -45,5 +46,16 @@ func SafeLoadDefaultAppName() string {
 		}
 	}
 
+	return ""
+}
+
+// GetAppConfigPathFromDefaults searches for an app config from the default locations and returns the first found
+// Returns an empty string if no file is found.
+func GetAppConfigPathFromDefaults() string {
+	for _, pathToAppConfig := range DefaultAppConfigPaths {
+		if _, err := os.Stat(pathToAppConfig); err == nil {
+			return pathToAppConfig
+		}
+	}
 	return ""
 }

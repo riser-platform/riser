@@ -7,6 +7,9 @@ go 1.12
 require (
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
+	github.com/coreos/etcd v3.3.10+incompatible
+	github.com/coreos/go-systemd v0.0.0-20190620071333-e64a0ec8b42a // indirect
+	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/docker/spdystream v0.0.0-20181023171402-6480d4af844c // indirect
 	github.com/elazarl/goproxy v0.0.0-20190703090003-6125c262ffb0 // indirect
 	github.com/emicklei/go-restful v2.9.6+incompatible // indirect

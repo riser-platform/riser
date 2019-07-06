@@ -26,11 +26,7 @@ func (logger *ScreenLogger) Info(message string) {
 	fmt.Println(message)
 }
 
-// Error logs an error to the screen
-func (logger *ScreenLogger) Error(message string, err error) {
+// Error logs an error message to the screen
+func (logger *ScreenLogger) Error(message string) {
 	fmt.Println(message)
-	if err != nil {
-		fmt.Println(err)
-		// TODO: Add error stack when verbose is on
-	}
 }

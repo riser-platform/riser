@@ -59,7 +59,7 @@ func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&deploymentName, "name", "n", "", "Optionally name the deployment. When specified the full deployment name will be <APP>-name (e.g. myapp-mydeployment).")
-	cmd.Flags().StringVarP(&appFilePath, "file", "f", "./app.yml", "Path to the application config file")
+	addAppFilePathFlag(cmd.Flags(), &appFilePath)
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "Prints the deployment but does not create it")
 
 	return cmd

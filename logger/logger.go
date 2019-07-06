@@ -4,14 +4,14 @@ package logger
 // Logger interface for logging
 type Logger interface {
 	Info(string)
-	Error(string, error)
+	Error(string)
 	Verbose(string)
 }
 
 // logger is the global shared instance of Logger
 var logger = Logger(NewScreenLogger(false))
 
-// Log returns a new default logger
+// Log returns the default logger
 func Log() Logger {
 	return logger
 }

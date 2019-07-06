@@ -1,16 +1,15 @@
 package ui
 
 import (
-	"errors"
 	"fmt"
 	"os"
+	"riser/logger"
 )
 
 // ExitIfError exits if the error is not null and prints the error message
 func ExitIfError(err error) {
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		ExitErrorMsg(err.Error())
 	}
 }
 
@@ -23,5 +22,6 @@ func ExitIfErrorMsg(err error, exitMessage string) {
 
 // ExitErrorMsg exits with error code 1 and prints a custom message
 func ExitErrorMsg(exitMessage string) {
-	ExitIfError(errors.New(exitMessage))
+	logger.Log().Error(exitMessage)
+	os.Exit(1)
 }

@@ -10,20 +10,22 @@ import (
 )
 
 func newValidateCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "validate (path/to/app.yml)",
+	var appFilePath string
+	cmd := &cobra.Command{
+		Use:   "validate",
 		Short: "Validates an app config",
-		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			appConfigPath := args[0]
-			app, err := config.LoadApp(appConfigPath)
+			app, err := config.LoadApp(appFilePath)
 			if err == nil {
-				logger.Log().Info(fmt.Sprintf("Loaded config %s", appConfigPath))
+				logger.Log().Info(fmt.Sprintf("Loaded config %s", appFilePath))
 				logger.Log().Verbose(litter.Sdump(app))
 			} else {
-				logger.Log().Error(fmt.Sprintf("Failed to load config %s", appConfigPath), err)
+				logger.Log().Error(fmt.Sprintf("Failed to load config %s: %s", appFilePath, err))
 			}
-
 		},
 	}
+
+	addAppFilePathFlag(cmd.Flags(), &appFilePath)
+
+	return cmd
 }
