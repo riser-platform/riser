@@ -2,6 +2,7 @@ package main
 
 import (
 	"riser/cmd"
+	"riser/rc"
 
 	"github.com/hashicorp/go-version"
 )
@@ -15,8 +16,12 @@ func main() {
 		panic(err)
 	}
 
+	// TODO: Load rc from file or prompt user to create new
+	config := &rc.RuntimeConfiguration{}
+
 	// Main execution path
 	cmd.Execute(&cmd.Runtime{
-		Version: currentVersion,
+		Version:       currentVersion,
+		Configuration: config,
 	})
 }

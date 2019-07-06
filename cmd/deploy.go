@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"riser/config"
+	"riser/rc"
 
 	"github.com/sanity-io/litter"
 	"github.com/tshak/riser-server/api/v1/model"
@@ -11,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newDeployCommand() *cobra.Command {
+func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	var appFilePath string
 	var dryRun bool
 	var deploymentName string
@@ -45,7 +46,7 @@ func newDeployCommand() *cobra.Command {
 			if dryRun {
 				fmt.Println(litter.Sdump(deployment))
 			} else {
-				apiClient, err := sdk.NewClient("http://localhost:8000")
+				apiClient, err := sdk.NewClient(currentContext.ServerURL)
 				if err != nil {
 					panic(err)
 				}

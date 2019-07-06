@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"riser/rc"
 
 	"github.com/tshak/riser-server/api/v1/model"
 
@@ -11,13 +12,13 @@ import (
 	"github.com/wzshiming/ctc"
 )
 
-func newStatusCommand() *cobra.Command {
+func newStatusCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	var appName string
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Gets the status for a deployment.",
 		Run: func(cmd *cobra.Command, args []string) {
-			apiClient, err := sdk.NewClient("http://localhost:8000")
+			apiClient, err := sdk.NewClient(currentContext.ServerURL)
 			if err != nil {
 				panic(err)
 			}

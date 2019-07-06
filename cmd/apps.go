@@ -2,20 +2,21 @@ package cmd
 
 import (
 	"fmt"
+	"riser/rc"
 
 	"github.com/spf13/cobra"
 	"github.com/tshak/riser-server/api/v1/model"
 	"github.com/tshak/riser/sdk"
 )
 
-func newAppsCommand() *cobra.Command {
+func newAppsCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apps",
 		Short: "Commands for apps",
 	}
 
 	cmd.AddCommand(newAppsListCommand())
-	cmd.AddCommand(newAppsNewCommand())
+	cmd.AddCommand(newAppsNewCommand(currentContext))
 
 	return cmd
 }
@@ -30,7 +31,7 @@ func newAppsListCommand() *cobra.Command {
 	}
 }
 
-func newAppsNewCommand() *cobra.Command {
+func newAppsNewCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "new (app name)",
 		Short: "Creates a new app",
@@ -38,7 +39,7 @@ func newAppsNewCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			appName := args[0]
 
-			apiClient, err := sdk.NewClient("http://localhost:8000")
+			apiClient, err := sdk.NewClient(currentContext.ServerURL)
 			if err != nil {
 				panic(err)
 			}
