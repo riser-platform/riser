@@ -12,47 +12,54 @@ import (
 )
 
 func newStatusCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "status (app name)",
+	var appName string
+	cmd := &cobra.Command{
+		Use:   "status",
 		Short: "Gets the status for a deployment.",
-		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			appName := args[0]
 			apiClient, err := sdk.NewClient("http://localhost:8000")
 			if err != nil {
 				panic(err)
 			}
 
 			statuses, err := apiClient.GetStatus(appName)
-
 			if err != nil {
 				panic(err)
 			}
 
-			table := simpletable.New()
-			table.SetStyle(simpletable.StyleCompactLite)
-			table.Header = &simpletable.Header{
-				Cells: []*simpletable.Cell{
-					defaultCell("Deployment"),
-					defaultCell("Stage"),
-					defaultCell("Rollout"),
-					defaultCell("Healthy"),
-				},
-			}
-
-			for _, status := range statuses {
-				row := []*simpletable.Cell{
-					defaultCell(status.DeploymentName),
-					defaultCell(status.StageName),
-					defaultCell(formatRolloutStatus(status.RolloutStatus)),
-					defaultCell(formatHealthStatus(status.HealthStatus)),
-				}
-				table.Body.Cells = append(table.Body.Cells, row)
-			}
-
-			fmt.Println(table.String())
+			drawStatusSummary(statuses)
 		},
 	}
+
+	addAppFlag(cmd.Flags(), &appName)
+
+	return cmd
+}
+
+func drawStatusSummary(statuses []model.StatusSummary) {
+
+	table := simpletable.New()
+	table.SetStyle(simpletable.StyleCompactLite)
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			defaultCell("Deployment"),
+			defaultCell("Stage"),
+			defaultCell("Rollout"),
+			defaultCell("Healthy"),
+		},
+	}
+
+	for _, status := range statuses {
+		row := []*simpletable.Cell{
+			defaultCell(status.DeploymentName),
+			defaultCell(status.StageName),
+			defaultCell(formatRolloutStatus(status.RolloutStatus)),
+			defaultCell(formatHealthStatus(status.HealthStatus)),
+		}
+		table.Body.Cells = append(table.Body.Cells, row)
+	}
+
+	fmt.Println(table.String())
 }
 
 func defaultCell(text string) *simpletable.Cell {

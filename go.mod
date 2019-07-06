@@ -27,6 +27,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20190414153302-2ae31c8b6b30 // indirect
 	github.com/sanity-io/litter v1.1.0
 	github.com/spf13/cobra v0.0.4
+	github.com/spf13/pflag v1.0.3
 	github.com/tshak/riser-server/api/v1/model v0.0.0-20190705140642-23b960ced1f3
 	github.com/tshak/riser/sdk v0.0.0-20190705130421-2e250dea579a
 	github.com/wzshiming/ctc v1.2.0
