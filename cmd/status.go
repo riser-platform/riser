@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"riser/ui/table"
 	"fmt"
 	"riser/rc"
 
 	"github.com/tshak/riser-server/api/v1/model"
 
-	"github.com/alexeyco/simpletable"
+
 	"github.com/spf13/cobra"
 	"github.com/tshak/riser/sdk"
 	"github.com/wzshiming/ctc"
@@ -38,33 +39,17 @@ func newStatusCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 }
 
 func drawStatusSummary(statuses []model.StatusSummary) {
-
-	table := simpletable.New()
-	table.SetStyle(simpletable.StyleCompactLite)
-	table.Header = &simpletable.Header{
-		Cells: []*simpletable.Cell{
-			defaultCell("Deployment"),
-			defaultCell("Stage"),
-			defaultCell("Rollout"),
-			defaultCell("Healthy"),
-		},
-	}
+	table := table.Default().Header("Deployment", "Stage", "Rollout", "Healthy")
 
 	for _, status := range statuses {
-		row := []*simpletable.Cell{
-			defaultCell(status.DeploymentName),
-			defaultCell(status.StageName),
-			defaultCell(formatRolloutStatus(status.RolloutStatus)),
-			defaultCell(formatHealthStatus(status.HealthStatus)),
+		table.AddRow(
+			status.DeploymentName,
+			status.StageName,
+			formatRolloutStatus(status.RolloutStatus),
+			formatHealthStatus(status.HealthStatus))
 		}
-		table.Body.Cells = append(table.Body.Cells, row)
-	}
 
-	fmt.Println(table.String())
-}
-
-func defaultCell(text string) *simpletable.Cell {
-	return &simpletable.Cell{Align: simpletable.AlignLeft, Text: text}
+	fmt.Println(table)
 }
 
 func formatHealthStatus(healthStatus string) string {

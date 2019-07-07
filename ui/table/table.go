@@ -12,11 +12,11 @@ type Table struct {
 func Default() *Table {
 	internal := simpletable.New()
 	internal.SetStyle(simpletable.StyleCompactLite)
-	internal.Header = &simpletable.Header{Cells: []*simpletable.Cell{}}
 	return &Table{internal}
 }
 
 func (t *Table) Header(values ...string) *Table {
+	t.internal.Header = &simpletable.Header{Cells: []*simpletable.Cell{}}
 	for _, v := range values {
 		t.internal.Header.Cells = append(t.internal.Header.Cells, defaultCell(v))
 	}
