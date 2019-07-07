@@ -1,6 +1,6 @@
 name: emojivoto-emoji-svc
 # Change this to the id given to you by "riser apps new emojivoto-emoji-svc"
-id: a04eaf60
+id: 668e1265
 image: buoyantio/emojivoto-emoji-svc
 deploy:
   replicas: 1

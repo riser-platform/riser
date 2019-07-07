@@ -1,6 +1,6 @@
 name: emojivoto
 # Change this to the id given to you by "riser apps new emojivoto"
-id: b1200585
+id: 4bc4b1fc
 # Docker image will be convention based and likely removed
 image: buoyantio/emojivoto-web
 deploy:
