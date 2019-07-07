@@ -40,6 +40,20 @@ func NewClient(baseURI string) (*Client, error) {
 	return &Client{baseURI: baseURIParsed}, nil
 }
 
+func (client *Client) ListApps() ([]model.App, error) {
+	apps := []model.App{}
+	apiUri := client.uri("/api/v1/apps")
+	response, err := doGet(apiUri.String())
+	if err != nil {
+		return nil, err
+	}
+	err = unmarshal(response, &apps)
+	if err != nil {
+		return nil, err
+	}
+	return apps, nil
+}
+
 func (client *Client) PostApp(newApp *model.NewApp) (*model.App, error) {
 	appJson, err := json.Marshal(newApp)
 	if err != nil {
@@ -88,11 +102,8 @@ func (client *Client) PutStatus(status *model.RawStatus) error {
 	}
 	apiUri := client.uri("/api/v1/status")
 
-	response, err := doBodyRequest(apiUri.String(), defaultContentType, "PUT", statusJson)
-	if err != nil {
-		return errors.Wrap(err, string(response))
-	}
-	return nil
+	_, err = doBodyRequest(apiUri.String(), defaultContentType, "PUT", statusJson)
+	return err
 }
 
 func (client *Client) GetStatus(appName string) ([]model.StatusSummary, error) {
@@ -100,7 +111,7 @@ func (client *Client) GetStatus(appName string) ([]model.StatusSummary, error) {
 
 	responseBody, err := doGet(apiUri.String())
 	if err != nil {
-		return nil, errors.Wrap(err, string(responseBody))
+		return nil, err
 	}
 
 	statuses := []model.StatusSummary{}

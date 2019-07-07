@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 	"riser/rc"
+	"riser/ui"
+	"riser/ui/table"
 
 	"github.com/spf13/cobra"
 	"github.com/tshak/riser-server/api/v1/model"
@@ -15,18 +17,29 @@ func newAppsCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 		Short: "Commands for apps",
 	}
 
-	cmd.AddCommand(newAppsListCommand())
+	cmd.AddCommand(newAppsListCommand(currentContext))
 	cmd.AddCommand(newAppsNewCommand(currentContext))
 
 	return cmd
 }
 
-func newAppsListCommand() *cobra.Command {
+func newAppsListCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
-		Short: "Lists available apps",
+		Short: "Lists all apps",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Not implemented")
+			apiClient, err := sdk.NewClient(currentContext.ServerURL)
+			ui.ExitIfError(err)
+			apps, err := apiClient.ListApps()
+			ui.ExitIfError(err)
+
+			table := table.Default().Header("Name", "Id")
+
+			for _, app := range apps {
+				table.AddRow(app.Name, app.Id)
+			}
+
+			fmt.Println(table)
 		},
 	}
 }
@@ -40,13 +53,9 @@ func newAppsNewCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 			appName := args[0]
 
 			apiClient, err := sdk.NewClient(currentContext.ServerURL)
-			if err != nil {
-				panic(err)
-			}
+			ui.ExitIfError(err)
 			app, err := apiClient.PostApp(&model.NewApp{Name: appName})
-			if err != nil {
-				panic(err)
-			}
+			ui.ExitIfError(err)
 
 			fmt.Printf("App %s created. Please add the following id to your manifest: %s", app.Name, app.Id)
 		},
