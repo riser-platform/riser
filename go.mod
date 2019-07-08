@@ -12,7 +12,7 @@ require (
 	github.com/sanity-io/litter v1.1.0
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/pflag v1.0.3
-	github.com/tshak/riser-server/api/v1/model v0.0.0-20190708160543-7376d4fb4910
+	github.com/tshak/riser-server/api/v1/model v0.0.0-20190708164139-2bdd59845e70
 	github.com/tshak/riser/sdk v0.0.0-20190705130421-2e250dea579a
 	github.com/wzshiming/ctc v1.2.0
 	github.com/wzshiming/winseq v0.0.0-20181031094240-8a45cfbfe1c2 // indirect

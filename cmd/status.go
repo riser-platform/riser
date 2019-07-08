@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"riser/rc"
 	"riser/ui/table"
+	"strings"
 
 	"github.com/tshak/riser-server/api/v1/model"
 
@@ -38,18 +39,28 @@ func newStatusCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 }
 
 func drawStatusSummary(statuses []model.StatusSummary) {
-	table := table.Default().Header("Deployment", "Stage", "Rev", "Rollout", "Healthy")
+	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Healthy")
 
 	for _, status := range statuses {
 		table.AddRow(
 			status.DeploymentName,
 			status.StageName,
 			fmt.Sprintf("%d", status.RolloutRevision),
+			getDockerTag(status.DockerImage),
 			formatRolloutStatus(status.RolloutStatus),
 			formatHealthStatus(status.HealthStatus))
 	}
 
 	fmt.Println(table)
+}
+
+func getDockerTag(dockerImage string) string {
+	idx := strings.Index(dockerImage, ":")
+	if idx == -1 {
+		// This should never happen since we don't allow images without tags or with digests
+		return "Unknown"
+	}
+	return dockerImage[idx+1:]
 }
 
 func formatHealthStatus(healthStatus string) string {
