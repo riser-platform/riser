@@ -170,13 +170,13 @@ func doRequest(request *http.Request) ([]byte, error) {
 		if response.StatusCode == 404 {
 			return nil, nil
 		}
-		errorResponse := &model.Error{}
+		errorResponse := map[string]string{}
 		errorMessage := ""
 		responseBody, err := ioutil.ReadAll(response.Body)
 		if err == nil {
 			err = unmarshal(responseBody, errorResponse)
 			if err == nil {
-				errorMessage = errorResponse.Message
+				errorMessage = errorResponse["message"]
 			}
 		}
 		return nil, &HttpError{StatusCode: response.StatusCode, Message: errorMessage}
