@@ -1,0 +1,9 @@
+name: testdummy
+id: bfc376c5
+image: tshak/testdummy
+deploy:
+  healthcheck:
+    path: /health
+expose:
+  containerPort: 8000
+

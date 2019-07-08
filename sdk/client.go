@@ -62,7 +62,6 @@ func (client *Client) PostApp(newApp *model.NewApp) (*model.App, error) {
 
 	apiUri := client.uri("/api/v1/apps")
 	response, err := doBodyRequest(apiUri.String(), defaultContentType, "POST", appJson)
-	// TODO: Handle 409
 	if err != nil {
 		return nil, errors.Wrap(err, string(response))
 	}
