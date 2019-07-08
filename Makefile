@@ -24,6 +24,7 @@ watch:
 # updates to the latest api models
 update-model:
 	go get -u github.com/tshak/riser-server/api/v1/model
+	go mod tidy
 
 
 

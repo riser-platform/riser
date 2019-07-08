@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"riser/ui/table"
 	"fmt"
 	"riser/rc"
+	"riser/ui/table"
 
 	"github.com/tshak/riser-server/api/v1/model"
-
 
 	"github.com/spf13/cobra"
 	"github.com/tshak/riser/sdk"
@@ -39,15 +38,16 @@ func newStatusCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 }
 
 func drawStatusSummary(statuses []model.StatusSummary) {
-	table := table.Default().Header("Deployment", "Stage", "Rollout", "Healthy")
+	table := table.Default().Header("Deployment", "Stage", "Rev", "Rollout", "Healthy")
 
 	for _, status := range statuses {
 		table.AddRow(
 			status.DeploymentName,
 			status.StageName,
+			fmt.Sprintf("%d", status.RolloutRevision),
 			formatRolloutStatus(status.RolloutStatus),
 			formatHealthStatus(status.HealthStatus))
-		}
+	}
 
 	fmt.Println(table)
 }
