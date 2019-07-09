@@ -39,7 +39,7 @@ func newStatusCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 }
 
 func drawStatusSummary(statuses []model.StatusSummary) {
-	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Healthy")
+	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Rollout Details")
 
 	for _, status := range statuses {
 		table.AddRow(
@@ -48,7 +48,7 @@ func drawStatusSummary(statuses []model.StatusSummary) {
 			fmt.Sprintf("%d", status.RolloutRevision),
 			getDockerTag(status.DockerImage),
 			formatRolloutStatus(status.RolloutStatus),
-			formatHealthStatus(status.HealthStatus))
+			status.RolloutStatusReason)
 	}
 
 	fmt.Println(table)
