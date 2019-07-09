@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"riser/config"
 	"riser/rc"
+	"riser/ui"
 
 	"github.com/sanity-io/litter"
 	"github.com/tshak/riser-server/api/v1/model"
@@ -25,9 +26,7 @@ func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 			stage := args[1]
 
 			app, err := config.LoadApp(appFilePath)
-			if err != nil {
-				panic(err)
-			}
+			ui.ExitIfErrorMsg(err, "Error loading app config")
 
 			if dryRun {
 				println("DRY RUN MODE")
@@ -35,8 +34,7 @@ func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 
 			deployment := &model.RawDeployment{
 				DeploymentMeta: model.DeploymentMeta{
-					// TODO: Support optional deploymentName
-					Name:   app.Name,
+					Name:   deploymentName,
 					Stage:  stage,
 					Docker: model.DeploymentDocker{Tag: dockerTag},
 				},
