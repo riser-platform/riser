@@ -75,10 +75,10 @@ func (client *Client) PostApp(newApp *model.NewApp) (*model.App, error) {
 	return app, nil
 }
 
-func (client *Client) PutDeployment(deployment *model.RawDeployment, dryRun bool) error {
+func (client *Client) PutDeployment(deployment *model.RawDeployment, dryRun bool) (string, error) {
 	deploymentJson, err := json.Marshal(deployment)
 	if err != nil {
-		return err
+		return "", err
 	}
 	apiUri := client.uri("/api/v1/deployments")
 	if dryRun {
@@ -89,9 +89,10 @@ func (client *Client) PutDeployment(deployment *model.RawDeployment, dryRun bool
 
 	response, err := doBodyRequest(apiUri.String(), defaultContentType, "PUT", deploymentJson)
 	if err != nil {
-		return errors.Wrap(err, string(response))
+		return "", errors.Wrap(err, string(response))
 	}
-	return nil
+
+	return safeDeserializeMessage(response), nil
 }
 
 func (client *Client) PutStatus(status *model.RawStatus) error {
@@ -170,17 +171,23 @@ func doRequest(request *http.Request) ([]byte, error) {
 		if response.StatusCode == 404 {
 			return nil, nil
 		}
-		errorResponse := map[string]interface{}{}
+
 		errorMessage := ""
 		responseBody, err := ioutil.ReadAll(response.Body)
 		if err == nil {
-			err = unmarshal(responseBody, &errorResponse)
-			if err == nil {
-				errorMessage = fmt.Sprintf("%s", errorResponse["message"])
-			}
+			errorMessage = safeDeserializeMessage(responseBody)
 		}
 		return nil, &HttpError{StatusCode: response.StatusCode, Message: errorMessage}
 	}
+}
+
+func safeDeserializeMessage(body []byte) string {
+	response := map[string]interface{}{}
+	err := unmarshal(body, &response)
+	if err == nil {
+		return fmt.Sprintf("%s", response["message"])
+	}
+	return ""
 }
 
 func isSuccess(statusCode int) bool {

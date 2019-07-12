@@ -45,13 +45,12 @@ func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 				fmt.Println(litter.Sdump(deployment))
 			} else {
 				apiClient, err := sdk.NewClient(currentContext.ServerURL)
-				if err != nil {
-					panic(err)
-				}
-				err = apiClient.PutDeployment(deployment, dryRun)
-				if err != nil {
-					panic(err)
-				}
+				ui.ExitIfError(err)
+
+				message, err := apiClient.PutDeployment(deployment, dryRun)
+				ui.ExitIfError(err)
+
+				fmt.Println(message)
 			}
 		},
 	}
