@@ -1,7 +1,8 @@
 name: testdummy
-id: bfc376c5
+id: 35108f29
 image: tshak/testdummy
 deploy:
+  replicas: 2
   healthcheck:
     path: /health
 expose:
