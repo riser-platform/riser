@@ -32,7 +32,7 @@ func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 				println("DRY RUN MODE")
 			}
 
-			deployment := &model.RawDeployment{
+			deployment := &model.DeploymentRequest{
 				DeploymentMeta: model.DeploymentMeta{
 					Name:   deploymentName,
 					Stage:  stage,

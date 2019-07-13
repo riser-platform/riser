@@ -75,7 +75,7 @@ func (client *Client) PostApp(newApp *model.NewApp) (*model.App, error) {
 	return app, nil
 }
 
-func (client *Client) PutDeployment(deployment *model.RawDeployment, dryRun bool) (string, error) {
+func (client *Client) PutDeployment(deployment *model.DeploymentRequest, dryRun bool) (string, error) {
 	deploymentJson, err := json.Marshal(deployment)
 	if err != nil {
 		return "", err

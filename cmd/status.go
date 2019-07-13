@@ -63,19 +63,20 @@ func getDockerTag(dockerImage string) string {
 	return dockerImage[idx+1:]
 }
 
-func formatHealthStatus(healthStatus string) string {
-	if healthStatus == model.HealthStatusTrue {
-		return fmt.Sprint(ctc.ForegroundBrightGreen, healthStatus, ctc.Reset)
-	}
-	if healthStatus == model.HealthStatusFalse {
-		return fmt.Sprint(ctc.ForegroundBrightRed, healthStatus, ctc.Reset)
-	}
-	if healthStatus == model.HealthStatusUnknown {
-		return fmt.Sprint(ctc.ForegroundBrightYellow, healthStatus, ctc.Reset)
-	}
+// TODO: add health status back
+// func formatHealthStatus(healthStatus string) string {
+// 	if healthStatus == model.HealthStatusTrue {
+// 		return fmt.Sprint(ctc.ForegroundBrightGreen, healthStatus, ctc.Reset)
+// 	}
+// 	if healthStatus == model.HealthStatusFalse {
+// 		return fmt.Sprint(ctc.ForegroundBrightRed, healthStatus, ctc.Reset)
+// 	}
+// 	if healthStatus == model.HealthStatusUnknown {
+// 		return fmt.Sprint(ctc.ForegroundBrightYellow, healthStatus, ctc.Reset)
+// 	}
 
-	return healthStatus
-}
+// 	return healthStatus
+// }
 
 func formatRolloutStatus(rolloutStatus string) string {
 	if rolloutStatus == model.RolloutStatusInProgress {

@@ -27,6 +27,7 @@ func Execute(runtime *Runtime) {
 
 	cmd.AddCommand(newAppsCommand(currentContext))
 	cmd.AddCommand(newDeployCommand(currentContext))
+	cmd.AddCommand(newSecretsCommand(currentContext))
 	cmd.AddCommand(newStatusCommand(currentContext))
 	cmd.AddCommand(newValidateCommand())
 	cmd.AddCommand(newVersionCmd(runtime.Version))
