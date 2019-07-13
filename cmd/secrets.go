@@ -5,6 +5,7 @@ import (
 	"riser/rc"
 	"riser/ui"
 	"riser/ui/table"
+	"time"
 
 	"github.com/tshak/riser/sdk"
 
@@ -67,7 +68,7 @@ func newSecretsListCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 			for _, secretMeta := range secretMetas {
 				table.AddRow(
 					secretMeta.Name,
-					secretMeta.LastUpdated.String())
+					secretMeta.LastUpdated.In(time.Now().Location()).Format(time.RFC1123))
 			}
 
 			fmt.Println(table)

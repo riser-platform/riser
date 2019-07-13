@@ -1,6 +1,6 @@
 name: emojivoto-voting-svc
 # Change this to the id given to you by "riser apps new emojivoto-voting-svc"
-id: 4cb64c40
+id: bab2d0e1
 image: buoyantio/emojivoto-voting-svc
 deploy:
   replicas: 1
