@@ -39,7 +39,7 @@ func newStatusCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 }
 
 func drawStatusSummary(statuses []model.StatusSummary) {
-	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Rollout Details")
+	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Rollout Details", "Problems")
 
 	for _, status := range statuses {
 		table.AddRow(
@@ -48,7 +48,8 @@ func drawStatusSummary(statuses []model.StatusSummary) {
 			fmt.Sprintf("%d", status.RolloutRevision),
 			getDockerTag(status.DockerImage),
 			formatRolloutStatus(status.RolloutStatus),
-			status.RolloutStatusReason)
+			status.RolloutStatusReason,
+			formatProblems(status.Problems))
 	}
 
 	fmt.Println(table)
@@ -63,20 +64,31 @@ func getDockerTag(dockerImage string) string {
 	return dockerImage[idx+1:]
 }
 
-// TODO: add health status back
-// func formatHealthStatus(healthStatus string) string {
-// 	if healthStatus == model.HealthStatusTrue {
-// 		return fmt.Sprint(ctc.ForegroundBrightGreen, healthStatus, ctc.Reset)
-// 	}
-// 	if healthStatus == model.HealthStatusFalse {
-// 		return fmt.Sprint(ctc.ForegroundBrightRed, healthStatus, ctc.Reset)
-// 	}
-// 	if healthStatus == model.HealthStatusUnknown {
-// 		return fmt.Sprint(ctc.ForegroundBrightYellow, healthStatus, ctc.Reset)
-// 	}
+func formatProblems(problems []model.Problem) string {
+	if len(problems) == 0 {
+		return fmt.Sprint(ctc.ForegroundBrightGreen, "None Found", ctc.Reset)
+	}
 
-// 	return healthStatus
-// }
+	message := ""
+	first := true
+	for _, problem := range problems {
+		newline := "\n"
+		if first {
+			newline = ""
+			first = false
+		}
+		message = fmt.Sprintf("%s%s%s", message, newline, formatProblem(problem))
+	}
+
+	return fmt.Sprint(ctc.ForegroundBrightRed, message, ctc.Reset)
+}
+
+func formatProblem(problem model.Problem) string {
+	if problem.Count == 1 {
+		return problem.Message
+	}
+	return fmt.Sprintf("(x%d) %s", problem.Count, problem.Message)
+}
 
 func formatRolloutStatus(rolloutStatus string) string {
 	if rolloutStatus == model.RolloutStatusInProgress {
