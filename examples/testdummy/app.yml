@@ -1,11 +1,13 @@
 name: testdummy
 id: 35108f29
 image: tshak/testdummy
-deploy:
-  replicas: 2
-  healthcheck:
-    path: /health
+replicas: 2
+healthcheck:
+  path: /health
 expose:
   containerPort: 8000
 
+stages:
+  dev:
+    replicas: 1
 
