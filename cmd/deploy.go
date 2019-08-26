@@ -6,7 +6,6 @@ import (
 	"riser/rc"
 	"riser/ui"
 
-	"github.com/sanity-io/litter"
 	"github.com/tshak/riser-server/api/v1/model"
 	"github.com/tshak/riser/sdk"
 
@@ -41,17 +40,13 @@ func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 				App: *app,
 			}
 
-			if dryRun {
-				fmt.Println(litter.Sdump(deployment))
-			} else {
-				apiClient, err := sdk.NewClient(currentContext.ServerURL)
-				ui.ExitIfError(err)
+			apiClient, err := sdk.NewClient(currentContext.ServerURL)
+			ui.ExitIfError(err)
 
-				message, err := apiClient.PutDeployment(deployment, dryRun)
-				ui.ExitIfError(err)
+			message, err := apiClient.PutDeployment(deployment, dryRun)
+			ui.ExitIfError(err)
 
-				fmt.Println(message)
-			}
+			fmt.Println(message)
 		},
 	}
 

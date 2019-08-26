@@ -87,12 +87,16 @@ func (client *Client) PutDeployment(deployment *model.DeploymentRequest, dryRun 
 		apiUri.RawQuery = q.Encode()
 	}
 
-	response, err := doBodyRequest(apiUri.String(), defaultContentType, "PUT", deploymentJson)
+	responseBody, err := doBodyRequest(apiUri.String(), defaultContentType, "PUT", deploymentJson)
 	if err != nil {
-		return "", errors.Wrap(err, string(response))
+		return "", errors.Wrap(err, string(responseBody))
 	}
 
-	return safeDeserializeMessage(response), nil
+	if dryRun {
+		return fmt.Sprintf("%s", responseBody), nil
+	} else {
+		return safeDeserializeMessage(responseBody), nil
+	}
 }
 
 func (client *Client) PutStatus(status *model.RawStatus) error {
@@ -181,13 +185,14 @@ func doRequest(request *http.Request) ([]byte, error) {
 	}
 }
 
+// TODO: Return message and rawbody in struct
 func safeDeserializeMessage(body []byte) string {
 	response := map[string]interface{}{}
 	err := unmarshal(body, &response)
 	if err == nil {
 		return fmt.Sprintf("%s", response["message"])
 	}
-	return ""
+	return fmt.Sprintf("%s", body)
 }
 
 func isSuccess(statusCode int) bool {
