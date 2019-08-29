@@ -38,7 +38,7 @@ func newStatusCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	return cmd
 }
 
-func drawStatusSummary(statuses []model.StatusSummary) {
+func drawStatusSummary(statuses []model.DeploymentStatus) {
 	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Rollout Details", "Problems")
 
 	for _, status := range statuses {
@@ -64,7 +64,7 @@ func getDockerTag(dockerImage string) string {
 	return dockerImage[idx+1:]
 }
 
-func formatProblems(problems []model.Problem) string {
+func formatProblems(problems []model.DeploymentStatusProblem) string {
 	if len(problems) == 0 {
 		return fmt.Sprint(ctc.ForegroundBrightGreen, "None Found", ctc.Reset)
 	}
@@ -83,7 +83,7 @@ func formatProblems(problems []model.Problem) string {
 	return fmt.Sprint(ctc.ForegroundBrightRed, message, ctc.Reset)
 }
 
-func formatProblem(problem model.Problem) string {
+func formatProblem(problem model.DeploymentStatusProblem) string {
 	if problem.Count == 1 {
 		return problem.Message
 	}

@@ -99,7 +99,7 @@ func (client *Client) PutDeployment(deployment *model.DeploymentRequest, dryRun 
 	}
 }
 
-func (client *Client) PutStatus(status *model.RawStatus) error {
+func (client *Client) PutStatus(status *model.DeploymentStatus) error {
 	statusJson, err := json.Marshal(status)
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func (client *Client) PutStatus(status *model.RawStatus) error {
 	return err
 }
 
-func (client *Client) GetStatus(appName string) ([]model.StatusSummary, error) {
+func (client *Client) GetStatus(appName string) ([]model.DeploymentStatus, error) {
 	apiUri := client.uri(fmt.Sprintf("/api/v1/status/%s", appName))
 
 	responseBody, err := doGet(apiUri.String())
@@ -118,7 +118,7 @@ func (client *Client) GetStatus(appName string) ([]model.StatusSummary, error) {
 		return nil, err
 	}
 
-	statuses := []model.StatusSummary{}
+	statuses := []model.DeploymentStatus{}
 	err = unmarshal(responseBody, &statuses)
 	if err != nil {
 		return nil, err
