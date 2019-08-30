@@ -12,10 +12,10 @@ require (
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/testify v1.4.0 // indirect
-	github.com/tshak/riser-server/api/v1/model v0.0.0-20190829114218-15a89d974bdd
+	github.com/tshak/riser-server/api/v1/model v0.0.0-20190830124733-bb393099df73
 	github.com/tshak/riser/sdk v0.0.0-20190705130421-2e250dea579a
 	github.com/wzshiming/ctc v1.2.0
 	github.com/wzshiming/winseq v0.0.0-20181031094240-8a45cfbfe1c2 // indirect
-	golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456 // indirect
-	k8s.io/apimachinery v0.0.0-20190828114620-4147c925140e // indirect
+	golang.org/x/sys v0.0.0-20190830080133-08d80c9d36de // indirect
+	k8s.io/apimachinery v0.0.0-20190830114704-564e0900f0fd // indirect
 )
