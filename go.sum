@@ -108,7 +108,6 @@ github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
-github.com/tshak/riser-server/api/v1/model v0.0.0-20190705130421-2e250dea579a/go.mod h1:Yv3DcegP/RBHqaFjXHP1XdpeXOqE9Qc+NE+iYLTTu+c=
 github.com/tshak/riser-server/api/v1/model v0.0.0-20190830140115-48e49a16e962 h1:8yrO1Smz2ApK75GxdhpZ4ICilDh/U0i8V4d53D+BOHE=
 github.com/tshak/riser-server/api/v1/model v0.0.0-20190830140115-48e49a16e962/go.mod h1:KStTMC3G0BNR/4uWty1P5g3TcN3B76ArANuw4MJOfgE=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
@@ -153,9 +152,6 @@ gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWD
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
-k8s.io/api v0.0.0-20190627205229-acea843d18eb h1:GPqcjfATaKQE9eB8VRN0cpueOB7NQZ7ZuAGy9j2fZoo=
-k8s.io/api v0.0.0-20190627205229-acea843d18eb/go.mod h1:dNIey7Yoxc4u51YMhX4E5Cs6xiuGvXIGghzAZ9RzR88=
-k8s.io/apimachinery v0.0.0-20190627205106-bc5732d141a8/go.mod h1:T1Vra67tZppnhHB3gqfn8/pmTb9EMVZXLvaevIRo6cU=
 k8s.io/apimachinery v0.0.0-20190629005116-7ae370969693 h1:4pKeJiSaQsSvoolSjC9wilznNq6RZerE+RvuUBq/6WI=
 k8s.io/apimachinery v0.0.0-20190629005116-7ae370969693/go.mod h1:T1Vra67tZppnhHB3gqfn8/pmTb9EMVZXLvaevIRo6cU=
 k8s.io/apimachinery v0.0.0-20190830114704-564e0900f0fd h1:QjVuqr4citCL+hQAYa8eOA9vCaN3Bkqa2j4j/Na6Loo=
