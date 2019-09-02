@@ -35,6 +35,7 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/tshak/riser-server/api/v1/model v0.0.0-20190705130421-2e250dea579a h1:ApZinkHJ2MQx79nd0KejLGq8VW0hwtAGlE1z+cGNOQM=
 github.com/tshak/riser-server/api/v1/model v0.0.0-20190705130421-2e250dea579a/go.mod h1:Yv3DcegP/RBHqaFjXHP1XdpeXOqE9Qc+NE+iYLTTu+c=
+github.com/tshak/riser-server/api/v1/model v0.0.0-20190830140115-48e49a16e962/go.mod h1:KStTMC3G0BNR/4uWty1P5g3TcN3B76ArANuw4MJOfgE=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20180906233101-161cd47e91fd/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20190613194153-d28f0bde5980/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=

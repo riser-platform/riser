@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -21,14 +22,29 @@ type Client struct {
 	baseURI *url.URL
 }
 
-// HttpError provides the status code.
-type HttpError struct {
+// ClientError provides the error message, status code.
+type ClientError struct {
 	StatusCode int
 	Message    string
 }
 
-func (e *HttpError) Error() string {
+func (e *ClientError) Error() string {
 	return fmt.Sprintf("Received HTTP %d (%s) %s", e.StatusCode, http.StatusText(e.StatusCode), e.Message)
+}
+
+type ClientValidationError struct {
+	ClientError
+	ValidationErrors map[string]interface{}
+}
+
+func (e *ClientValidationError) Error() string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("%s:", e.Message))
+	builder.WriteString("\n")
+	for fieldName, errorMessage := range e.ValidationErrors {
+		builder.WriteString(fmt.Sprintf(" • %s: %s\n", fieldName, errorMessage))
+	}
+	return builder.String()
 }
 
 func NewClient(baseURI string) (*Client, error) {
@@ -89,13 +105,13 @@ func (client *Client) PutDeployment(deployment *model.DeploymentRequest, dryRun 
 
 	responseBody, err := doBodyRequest(apiUri.String(), defaultContentType, "PUT", deploymentJson)
 	if err != nil {
-		return "", errors.Wrap(err, string(responseBody))
+		return "", err
 	}
 
 	if dryRun {
 		return fmt.Sprintf("%s", responseBody), nil
 	} else {
-		return safeDeserializeMessage(responseBody), nil
+		return safeUnmarshalApiResponse(responseBody).Message, nil
 	}
 }
 
@@ -176,23 +192,40 @@ func doRequest(request *http.Request) ([]byte, error) {
 			return nil, nil
 		}
 
-		errorMessage := ""
-		responseBody, err := ioutil.ReadAll(response.Body)
-		if err == nil {
-			errorMessage = safeDeserializeMessage(responseBody)
-		}
-		return nil, &HttpError{StatusCode: response.StatusCode, Message: errorMessage}
+		return nil, getErrorFromResponse(response)
 	}
 }
 
-// TODO: Return message and rawbody in struct
-func safeDeserializeMessage(body []byte) string {
-	response := map[string]interface{}{}
-	err := unmarshal(body, &response)
+func getErrorFromResponse(response *http.Response) error {
+	errorMessage := fmt.Sprintf("%s", response.Body)
+	responseMap := map[string]interface{}{}
+
+	responseBytes, err := ioutil.ReadAll(response.Body)
 	if err == nil {
-		return fmt.Sprintf("%s", response["message"])
+		err := unmarshal(responseBytes, &responseMap)
+		if err == nil {
+			errorMessage = fmt.Sprintf("%s", responseMap["message"])
+		}
 	}
-	return fmt.Sprintf("%s", body)
+	clientErr := &ClientError{StatusCode: response.StatusCode, Message: errorMessage}
+	if validationErrors, ok := responseMap["validationErrors"]; ok {
+		if validationErrorMap, ok := validationErrors.(map[string]interface{}); ok {
+			return &ClientValidationError{ClientError: *clientErr, ValidationErrors: validationErrorMap}
+		}
+	}
+	return clientErr
+}
+
+func safeUnmarshalApiResponse(responseBytes []byte) *model.APIResponse {
+	message := string(responseBytes)
+	responseMap := map[string]interface{}{}
+	err := unmarshal(responseBytes, &responseMap)
+	if err == nil {
+		message = fmt.Sprintf("%s", responseMap["message"])
+	}
+	return &model.APIResponse{
+		Message: message,
+	}
 }
 
 func isSuccess(statusCode int) bool {
