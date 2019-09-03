@@ -1,2 +1,4 @@
 name: testdummy
 replicas: 2
+badfield: oops
+

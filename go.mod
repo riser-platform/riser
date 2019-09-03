@@ -7,7 +7,8 @@ go 1.12
 require (
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
-	github.com/ghodss/yaml v1.0.0
+	// Pinning to 25d852a  until they get their release act together or until go-yaml/yaml.v2 supports json tags in which case we can remove this dep
+	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.0 // indirect
 	github.com/hashicorp/go-version v1.2.0
