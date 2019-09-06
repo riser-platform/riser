@@ -22,8 +22,9 @@ watch:
 	filewatcher gotestsum
 
 # updates to the latest api models
+# Note: As of go 1.13 GOSUMDB returns a 410. Disabling until we figure out why.
 update-model:
-	go get -u github.com/tshak/riser-server/api/v1/model
+	GOSUMDB=off go get -u github.com/tshak/riser-server/api/v1/model@latest
 	go mod tidy
 
 
