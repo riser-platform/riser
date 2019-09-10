@@ -13,13 +13,13 @@ import (
 	"github.com/wzshiming/ctc"
 )
 
-func newStatusCommand(currentContext *rc.RuntimeContext) *cobra.Command {
+func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 	var appName string
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Gets the status for a deployment.",
 		Run: func(cmd *cobra.Command, args []string) {
-			apiClient, err := sdk.NewClient(currentContext.ServerURL)
+			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			if err != nil {
 				panic(err)
 			}

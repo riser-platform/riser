@@ -20,6 +20,7 @@ const defaultContentType = "application/json"
 // Client is a API v1 client
 type Client struct {
 	baseURI *url.URL
+	apikey  string
 }
 
 // ClientError provides the error message, status code.
@@ -47,19 +48,19 @@ func (e *ClientValidationError) Error() string {
 	return builder.String()
 }
 
-func NewClient(baseURI string) (*Client, error) {
+func NewClient(baseURI string, apikey string) (*Client, error) {
 	baseURIParsed, err := url.Parse(baseURI)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Client{baseURI: baseURIParsed}, nil
+	return &Client{baseURI: baseURIParsed, apikey: apikey}, nil
 }
 
 func (client *Client) ListApps() ([]model.App, error) {
 	apps := []model.App{}
 	apiUri := client.uri("/api/v1/apps")
-	response, err := doGet(apiUri.String())
+	response, err := doGet(apiUri.String(), client.apikey)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,7 @@ func (client *Client) PostApp(newApp *model.NewApp) (*model.App, error) {
 	}
 
 	apiUri := client.uri("/api/v1/apps")
-	response, err := doBodyRequest(apiUri.String(), defaultContentType, "POST", appJson)
+	response, err := doBodyRequest(apiUri.String(), client.apikey, defaultContentType, "POST", appJson)
 	if err != nil {
 		return nil, errors.Wrap(err, string(response))
 	}
@@ -103,7 +104,7 @@ func (client *Client) PutDeployment(deployment *model.DeploymentRequest, dryRun 
 		apiUri.RawQuery = q.Encode()
 	}
 
-	responseBody, err := doBodyRequest(apiUri.String(), defaultContentType, "PUT", deploymentJson)
+	responseBody, err := doBodyRequest(apiUri.String(), client.apikey, defaultContentType, "PUT", deploymentJson)
 	if err != nil {
 		return "", err
 	}
@@ -122,14 +123,14 @@ func (client *Client) PutStatus(status *model.DeploymentStatus) error {
 	}
 	apiUri := client.uri("/api/v1/status")
 
-	_, err = doBodyRequest(apiUri.String(), defaultContentType, "PUT", statusJson)
+	_, err = doBodyRequest(apiUri.String(), client.apikey, defaultContentType, "PUT", statusJson)
 	return err
 }
 
 func (client *Client) GetStatus(appName string) ([]model.DeploymentStatus, error) {
 	apiUri := client.uri(fmt.Sprintf("/api/v1/status/%s", appName))
 
-	responseBody, err := doGet(apiUri.String())
+	responseBody, err := doGet(apiUri.String(), client.apikey)
 	if err != nil {
 		return nil, err
 	}
@@ -160,21 +161,27 @@ func (client *Client) uri(apiPath string) url.URL {
 	return apiURI
 }
 
-func doGet(uri string) ([]byte, error) {
+func doGet(uri string, apikey string) ([]byte, error) {
 	request, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return nil, err
 	}
 	request.Header.Add("Accept", defaultContentType)
+	request.Header.Add(apikeyHeader(apikey))
 	return doRequest(request)
 }
 
-func doBodyRequest(uri, contentType, httpMethod string, body []byte) ([]byte, error) {
+func apikeyHeader(apikey string) (string, string) {
+	return "Authorization", fmt.Sprintf("Apikey: %s", apikey)
+}
+
+func doBodyRequest(uri, apikey, contentType, httpMethod string, body []byte) ([]byte, error) {
 	request, err := http.NewRequest(httpMethod, uri, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 	request.Header.Add("Content-Type", contentType)
+	request.Header.Add(apikeyHeader(apikey))
 	return doRequest(request)
 }
 

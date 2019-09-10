@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
+func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 	var appFilePath string
 	var dryRun bool
 	var deploymentName string
@@ -40,7 +40,7 @@ func newDeployCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 				App: *app,
 			}
 
-			apiClient, err := sdk.NewClient(currentContext.ServerURL)
+			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 
 			message, err := apiClient.PutDeployment(deployment, dryRun)

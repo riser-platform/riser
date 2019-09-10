@@ -11,7 +11,7 @@ import (
 	"github.com/tshak/riser/sdk"
 )
 
-func newAppsCommand(currentContext *rc.RuntimeContext) *cobra.Command {
+func newAppsCommand(currentContext *rc.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apps",
 		Short: "Commands for apps",
@@ -23,12 +23,12 @@ func newAppsCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	return cmd
 }
 
-func newAppsListCommand(currentContext *rc.RuntimeContext) *cobra.Command {
+func newAppsListCommand(currentContext *rc.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
 		Short: "Lists all apps",
 		Run: func(cmd *cobra.Command, args []string) {
-			apiClient, err := sdk.NewClient(currentContext.ServerURL)
+			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 			apps, err := apiClient.ListApps()
 			ui.ExitIfError(err)
@@ -44,7 +44,7 @@ func newAppsListCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	}
 }
 
-func newAppsNewCommand(currentContext *rc.RuntimeContext) *cobra.Command {
+func newAppsNewCommand(currentContext *rc.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "new (app name)",
 		Short: "Creates a new app",
@@ -52,7 +52,7 @@ func newAppsNewCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			appName := args[0]
 
-			apiClient, err := sdk.NewClient(currentContext.ServerURL)
+			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 			app, err := apiClient.PostApp(&model.NewApp{Name: appName})
 			ui.ExitIfError(err)

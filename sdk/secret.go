@@ -10,7 +10,7 @@ import (
 func (client *Client) ListSecretMetas(appName, stageName string) ([]model.SecretMetaStatus, error) {
 	secretMetas := []model.SecretMetaStatus{}
 	apiUri := client.uri(fmt.Sprintf("/api/v1/secrets/%s/%s", appName, stageName))
-	response, err := doGet(apiUri.String())
+	response, err := doGet(apiUri.String(), client.apikey)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +35,6 @@ func (client *Client) SaveSecret(appName, stageName, secretName, plainTextSecret
 	}
 	apiUri := client.uri("/api/v1/secrets")
 
-	_, err = doBodyRequest(apiUri.String(), defaultContentType, "PUT", secretJson)
+	_, err = doBodyRequest(apiUri.String(), client.apikey, defaultContentType, "PUT", secretJson)
 	return err
 }

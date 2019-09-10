@@ -3,6 +3,7 @@ package main
 import (
 	"riser/cmd"
 	"riser/rc"
+	"riser/ui"
 
 	"github.com/hashicorp/go-version"
 )
@@ -12,12 +13,10 @@ var versionString = "0.0.0-local"
 
 func main() {
 	currentVersion, err := version.NewVersion(versionString)
-	if err != nil {
-		panic(err)
-	}
+	ui.ExitIfErrorMsg(err, "Invalid version")
 
-	// TODO: Load rc from file or prompt user to create new
-	config := &rc.RuntimeConfiguration{}
+	config, err := rc.LoadRc()
+	ui.ExitIfErrorMsg(err, "Unable to load runtime configuration")
 
 	// Main execution path
 	cmd.Execute(&cmd.Runtime{

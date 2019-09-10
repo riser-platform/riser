@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newSecretsCommand(currentContext *rc.RuntimeContext) *cobra.Command {
+func newSecretsCommand(currentContext *rc.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "secrets",
 		Short: "Commands for secrets",
@@ -23,7 +23,7 @@ func newSecretsCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	return cmd
 }
 
-func newSecretsSaveCommand(currentContext *rc.RuntimeContext) *cobra.Command {
+func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
 	var appName string
 	cmd := &cobra.Command{
 		Use:   "save (name) (plaintextsecret) (stage)",
@@ -35,7 +35,7 @@ func newSecretsSaveCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 			plainTextSecret := args[1]
 			stageName := args[2]
 
-			apiClient, err := sdk.NewClient(currentContext.ServerURL)
+			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 
 			// TODO: Prompt to confirm first
@@ -50,7 +50,7 @@ func newSecretsSaveCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 	return cmd
 }
 
-func newSecretsListCommand(currentContext *rc.RuntimeContext) *cobra.Command {
+func newSecretsListCommand(currentContext *rc.Context) *cobra.Command {
 	var appName string
 	cmd := &cobra.Command{
 		Use:   "list (stage)",
@@ -58,7 +58,7 @@ func newSecretsListCommand(currentContext *rc.RuntimeContext) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			stageName := args[0]
-			apiClient, err := sdk.NewClient(currentContext.ServerURL)
+			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 
 			secretMetas, err := apiClient.ListSecretMetas(appName, stageName)
