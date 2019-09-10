@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
-// versionString is a var because overwritten by the compiler using ldflags
+// versionString is a var because it's overwritten by the compiler using ldflags
 var versionString = "0.0.0-local"
 
 func main() {
