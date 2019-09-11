@@ -32,7 +32,8 @@ func newContextAddCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := config.AddContext(&rc.Context{Name: args[0], ServerURL: args[1], Apikey: args[2]})
 			ui.ExitIfErrorMsg(err, "Error adding context")
-			rc.SaveRc(config)
+			err = rc.SaveRc(config)
+			ui.ExitIfErrorMsg(err, "Error saving rc file")
 		},
 	}
 
