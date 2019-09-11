@@ -63,12 +63,13 @@ func newContextCurrentCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) > 0 && len(args[0]) > 0 {
 				err := config.SetCurrentContext(args[0])
-				rc.SaveRc(config)
 				ui.ExitIfErrorMsg(err, "unable to set context")
+				err = rc.SaveRc(config)
+				ui.ExitIfErrorMsg(err, "Error saving to rc file")
+
+				logger.Log().Info(fmt.Sprintf("Successfully loaded context \"%s\"\n", config.CurrentContextName))
 			} else {
-				currentContext, err := config.CurrentContext()
-				ui.ExitIfErrorMsg(err, "could not load current context")
-				logger.Log().Info(fmt.Sprintf("Successfully loaded context \"%s\"\n", currentContext.Name))
+				logger.Log().Info(fmt.Sprintf("Current Context: \"%s\"\n", config.CurrentContextName))
 			}
 		},
 	}
