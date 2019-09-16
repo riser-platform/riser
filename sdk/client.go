@@ -143,6 +143,19 @@ func (client *Client) GetStatus(appName string) ([]model.DeploymentStatus, error
 	return statuses, nil
 }
 
+func (client *Client) PostStagePing(stageName string) error {
+	apiUri := client.uri(fmt.Sprintf("/api/v1/stage/%s/ping", stageName))
+
+	request, err := http.NewRequest("POST", apiUri.String(), nil)
+	if err != nil {
+		return err
+	}
+	request.Header.Add("Accept", defaultContentType)
+	request.Header.Add(apikeyHeader(client.apikey))
+	_, err = doRequest(request)
+	return err
+}
+
 // unmarshal ignores nil response data and wraps the error with response content for easier debugging
 func unmarshal(responseBody []byte, v interface{}) error {
 	if responseBody != nil {
