@@ -127,7 +127,7 @@ func (client *Client) PutStatus(status *model.DeploymentStatus) error {
 	return err
 }
 
-func (client *Client) GetStatus(appName string) ([]model.DeploymentStatus, error) {
+func (client *Client) GetStatus(appName string) (*model.Status, error) {
 	apiUri := client.uri(fmt.Sprintf("/api/v1/status/%s", appName))
 
 	responseBody, err := doGet(apiUri.String(), client.apikey)
@@ -135,12 +135,12 @@ func (client *Client) GetStatus(appName string) ([]model.DeploymentStatus, error
 		return nil, err
 	}
 
-	statuses := []model.DeploymentStatus{}
-	err = unmarshal(responseBody, &statuses)
+	status := &model.Status{}
+	err = unmarshal(responseBody, status)
 	if err != nil {
 		return nil, err
 	}
-	return statuses, nil
+	return status, nil
 }
 
 func (client *Client) PostStagePing(stageName string) error {

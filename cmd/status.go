@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"riser/rc"
+	"riser/ui"
 	"riser/ui/table"
 	"strings"
 
@@ -20,16 +21,12 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 		Short: "Gets the status for a deployment.",
 		Run: func(cmd *cobra.Command, args []string) {
 			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
-			if err != nil {
-				panic(err)
-			}
+			ui.ExitIfError(err)
 
-			statuses, err := apiClient.GetStatus(appName)
-			if err != nil {
-				panic(err)
-			}
+			status, err := apiClient.GetStatus(appName)
+			ui.ExitIfErrorMsg(err, "Error getting status")
 
-			drawStatusSummary(statuses)
+			drawStatus(status)
 		},
 	}
 
@@ -38,21 +35,30 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 	return cmd
 }
 
-func drawStatusSummary(statuses []model.DeploymentStatus) {
+func drawStatus(status *model.Status) {
 	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Rollout Details", "Problems")
-
-	for _, status := range statuses {
+	for _, deploymentStatus := range status.Deployments {
 		table.AddRow(
-			status.DeploymentName,
-			status.StageName,
-			fmt.Sprintf("%d", status.RolloutRevision),
-			getDockerTag(status.DockerImage),
-			formatRolloutStatus(status.RolloutStatus),
-			status.RolloutStatusReason,
-			formatProblems(status.Problems))
+			deploymentStatus.DeploymentName,
+			deploymentStatus.StageName,
+			fmt.Sprintf("%d", deploymentStatus.RolloutRevision),
+			getDockerTag(deploymentStatus.DockerImage),
+			formatRolloutStatus(deploymentStatus.RolloutStatus),
+			deploymentStatus.RolloutStatusReason,
+			formatProblems(deploymentStatus.Problems))
 	}
 
 	fmt.Println(table)
+	fmt.Print("\n")
+
+	for _, stageStatus := range status.Stages {
+		if !stageStatus.Healthy {
+			fmt.Print(ctc.ForegroundBrightYellow)
+			fmt.Printf("Warning: stage %q is not healhty. %s\n", stageStatus.StageName, stageStatus.Reason)
+			fmt.Print(ctc.Reset)
+		}
+	}
+
 }
 
 func getDockerTag(dockerImage string) string {
