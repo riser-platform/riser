@@ -144,7 +144,7 @@ func (client *Client) GetStatus(appName string) (*model.Status, error) {
 }
 
 func (client *Client) PostStagePing(stageName string) error {
-	apiUri := client.uri(fmt.Sprintf("/api/v1/stage/%s/ping", stageName))
+	apiUri := client.uri(fmt.Sprintf("/api/v1/stages/%s/ping", stageName))
 
 	request, err := http.NewRequest("POST", apiUri.String(), nil)
 	if err != nil {
@@ -154,6 +154,24 @@ func (client *Client) PostStagePing(stageName string) error {
 	request.Header.Add(apikeyHeader(client.apikey))
 	_, err = doRequest(request)
 	return err
+}
+
+func (client *Client) ListStages() ([]model.Stage, error) {
+	apiUri := client.uri("/api/v1/stages")
+
+	body, err := doGet(apiUri.String(), client.apikey)
+	if err != nil {
+		return nil, err
+	}
+
+	stages := []model.Stage{}
+
+	err = unmarshal(body, &stages)
+	if err != nil {
+		return nil, err
+	}
+
+	return stages, nil
 }
 
 // unmarshal ignores nil response data and wraps the error with response content for easier debugging

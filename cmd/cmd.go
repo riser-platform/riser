@@ -29,6 +29,7 @@ func Execute(runtime *Runtime) {
 	cmd.AddCommand(newContextCommand(runtime.Configuration))
 	cmd.AddCommand(newDeployCommand(currentContext))
 	cmd.AddCommand(newOpsCommand())
+	cmd.AddCommand(newStagesCommand(currentContext))
 	cmd.AddCommand(newSecretsCommand(currentContext))
 	cmd.AddCommand(newStatusCommand(currentContext))
 	cmd.AddCommand(newValidateCommand())

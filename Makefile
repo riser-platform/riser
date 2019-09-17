@@ -4,10 +4,6 @@ build:
 test: fmt lint
 	gotestsum
 
-# Runs teh server in development mode
-run: fmt lint
-	go run ./main.go
-
 # Run go fmt against code
 fmt:
 	go fmt ./...
