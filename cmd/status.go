@@ -54,7 +54,7 @@ func drawStatus(status *model.Status) {
 	for _, stageStatus := range status.Stages {
 		if !stageStatus.Healthy {
 			fmt.Print(ctc.ForegroundBrightYellow)
-			fmt.Printf("Warning: stage %q is not healhty. %s\n", stageStatus.StageName, stageStatus.Reason)
+			fmt.Printf("Warning: stage %q is not healthy. %s\n", stageStatus.StageName, stageStatus.Reason)
 			fmt.Print(ctc.Reset)
 		}
 	}
