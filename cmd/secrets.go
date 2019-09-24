@@ -42,7 +42,7 @@ func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
 			err = apiClient.SaveSecret(appName, stageName, secretName, plainTextSecret)
 			ui.ExitIfErrorMsg(err, "Error saving secret")
 
-			fmt.Printf("Secret %q saved. This change will take affect during the next deployment to stage %q\n", secretName, stageName)
+			fmt.Printf("Secret %q saved. New values will take affect the next time %q in stage %q is deployed\n", secretName, appName, stageName)
 		},
 	}
 	addAppFlag(cmd.Flags(), &appName)
