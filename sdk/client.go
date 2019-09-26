@@ -156,7 +156,7 @@ func (client *Client) PostStagePing(stageName string) error {
 	return err
 }
 
-func (client *Client) ListStages() ([]model.Stage, error) {
+func (client *Client) ListStages() ([]model.StageMeta, error) {
 	apiUri := client.uri("/api/v1/stages")
 
 	body, err := doGet(apiUri.String(), client.apikey)
@@ -164,7 +164,7 @@ func (client *Client) ListStages() ([]model.Stage, error) {
 		return nil, err
 	}
 
-	stages := []model.Stage{}
+	stages := []model.StageMeta{}
 
 	err = unmarshal(body, &stages)
 	if err != nil {
@@ -172,6 +172,19 @@ func (client *Client) ListStages() ([]model.Stage, error) {
 	}
 
 	return stages, nil
+}
+
+// SetStageConfig sets configuration for a stage. Empty values are ignored, preserving existing config values.
+func (client *Client) SetStageConfig(stageName string, config model.StageConfig) error {
+	apiUri := client.uri(fmt.Sprintf("/api/v1/stages/%s", stageName))
+
+	body, err := json.Marshal(config)
+	if err != nil {
+		return err
+	}
+
+	_, err = doBodyRequest(apiUri.String(), client.apikey, defaultContentType, "PUT", body)
+	return err
 }
 
 // unmarshal ignores nil response data and wraps the error with response content for easier debugging
