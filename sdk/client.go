@@ -176,7 +176,7 @@ func (client *Client) ListStages() ([]model.StageMeta, error) {
 
 // SetStageConfig sets configuration for a stage. Empty values are ignored, preserving existing config values.
 func (client *Client) SetStageConfig(stageName string, config model.StageConfig) error {
-	apiUri := client.uri(fmt.Sprintf("/api/v1/stages/%s", stageName))
+	apiUri := client.uri(fmt.Sprintf("/api/v1/stages/%s/config", stageName))
 
 	body, err := json.Marshal(config)
 	if err != nil {
