@@ -1,8 +1,8 @@
-build:
-	go build -o bin/riser
-
 test: fmt lint
 	gotestsum
+
+build:
+	go build -o bin/riser
 
 # Run go fmt against code
 fmt:
