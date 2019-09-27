@@ -1,5 +1,5 @@
 name: testdummy
-id: 78344c3e
+id: a28df002
 image: tshak/testdummy
 replicas: 2
 healthcheck:
