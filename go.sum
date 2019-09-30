@@ -58,6 +58,7 @@ github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
+github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a/go.mod h1:yL958EeXv8Ylng6IfnvG4oflryUi3vgA3xPs9hmII1s=
 github.com/json-iterator/go v0.0.0-20180612202835-f2b4162afba3/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/json-iterator/go v1.1.6 h1:MrUvLMLTMxbqFJ9kzlvat/rYZqZnW3u4wkLzWTaFwKs=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
@@ -116,8 +117,8 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/tshak/riser-server/api/v1/model v0.0.0-20190830140115-48e49a16e962 h1:8yrO1Smz2ApK75GxdhpZ4ICilDh/U0i8V4d53D+BOHE=
 github.com/tshak/riser-server/api/v1/model v0.0.0-20190830140115-48e49a16e962/go.mod h1:KStTMC3G0BNR/4uWty1P5g3TcN3B76ArANuw4MJOfgE=
-github.com/tshak/riser-server/api/v1/model v0.0.0-20190930125031-39271dff0ba3 h1:NrEy7OegfF9lLmaSBx9bZAxXpeIOptJn9FBLErnHSWk=
-github.com/tshak/riser-server/api/v1/model v0.0.0-20190930125031-39271dff0ba3/go.mod h1:b8jAkH2WIbdGYR8cT6Bzxt00QqHxg6S9ovKD2ZpauoE=
+github.com/tshak/riser-server/api/v1/model v0.0.0-20190930140053-20d028af1577 h1:uEtEMilQre4e/wcPZBlhfZiwmFIwwq9lriIusti39tk=
+github.com/tshak/riser-server/api/v1/model v0.0.0-20190930140053-20d028af1577/go.mod h1:7tkkhK0ilMyZiMR54oEiSDfw/iMpeHyh1PBlqi73yUI=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/wzshiming/ctc v1.2.0 h1:TrXZ+Uzj1y+GarLb0Ux08WTXX2trk5nnHfduNp2mSfM=
 github.com/wzshiming/ctc v1.2.0/go.mod h1:20Wvt1IsAUnS05mzVntGRQTOGqu0F6mURodp5zH6a4c=
