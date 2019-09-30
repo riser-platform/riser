@@ -116,8 +116,8 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/tshak/riser-server/api/v1/model v0.0.0-20190830140115-48e49a16e962 h1:8yrO1Smz2ApK75GxdhpZ4ICilDh/U0i8V4d53D+BOHE=
 github.com/tshak/riser-server/api/v1/model v0.0.0-20190830140115-48e49a16e962/go.mod h1:KStTMC3G0BNR/4uWty1P5g3TcN3B76ArANuw4MJOfgE=
-github.com/tshak/riser-server/api/v1/model v0.0.0-20190926181744-2bd0a3ba0692 h1:+/0ujLMKqsm5iFvyFyfcjoQaYjTW2oH8yMoQTBMPV+s=
-github.com/tshak/riser-server/api/v1/model v0.0.0-20190926181744-2bd0a3ba0692/go.mod h1:b8jAkH2WIbdGYR8cT6Bzxt00QqHxg6S9ovKD2ZpauoE=
+github.com/tshak/riser-server/api/v1/model v0.0.0-20190930125031-39271dff0ba3 h1:NrEy7OegfF9lLmaSBx9bZAxXpeIOptJn9FBLErnHSWk=
+github.com/tshak/riser-server/api/v1/model v0.0.0-20190930125031-39271dff0ba3/go.mod h1:b8jAkH2WIbdGYR8cT6Bzxt00QqHxg6S9ovKD2ZpauoE=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/wzshiming/ctc v1.2.0 h1:TrXZ+Uzj1y+GarLb0Ux08WTXX2trk5nnHfduNp2mSfM=
 github.com/wzshiming/ctc v1.2.0/go.mod h1:20Wvt1IsAUnS05mzVntGRQTOGqu0F6mURodp5zH6a4c=
