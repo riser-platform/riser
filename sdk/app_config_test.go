@@ -8,7 +8,7 @@ import (
 )
 
 const expectedAppConfig = `name: myapp
-id: myid
+id: "myid"
 # TODO: Update to use your docker image registry/repo (without tag) here
 image: your/image
 expose:

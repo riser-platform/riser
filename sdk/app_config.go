@@ -8,7 +8,7 @@ import (
 )
 
 const appConfigTemplate = `name: {{.AppName}}
-id: {{.AppId}}
+id: "{{.AppId}}"
 # TODO: Update to use your docker image registry/repo (without tag) here
 image: your/image
 expose:
