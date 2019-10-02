@@ -1,5 +1,15 @@
-test: fmt lint
-	gotestsum
+# Run tests.
+test: fmt lint test-cmd
+			$(TEST_COMMAND)
+			# Nested go modules are not tested for some reason, so test them separately
+			cd sdk && $(TEST_COMMAND)
+
+test-cmd:
+ifeq (, $(shell which gotestsum))
+TEST_COMMAND=go test ./...
+else
+TEST_COMMAND=gotestsum
+endif
 
 build:
 	go build -o bin/riser
@@ -22,6 +32,7 @@ watch:
 update-model:
 	GOSUMDB=off go get -u github.com/tshak/riser-server/api/v1/model@latest
 	go mod tidy
+	cd sdk && GOSUMDB=off go get -u github.com/tshak/riser-server/api/v1/model@latest && go mod tidy
 
 
 
