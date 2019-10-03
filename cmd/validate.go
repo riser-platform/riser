@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"riser/config"
 	"riser/logger"
+	"riser/rc"
+	"riser/ui"
 
-	"github.com/sanity-io/litter"
+	"github.com/tshak/riser/sdk"
+
 	"github.com/spf13/cobra"
 )
 
-func newValidateCommand() *cobra.Command {
+func newValidateCommand(currentContext *rc.Context) *cobra.Command {
 	var appFilePath string
 	cmd := &cobra.Command{
 		Use:   "validate",
@@ -17,10 +20,15 @@ func newValidateCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			app, err := config.LoadApp(appFilePath)
 			if err == nil {
-				logger.Log().Info(fmt.Sprintf("Loaded config %s", appFilePath))
-				logger.Log().Verbose(litter.Sdump(app))
+				apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
+				ui.ExitIfError(err)
+
+				err = apiClient.PostValidateAppConfig(app)
+				ui.ExitIfError(err)
+
+				fmt.Println("App config is valid")
 			} else {
-				logger.Log().Error(fmt.Sprintf("Failed to load config %s: %s", appFilePath, err))
+				logger.Log().Error(fmt.Sprintf("Failed to load app config %s: %s", appFilePath, err))
 			}
 		},
 	}

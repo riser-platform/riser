@@ -92,6 +92,22 @@ func (client *Client) PostApp(newApp *model.NewApp) (*model.App, error) {
 	return app, nil
 }
 
+func (client *Client) PostValidateAppConfig(appConfig *model.AppConfigWithOverrides) error {
+	appConfigJson, err := json.Marshal(appConfig)
+	if err != nil {
+		return errors.Wrap(err, "Invalid app config")
+	}
+
+	apiUri := client.uri("/api/v1/validate/appconfig")
+
+	_, err = doBodyRequest(apiUri.String(), client.apikey, defaultContentType, "POST", appConfigJson)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (client *Client) PutDeployment(deployment *model.DeploymentRequest, dryRun bool) (string, error) {
 	deploymentJson, err := json.Marshal(deployment)
 	if err != nil {

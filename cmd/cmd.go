@@ -32,7 +32,7 @@ func Execute(runtime *Runtime) {
 	cmd.AddCommand(newStagesCommand(currentContext))
 	cmd.AddCommand(newSecretsCommand(currentContext))
 	cmd.AddCommand(newStatusCommand(currentContext))
-	cmd.AddCommand(newValidateCommand())
+	cmd.AddCommand(newValidateCommand(currentContext))
 	cmd.AddCommand(newVersionCmd(runtime.Version))
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
