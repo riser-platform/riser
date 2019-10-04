@@ -34,7 +34,7 @@ func newAppsListCommand(currentContext *rc.Context) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
-			apps, err := apiClient.ListApps()
+			apps, err := apiClient.Apps.List()
 			ui.ExitIfError(err)
 
 			table := table.Default().Header("Name", "Id")
@@ -87,7 +87,7 @@ func newAppsNewCommand(currentContext *rc.Context) *cobra.Command {
 func createNewApp(currentContext *rc.Context, appName string) *model.App {
 	apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 	ui.ExitIfError(err)
-	app, err := apiClient.PostApp(&model.NewApp{Name: appName})
+	app, err := apiClient.Apps.Create(&model.NewApp{Name: appName})
 	ui.ExitIfError(err)
 	return app
 }

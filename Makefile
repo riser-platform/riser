@@ -21,6 +21,7 @@ fmt:
 # Run go vet against code
 lint:
 	golangci-lint run
+	cd sdk && golangci-lint run
 
 # compile and run unit tests on change.
 # requires filewatcher and gotestsum

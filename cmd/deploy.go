@@ -43,7 +43,7 @@ func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 
-			message, err := apiClient.PutDeployment(deployment, dryRun)
+			message, err := apiClient.Deployments.Save(deployment, dryRun)
 			ui.ExitIfError(err)
 
 			fmt.Println(message)

@@ -23,7 +23,7 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 
-			status, err := apiClient.GetStatus(appName)
+			status, err := apiClient.Status.Get(appName)
 			ui.ExitIfErrorMsg(err, "Error getting status")
 
 			drawStatus(status)

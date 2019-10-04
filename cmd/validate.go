@@ -23,7 +23,7 @@ func newValidateCommand(currentContext *rc.Context) *cobra.Command {
 				apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 				ui.ExitIfError(err)
 
-				err = apiClient.PostValidateAppConfig(app)
+				err = apiClient.Validate.AppConfig(app)
 				ui.ExitIfError(err)
 
 				fmt.Println("App config is valid")

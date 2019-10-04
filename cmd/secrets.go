@@ -39,7 +39,7 @@ func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
 			ui.ExitIfError(err)
 
 			// TODO: Prompt to confirm first
-			err = apiClient.SaveSecret(appName, stageName, secretName, plainTextSecret)
+			err = apiClient.Secrets.Save(appName, stageName, secretName, plainTextSecret)
 			ui.ExitIfErrorMsg(err, "Error saving secret")
 
 			fmt.Printf("Secret %q saved. New values will take affect the next time %q in stage %q is deployed\n", secretName, appName, stageName)
@@ -61,7 +61,7 @@ func newSecretsListCommand(currentContext *rc.Context) *cobra.Command {
 			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 
-			secretMetas, err := apiClient.ListSecretMetas(appName, stageName)
+			secretMetas, err := apiClient.Secrets.List(appName, stageName)
 			ui.ExitIfError(err)
 
 			table := table.Default().Header("Name", "Last Updated")

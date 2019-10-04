@@ -28,7 +28,7 @@ func newStagesListCommand(currentContext *rc.Context) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
-			stages, err := apiClient.ListStages()
+			stages, err := apiClient.Stages.List()
 			ui.ExitIfError(err)
 
 			table := table.Default().Header("Name")
