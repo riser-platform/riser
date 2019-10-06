@@ -6,6 +6,8 @@ import (
 	"riser/rc"
 	"riser/ui"
 
+	"github.com/wzshiming/ctc"
+
 	"github.com/tshak/riser-server/api/v1/model"
 	"github.com/tshak/riser/sdk"
 
@@ -43,8 +45,18 @@ func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 			ui.ExitIfError(err)
 
 			fmt.Println(deployResult.Message)
-			if dryRun && deployResult.DryRunResult != nil {
-				fmt.Println(deployResult.DryRunResult)
+			if dryRun && deployResult.DryRunCommits != nil {
+				for _, commit := range deployResult.DryRunCommits {
+					fmt.Print(ctc.ForegroundBrightCyan)
+					fmt.Printf("Commit: %s\n", commit.Message)
+					for _, file := range commit.Files {
+						fmt.Print(ctc.ForegroundBrightWhite)
+						fmt.Printf("File: %s\n", file.Name)
+						fmt.Print(ctc.ForegroundBrightBlack)
+						fmt.Println(file.Contents)
+					}
+					fmt.Print(ctc.Reset)
+				}
 			}
 		},
 	}

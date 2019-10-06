@@ -49,12 +49,12 @@ func Test_Deployment_Save_DryRun(t *testing.T) {
 		actualModel := &model.DeploymentRequest{}
 		mustUnmarshalR(r.Body, actualModel)
 		assert.Equal(t, requestModel, actualModel)
-		fmt.Fprint(w, `{"message": "dryRun", "dryRunResult": "test"}`)
+		fmt.Fprint(w, `{"message": "dryRun", "dryRunCommits": [{ "message": "test"}]}`)
 	})
 
 	result, err := client.Deployments.Save(requestModel, true)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "dryRun", result.Message)
-	assert.EqualValues(t, "test", result.DryRunResult)
+	assert.EqualValues(t, "test", result.DryRunCommits[0].Message)
 }

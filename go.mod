@@ -13,7 +13,7 @@ require (
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/testify v1.4.0
-	github.com/tshak/riser-server/api/v1/model v0.0.0-20191006073840-f89127681c59
+	github.com/tshak/riser-server/api/v1/model v0.0.0-20191006090436-fbaa2a96f3a7
 	github.com/tshak/riser/sdk v0.0.0-00010101000000-000000000000
 	github.com/wzshiming/ctc v1.2.0
 	github.com/wzshiming/winseq v0.0.0-20181031094240-8a45cfbfe1c2 // indirect
