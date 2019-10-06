@@ -27,10 +27,6 @@ func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 			app, err := config.LoadApp(appFilePath)
 			ui.ExitIfErrorMsg(err, "Error loading app config")
 
-			if dryRun {
-				println("DRY RUN MODE")
-			}
-
 			deployment := &model.DeploymentRequest{
 				DeploymentMeta: model.DeploymentMeta{
 					Name:   deploymentName,
@@ -43,10 +39,13 @@ func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 			apiClient, err := sdk.NewClient(currentContext.ServerURL, currentContext.Apikey)
 			ui.ExitIfError(err)
 
-			message, err := apiClient.Deployments.Save(deployment, dryRun)
+			deployResult, err := apiClient.Deployments.Save(deployment, dryRun)
 			ui.ExitIfError(err)
 
-			fmt.Println(message)
+			fmt.Println(deployResult.Message)
+			if dryRun && deployResult.DryRunResult != nil {
+				fmt.Println(deployResult.DryRunResult)
+			}
 		},
 	}
 

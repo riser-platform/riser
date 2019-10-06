@@ -27,10 +27,34 @@ func Test_Deployments_Save(t *testing.T) {
 		fmt.Fprint(w, `{"message": "saved"}`)
 	})
 
-	message, err := client.Deployments.Save(requestModel, false)
+	result, err := client.Deployments.Save(requestModel, false)
 
 	assert.NoError(t, err)
-	assert.Equal(t, "saved", message)
+	assert.Equal(t, "saved", result.Message)
 }
 
-// TODO: Test_Deployments_Save_Dryrun
+func Test_Deployment_Save_DryRun(t *testing.T) {
+	setup()
+	defer teardown()
+
+	requestModel := &model.DeploymentRequest{
+		DeploymentMeta: model.DeploymentMeta{
+			Name: "mydeployment",
+		},
+	}
+
+	mux.HandleFunc("/api/v1/deployments", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPut, r.Method)
+		assert.Equal(t, "true", r.URL.Query().Get("dryRun"))
+		actualModel := &model.DeploymentRequest{}
+		mustUnmarshalR(r.Body, actualModel)
+		assert.Equal(t, requestModel, actualModel)
+		fmt.Fprint(w, `{"message": "dryRun", "dryRunResult": "test"}`)
+	})
+
+	result, err := client.Deployments.Save(requestModel, true)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "dryRun", result.Message)
+	assert.EqualValues(t, "test", result.DryRunResult)
+}

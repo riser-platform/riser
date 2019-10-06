@@ -7,17 +7,17 @@ import (
 )
 
 type DeploymentsClient interface {
-	Save(deployment *model.DeploymentRequest, dryRun bool) (string, error)
+	Save(deployment *model.DeploymentRequest, dryRun bool) (*model.DeploymentResponse, error)
 }
 
 type deploymentsClient struct {
 	client *Client
 }
 
-func (c *deploymentsClient) Save(deployment *model.DeploymentRequest, dryRun bool) (string, error) {
+func (c *deploymentsClient) Save(deployment *model.DeploymentRequest, dryRun bool) (*model.DeploymentResponse, error) {
 	request, err := c.client.NewRequest(http.MethodPut, "/api/v1/deployments", deployment)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if dryRun {
@@ -26,16 +26,11 @@ func (c *deploymentsClient) Save(deployment *model.DeploymentRequest, dryRun boo
 		request.URL.RawQuery = q.Encode()
 	}
 
-	responseModel := &model.APIResponse{}
+	responseModel := &model.DeploymentResponse{}
 	_, err = c.client.Do(request, responseModel)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	// TODO: API should return a proper model here for dryrun support
-	if dryRun {
-		return "Dry run not yet implemented", nil
-	} else {
-		return responseModel.Message, nil
-	}
+	return responseModel, nil
 }
