@@ -36,9 +36,12 @@
           args:
           - "-root"
           - "/tmp/git"
-          envFrom:
-          - configMapRef:
-              name: kube-applier
+          env:
+          - name: GIT_SYNC_REPO
+            valueFrom:
+              secretKeyRef:
+                name: kube-applier
+                key: GIT_SYNC_REPO
           image: "gcr.io/google_containers/git-sync:v3.1.1"
           ports:
             - containerPort: 2020

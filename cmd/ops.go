@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os/exec"
 	"path"
+	"riser/installer"
 	"riser/logger"
 	"riser/ui"
 	"strings"
@@ -18,6 +19,7 @@ import (
 )
 
 const ApiKeySizeBytes = 20
+const demoStageName = "demo"
 
 func newOpsCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -82,7 +84,11 @@ func newInstallDemoCommand() *cobra.Command {
 
 			var gitUrl string
 			gitUrlPrompt := &survey.Input{
-				Message: "Enter the GitHub URL as the riser state repo (e.g. https://github.com/your/repo). It's recommended to use an empty repo.",
+				Message: "Enter the GitHub URL as the riser state repo (e.g. https://github.com/your/repo). Include auth if this is a private repo.",
+				Help: `
+For private repos it's recommended that you use a Personal Access Token. For example: https://oauthtoken:YOUR-TOKEN-HERE@github.com/your/repo.
+See https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line for more information on creating a GitHub Personal Access Token
+`,
 			}
 			err = survey.AskOne(gitUrlPrompt, &gitUrl)
 			ui.ExitIfError(err)
@@ -91,32 +97,25 @@ func newInstallDemoCommand() *cobra.Command {
 			// TODO: reprompt instead of exit on validation failure
 			ui.ExitIfError(err)
 
-			gitUsername := "oauthtoken"
-			gitUsernamePrompt := &survey.Input{
-				Message: "Enter a username that has write access to the repo. Use \"oauthtoken\" if using a Github Personal Access Token (recommended).",
-				Help:    "See https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line for more information on creating a GitHub Personal Access Token",
-				Default: gitUsername,
-			}
-			err = survey.AskOne(gitUsernamePrompt, &gitUsername)
-			ui.ExitIfError(err)
-
-			var gitPassword string
-			gitPasswordPrompt := &survey.Password{
-				Message: "Enter the password or Personal Access Token",
-			}
-			err = survey.AskOne(gitPasswordPrompt, &gitPassword)
-			ui.ExitIfError(err)
-
 			gitUrlParsed, err := url.Parse(gitUrl)
 			ui.ExitIfErrorMsg(err, "Unable to parse git URL")
-			gitUrlParsed.User = url.UserPassword(gitUsername, gitPassword)
 
-			// TODO: Wrap with a timeout
-			_, err = exec.Command("git", "ls-remote", gitUrlParsed.String(), "HEAD").Output()
-			ui.ExitIfErrorMsg(err, fmt.Sprintf("Error validating git remote."))
+			gitRepoName := strings.Split(gitUrlParsed.Path, "/")[2]
 
-			logger.Log().Info("Installing kubeapplier...")
-			_, err = exec.Command("kubectl", "apply", "-f", path.Join(demoPath, "kubeapplier")).Output()
+			logger.Log().Info("Installing demo...")
+			err = installer.Run(
+				installer.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", gitUrlParsed.String(), "HEAD")),
+				installer.NewExecStep("Install infra", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
+				installer.NewShellExecStep("Create git secret for kube-applier",
+					"kubectl create secret generic kube-applier --namespace=kube-applier "+
+						fmt.Sprintf("--from-literal=GIT_SYNC_REPO=%s", gitUrlParsed.String())+
+						" --dry-run=true -o yaml | kubectl apply -f -"),
+				installer.NewShellExecStep("Create kube-applier configuration",
+					"kubectl create configmap kube-applier --namespace kube-applier "+
+						fmt.Sprintf("--from-literal=REPO_PATH=/git-repo/%s/stages/%s/kube-resources", gitRepoName, demoStageName)+
+						" --dry-run=true -o yaml | kubectl apply -f -"),
+			)
+
 			ui.ExitIfError(err)
 		},
 	}
