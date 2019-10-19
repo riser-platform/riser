@@ -4,6 +4,7 @@ package logger
 // Logger interface for logging
 type Logger interface {
 	Info(string)
+	Warn(string)
 	Error(string)
 	Verbose(string)
 }

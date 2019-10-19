@@ -1,0 +1,101 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: riser-server
+  namespace: riser-system
+  labels:
+    app: riser-server
+  annotations:
+    sidecar.istio.io/rewriteAppHTTPProbers: "true"
+spec:
+  selector:
+    matchLabels:
+      app: riser-server
+  serviceName: riser-server
+  template:
+    metadata:
+      labels:
+        app: riser-server
+    spec:
+      imagePullSecrets:
+        - name: riser-registry
+      terminationGracePeriodSeconds: 10
+      imagePullSecrets:
+        - name: us-gcr-io-registry
+      containers:
+      - name: server
+        # TODO(OSS): Move to public registry
+        image: us.gcr.io/platpoc/riser-server:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        envFrom:
+        - configMapRef:
+            name: riser-server
+        env:
+        - name: RISER_GIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: riser-server
+              key: RISER_GIT_PASSWORD
+        - name: RISER_GIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: riser-server
+              key: RISER_GIT_USERNAME
+        - name: RISER_POSTGRES_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: riser-server
+              key: RISER_POSTGRES_USERNAME
+        - name: RISER_POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: riser-server
+              key: RISER_POSTGRES_PASSWORD
+        - name: RISER_BOOTSTRAP_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: riser-server
+              key: RISER_BOOTSTRAP_APIKEY
+              optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: riser-server
+  namespace: riser-system
+  labels:
+    app: riser-server
+spec:
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 0
+  selector:
+    app: riser-server
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  labels:
+    app: riser-server
+  name: riser-server-api
+  namespace: riser-system
+spec:
+  gateways:
+  - riser-system/public-default
+  - mesh
+  hosts:
+  - api.prod.tshak.net
+  - riser-server.riser-system.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: riser-server.riser-system.svc.cluster.local

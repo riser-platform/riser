@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: riser-system
+  labels:
+    istio-injection: enabled

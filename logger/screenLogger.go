@@ -26,6 +26,11 @@ func (logger *ScreenLogger) Info(message string) {
 	fmt.Println(message)
 }
 
+// Warn logs a warning message to the screen
+func (logger *ScreenLogger) Warn(message string) {
+	fmt.Println(message)
+}
+
 // Error logs an error message to the screen
 func (logger *ScreenLogger) Error(message string) {
 	fmt.Println(message)
