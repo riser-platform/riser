@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"os/exec"
 	"path"
-	"riser/installer"
 	"riser/logger"
+	"riser/steps"
 	"riser/ui"
 	"strings"
 
@@ -108,17 +108,17 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 			gitRepoName := strings.Split(gitUrlParsed.Path, "/")[2]
 
 			logger.Log().Info("Installing demo...")
-			apiKeyGenStep := installer.NewExecStep("Generate Riser API key", exec.Command("riser", "ops", "generate-apikey"))
-			err = installer.Run(
-				installer.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", gitUrlParsed.String(), "HEAD")),
+			apiKeyGenStep := steps.NewExecStep("Generate Riser API key", exec.Command("riser", "ops", "generate-apikey"))
+			err = steps.Run(
+				steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", gitUrlParsed.String(), "HEAD")),
 				// Install namespaces and istio CRDs separately due to ordering issues (declarative infra... not quite!)
-				installer.NewExecStep("Apply namespaces and CRDs", exec.Command("kubectl", "apply",
+				steps.NewExecStep("Apply namespaces and CRDs", exec.Command("kubectl", "apply",
 					"-f", path.Join(demoPath, "kube-resources/riser-server/namespaces.yaml"),
 					"-f", path.Join(demoPath, "kube-resources/istio/0_namespace.yaml"),
 					"-f", path.Join(demoPath, "kube-resources/istio/1_init.yaml"),
 				)),
-				installer.NewWaitStep(
-					installer.NewExecStep("Wait for istio CRDs",
+				steps.NewWaitStep(
+					steps.NewExecStep("Wait for istio CRDs",
 						exec.Command("kubectl", "wait", "--for", "condition=established", "crd/gateways.networking.istio.io")),
 					10,
 					func(stepErr error) bool {
@@ -130,14 +130,14 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 			ui.ExitIfError(err)
 
 			// Run another group of steps since we rely on the state of previous steps (step runner could support deffered state but this is simpler for now)
-			err = installer.Run(
-				installer.NewShellExecStep("Create riser-server configuration",
+			err = steps.Run(
+				steps.NewShellExecStep("Create riser-server configuration",
 					"kubectl create configmap riser-server --namespace=riser-system "+
 						fmt.Sprintf("--from-literal=RISER_GIT_URL=%s", gitUrlNoAuthParsed.String())+
 						" --dry-run=true -o yaml | kubectl apply -f -"),
 				//TODO: This is not  idempotent as a new APIKEY will be generated but only the bootstrapped key will be used.
 				// While this does not affect the server, the installer will overwrite the riser login with the wrong APIKEY
-				installer.NewShellExecStep("Create secret for riser-server",
+				steps.NewShellExecStep("Create secret for riser-server",
 					"kubectl create secret generic riser-server --namespace=riser-system "+
 						fmt.Sprintf("--from-literal=RISER_BOOTSTRAP_APIKEY=%s ", apiKeyGenStep.State("stdout"))+
 						fmt.Sprintf("--from-literal=RISER_GIT_USERNAME=%s ", gitUrlParsed.User.Username())+
@@ -145,12 +145,12 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 						"--from-literal=RISER_POSTGRES_USERNAME=riseradmin "+
 						"--from-literal=RISER_POSTGRES_PASSWORD=riserpw "+
 						" --dry-run=true -o yaml | kubectl apply -f -"),
-				installer.NewExecStep("Apply all demo resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
-				installer.NewShellExecStep("Create secret for kube-applier",
+				steps.NewExecStep("Apply all demo resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
+				steps.NewShellExecStep("Create secret for kube-applier",
 					"kubectl create secret generic kube-applier --namespace=kube-applier "+
 						fmt.Sprintf("--from-literal=GIT_SYNC_REPO=%s", gitUrlParsed.String())+
 						" --dry-run=true -o yaml | kubectl apply -f -"),
-				installer.NewShellExecStep("Create kube-applier configuration",
+				steps.NewShellExecStep("Create kube-applier configuration",
 					"kubectl create configmap kube-applier --namespace kube-applier "+
 						fmt.Sprintf("--from-literal=REPO_PATH=/git-repo/%s/stages/%s/kube-resources", gitRepoName, demoStageName)+
 						" --dry-run=true -o yaml | kubectl apply -f -"),

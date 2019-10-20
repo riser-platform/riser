@@ -1,4 +1,4 @@
-package installer
+package steps
 
 type WaitStep struct {
 	StepMeta
