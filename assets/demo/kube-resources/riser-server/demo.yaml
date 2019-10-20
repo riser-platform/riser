@@ -1,0 +1,72 @@
+# Contains demo specific config
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  labels:
+    app: riser-server
+  name: riser-server-api
+  namespace: riser-system
+spec:
+  gateways:
+  - riser-system/public-default
+  - mesh
+  hosts:
+  - api.demo.riser
+  - riser-server.riser-system.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: riser-server.riser-system.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: public-default
+  namespace: riser-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "api.demo.riser"
+    - "*.apps.demo.riser"
+    tls:
+      httpsRedirect: true
+  - port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: riser
+      mode: SIMPLE
+    hosts:
+    - "api.demo.riser"
+    - "*.apps.demo.riser"
+---
+# Note: Istio currently installs cert-manager
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: selfsigning-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: demo.riser
+  namespace: istio-system
+spec:
+  dnsNames:
+  - 'api.demo.riser'
+  - '*.apps.demo.riser'
+  issuerRef:
+    kind: ClusterIssuer
+    name: selfsigning-issuer
+  secretName: riser
+
