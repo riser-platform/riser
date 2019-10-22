@@ -1,5 +1,5 @@
 name: emojivoto-emoji-svc
-# Change this to the id given to you by "riser apps new emojivoto-emoji-svc"
+# TODO: Change this to the id given to you by "riser apps new emojivoto-emoji-svc"
 id: f05e2083
 image: buoyantio/emojivoto-emoji-svc
 environment:

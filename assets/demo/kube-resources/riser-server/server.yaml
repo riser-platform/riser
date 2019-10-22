@@ -25,8 +25,7 @@ spec:
         - name: us-gcr-io-registry
       containers:
       - name: server
-        # TODO(OSS): Move to public registry
-        image: us.gcr.io/platpoc/riser-server:latest
+        image: riserplatform/riser-server:latest
         imagePullPolicy: Always
         resources:
           limits:
@@ -76,8 +75,8 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 8000
-    targetPort: 0
+    port: 80
+    targetPort: 8000
   selector:
     app: riser-server
 

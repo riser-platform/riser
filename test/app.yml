@@ -1,8 +1,0 @@
-deploy:
-  replicas: 2
-
-environment:
-  DEBUG: true
-
-expose:
-  containerPort: 8080

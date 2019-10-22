@@ -45,6 +45,7 @@ rules:
   verbs:
   - get
   - list
+  - update
   - watch
 - apiGroups:
   - apps
@@ -52,6 +53,14 @@ rules:
   - deployments/status
   verbs:
   - get
+- apiGroups:
+  - networking.istio.io
+  resources:
+  - gateways
+  verbs:
+  - get
+  - list
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -121,7 +130,7 @@ spec:
         envFrom:
         - configMapRef:
             name: riser-riser-controller
-        image: us.gcr.io/platpoc/riser-controller:latest
+        image: riserplatform/riser-controller:latest
         name: manager
         resources:
           limits:

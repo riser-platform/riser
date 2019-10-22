@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/tshak/riser-server/api/v1/model"
+	"github.com/riser-platform/riser-server/api/v1/model"
 )
 
 type SecretsClient interface {

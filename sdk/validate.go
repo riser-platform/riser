@@ -3,7 +3,7 @@ package sdk
 import (
 	"net/http"
 
-	"github.com/tshak/riser-server/api/v1/model"
+	"github.com/riser-platform/riser-server/api/v1/model"
 )
 
 type ValidateClient interface {

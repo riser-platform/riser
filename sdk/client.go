@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -48,7 +49,12 @@ func NewClient(baseURI string, apikey string) (*Client, error) {
 	client.Stages = &stagesClient{client: client}
 	client.Status = &statusClient{client: client}
 	client.Validate = &validateClient{client: client}
+
 	return client, nil
+}
+
+func (c *Client) MakeInsecure() {
+	c.client = &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
 }
 
 func (c *Client) NewGetRequest(relativeUrl string) (*http.Request, error) {

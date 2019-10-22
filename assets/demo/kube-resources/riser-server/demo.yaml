@@ -24,6 +24,9 @@ kind: Gateway
 metadata:
   name: public-default
   namespace: riser-system
+  annotations:
+    riser-gateway: public-default
+    riser-gatewayHost: demo.riser
 spec:
   selector:
     istio: ingressgateway

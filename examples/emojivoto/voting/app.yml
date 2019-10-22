@@ -1,5 +1,5 @@
 name: emojivoto-voting-svc
-# Change this to the id given to you by "riser apps new emojivoto-voting-svc"
+# TODO: Change this to the id given to you by "riser apps new emojivoto-voting-svc"
 id: bab2d0e1
 image: buoyantio/emojivoto-voting-svc
 environment:

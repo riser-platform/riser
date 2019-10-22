@@ -1,0 +1,50 @@
+# This is a fully featured app.yaml. Riser believes in smart defaults. As such most fields are not required.
+# Use "riser apps init" to create a new app with a minimal app config file
+# Riser is an experimental project and this is subject to change or be out of date at any given time.
+
+# The name of your app. Use "riser apps init" or "riser apps new" to create a new app
+name: myapp
+# The id of your app. This is provided to you by riser.
+id: "a75d80f9"
+# The docker image, without tag or digest.
+image: your/image
+# Optional. Environment variables specified in the form of "key: value". Do not put secrets here.
+environment:
+  DEBUG: true
+  DEFAULT_CACHE_TIMEOUT: "1m"
+  # ETC...
+
+# Optional. Settings for controlling how your service is exposed to the outside world.
+expose:
+  # TODO: Is this actually optional??? What's teh default? Just no exposure?
+  # Optional: The port that your app listens on.
+  # Riser currently exposes your app via HTTPS on port 443 regardless of what port your app listens on.
+  containerPort: 8000
+
+# Optional. The health check section allows you to configure a health check endpoint for your app.
+healthcheck:
+  # Optional. The path to
+  path: "/health"
+  # Optional. The port serving your health check endpoint. This only needs to be set if your healthcheck endpoint listens on a different port than your service.
+  # Defaults to expose.containerPort
+  port: 8000
+
+# Optional. Defaults to Kubernetes cluster/namespace defaults.
+replicas: 1
+
+# Optional. Defaults to Kubernetes cluster/namespace defaults.
+resources:
+  # Optional. This sets the maximum number of CPU cores that the app can utilize. Defaults to Kubernetes cluster/namespace defaults.
+  cpuCores: 1
+  # Optional. This sets the maximum amount of memory that an app can utilize. If this limit is reached the app will receive an OOM signal. Defaults to Kubernetes cluster/namespace defaults.
+  memoryMB: 128
+
+# Optional. Stage specific settings. Most settings can be overridden except for "name" and "id".
+stages:
+  # e.g. for a stage named "prod" that wishes to set the replica count to "3"
+  prod:
+    replicas: 3
+
+
+
+

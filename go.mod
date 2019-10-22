@@ -1,6 +1,6 @@
 module riser
 
-replace github.com/tshak/riser/sdk => ./sdk
+replace github.com/riser-platform/riser/sdk => ./sdk
 
 go 1.13
 
@@ -18,15 +18,18 @@ require (
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942 // indirect
+	github.com/riser-platform/riser-server/api/v1/model v0.0.0-20191026161747-d518fbc205a3
+	github.com/riser-platform/riser/sdk v0.0.0-00010101000000-000000000000
+	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
+	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/testify v1.4.0
-	github.com/tshak/riser-server/api/v1/model v0.0.0-20191006090436-fbaa2a96f3a7
-	github.com/tshak/riser/sdk v0.0.0-00010101000000-000000000000
 	github.com/wzshiming/ctc v1.2.0
 	github.com/wzshiming/winseq v0.0.0-20181031094240-8a45cfbfe1c2 // indirect
 	golang.org/x/sys v0.0.0-20190902133755-9109b7679e13 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/pipe.v2 v2.0.0-20140414041502-3c2ca4d52544
 	gopkg.in/yaml.v2 v2.2.4
+	sigs.k8s.io/controller-runtime v0.3.0 // indirect
 )

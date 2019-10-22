@@ -1,9 +1,9 @@
 package main
 
 import (
-	"riser/cmd"
-	"riser/rc"
-	"riser/ui"
+	"riser/pkg/cmd"
+	"riser/pkg/rc"
+	"riser/pkg/ui"
 
 	"github.com/hashicorp/go-version"
 )
@@ -20,6 +20,7 @@ func main() {
 
 	// Main execution path
 	cmd.Execute(&cmd.Runtime{
+		Assets:        Assets,
 		Version:       currentVersion,
 		Configuration: config,
 	})

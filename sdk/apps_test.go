@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/tshak/riser-server/api/v1/model"
+	"github.com/riser-platform/riser-server/api/v1/model"
 
 	"github.com/stretchr/testify/assert"
 )

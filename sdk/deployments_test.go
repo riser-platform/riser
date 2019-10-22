@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tshak/riser-server/api/v1/model"
+	"github.com/riser-platform/riser-server/api/v1/model"
 )
 
 func Test_Deployments_Save(t *testing.T) {

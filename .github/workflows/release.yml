@@ -1,0 +1,76 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v1.1.1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Checkout code
+        uses: actions/checkout@v1.0.0
+
+      - name: Get dependencies
+        env:
+          GH_TSHAK: ${{ secrets.GH_TSHAK }}
+        run: |
+          git config \
+          --global \
+          url."https://tshak:${GH_TSHAK}@github.com".insteadOf \
+          "https://github.com"
+          go mod download
+
+      - name: Build
+        run: |
+          make release VERSION="${{ github.ref }}"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: true
+
+      - name: Upload Release Asset (darwin-amd64)
+        id: upload-release-asset-darwin-amd64
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./riser-darwin-amd64.zip
+          asset_name: riser-darwin-amd64.zip
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset (linux-amd64)
+        id: upload-release-asset-linux-amd64
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./riser-linux-amd64.zip
+          asset_name: riser-linux-amd64.zip
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset (windows-amd64)
+        id: upload-release-asset-windows-amd64
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./riser-windows-amd64.zip
+          asset_name: riser-windows-amd64.zip
+          asset_content_type: application/zip
+

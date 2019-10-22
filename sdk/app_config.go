@@ -12,7 +12,7 @@ id: "{{.AppId}}"
 # TODO: Update to use your docker image registry/repo (without tag) here
 image: your/image
 expose:
-	# TODO: Update the container port that gets exposed to the HTTPS gateway
+  # TODO: Update the container port that gets exposed to the HTTPS gateway
   containerPort: 8000
 `
 

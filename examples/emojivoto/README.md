@@ -1,1 +1,1 @@
-A microservice demo using three services. See https://github.com/BuoyantIO/emojivoto/tree/master/emojivoto-web for more information.
+Emjo.voto is a microservice demo using three apps: two GRPC data services and one web frontend. See https://github.com/BuoyantIO/emojivoto for the source code and other information. Each app has its own app config in their respective folders. Review and update each app config before deploying them.

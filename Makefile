@@ -11,6 +11,10 @@ else
 TEST_COMMAND=gotestsum
 endif
 
+# Bundle static assets
+generate:
+	go run asset_generator.go
+
 build:
 	go build -o bin/riser
 
@@ -31,9 +35,21 @@ watch:
 # updates to the latest api models
 # Note: As of go 1.13 GOSUMDB returns a 410. Disabling until we figure out why.
 update-model:
-	GOSUMDB=off go get -u github.com/tshak/riser-server/api/v1/model@latest
-	go mod tidy
-	cd sdk && GOSUMDB=off go get -u github.com/tshak/riser-server/api/v1/model@latest && go mod tidy
+	GOSUMDB=off go get -u github.com/riser-platform/riser-server/api/v1/model@latest
+	cd sdk && GOSUMDB=off go get -u github.com/riser-platform/riser-server/api/v1/model@latest && go mod tidy
 
+	# Github actions passes the full ref so strip it off
+VERSIONCLEAN=$(subst refs/tags/,,$(VERSION))
+release: check-version
+	GOOS=darwin GOARCH=amd64 go build -ldflags="-X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/darwin-amd64/riser"
+	GOOS=linux GOARCH=amd64 go build -ldflags="-X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/linux-amd64/riser"
+	GOOS=windows GOARCH=amd64 go build -ldflags="-X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/windows-amd64/riser.exe"
+	zip -r riser-darwin-amd64.zip -j bin/darwin-amd64/riser
+	zip -r riser-linux-amd64.zip -j bin/linux-amd64/riser
+	zip -r riser-windows-amd64.zip -j bin/windows-amd64/riser.exe
+
+
+check-version:
+	@if test -z "${VERSION}"; then echo "Usage: make <target> VERSION=<version>"; exit 1; fi
 
 
