@@ -1,0 +1,133 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: riser-leader-election-role
+  namespace: riser-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - configmaps/status
+  verbs:
+  - get
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: riser-riser-controller
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: riser-leader-election-rolebinding
+  namespace: riser-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: riser-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: riser-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: riser-riser-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: riser-riser-controller
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: riser-system
+---
+apiVersion: v1
+data:
+  RISER_SERVER_URL: http://riser-server.riser-system.svc.cluster.local
+  RISER_STAGE: demo
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: riser-riser-controller
+  namespace: riser-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: riser-controller-manager
+  namespace: riser-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+    spec:
+      containers:
+      - args:
+        - --enable-leader-election
+        command:
+        - /manager
+        env:
+        - name: RISER_SERVER_APIKEY
+          valueFrom:
+            secretKeyRef:
+              key: RISER_SERVER_APIKEY
+              name: riser-controller
+        envFrom:
+        - configMapRef:
+            name: riser-riser-controller
+        image: us.gcr.io/platpoc/riser-controller:latest
+        name: manager
+        resources:
+          limits:
+            cpu: 1
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+      terminationGracePeriodSeconds: 10

@@ -71,10 +71,11 @@ func installDemo() {
 	var gitUrl string
 	gitUrlPrompt := &survey.Input{
 		Message: "Enter the GitHub URL (including auth) for the riser state repo.",
-		Help: `
-It's recommended that you use a Personal Access Token with repo full access. For example: https://oauthtoken:YOUR-TOKEN-HERE@github.com/your/repo.
+		Help: ui.StripNewLines(`
+The riser state repo contains all kubernetes state for riser apps and infrastructure. This repo should never hold any secrets, but you may still wish for it to be private.
+For private repos it's recommended that you use a Personal Access Token with repo full access. For example: https://oauthtoken:YOUR-TOKEN-HERE@github.com/your/repo.
 See https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line for more information on creating a GitHub Personal Access Token
-`,
+`),
 	}
 	err = survey.AskOne(gitUrlPrompt, &gitUrl)
 	ui.ExitIfError(err)
@@ -106,10 +107,12 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 			"-f", path.Join(demoPath, "kube-resources/istio/0_namespace.yaml"),
 			"-f", path.Join(demoPath, "kube-resources/istio/1_init.yaml"),
 		)),
-		steps.NewWaitStep(
-			steps.NewExecStep("Wait for istio CRDs",
-				exec.Command("kubectl", "wait", "--for", "condition=established", "crd/gateways.networking.istio.io")),
-			10,
+		steps.NewRetryStep(
+			func() steps.Step {
+				return steps.NewExecStep("Wait for istio CRDs",
+					exec.Command("kubectl", "wait", "--for", "condition=established", "crd/gateways.networking.istio.io"))
+			},
+			60,
 			func(stepErr error) bool {
 				return strings.Contains(stepErr.Error(), "Error from server (NotFound)")
 			}),
@@ -124,7 +127,7 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 			"kubectl create configmap riser-server --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_GIT_URL=%s", gitUrlNoAuthParsed.String())+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
-		//TODO: This is not  idempotent as a new APIKEY will be generated but only the bootstrapped key will be used.
+		// TODO: This is not  idempotent as a new APIKEY will be generated but only the bootstrapped key will be used.
 		// While this does not affect the server, the installer will overwrite the riser login with the wrong APIKEY
 		steps.NewShellExecStep("Create secret for riser-server",
 			"kubectl create secret generic riser-server --namespace=riser-system "+
@@ -133,6 +136,11 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 				fmt.Sprintf("--from-literal=RISER_GIT_PASSWORD=%s ", gitUrlPassword)+
 				"--from-literal=RISER_POSTGRES_USERNAME=riseradmin "+
 				"--from-literal=RISER_POSTGRES_PASSWORD=riserpw "+
+				" --dry-run=true -o yaml | kubectl apply -f -"),
+		// TODO: See idempotent message from riser-server secret
+		steps.NewShellExecStep("Create secret for riser-controller",
+			"kubectl create secret generic riser-controller --namespace=riser-system "+
+				fmt.Sprintf("--from-literal=RISER_SERVER_APIKEY=%s ", apiKeyGenStep.State("stdout"))+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
 		steps.NewExecStep("Apply all demo resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
 		steps.NewShellExecStep("Create secret for kube-applier",
