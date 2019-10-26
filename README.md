@@ -1,7 +1,7 @@
 # Riser
 
 <p align="left">
-    <a href="https://github.com/riser-platform/riser"><img alt="GitHub Actions status" src="https://github.com/riser-platform/riser/workflows/Main/badge.svg"></a>
+    <a href="https://github.com/riser-platform/riser"><img alt="GitHub Actions status" src="https://github.com/riser-platform/riser/workflows/Build/badge.svg"></a>
 </p>
 
 Riser is an opinionated app platform built on Kubernetes. It provides radically simplified application deployment and management without vendor lock-in.
