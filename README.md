@@ -41,4 +41,5 @@ If you change anything in the `assets` folder, you must run `make generate` to s
 
 ### Related projects
 
-TODO: link to server and controller.
+- [Riser Server](https://github.com/riser-platform/riser-server)
+- [Riser Controller](https://github.com/riser-platform/riser-controller)

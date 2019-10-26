@@ -16,7 +16,7 @@ The Riser demo is the easiest way to experiment with Riser. The demo is a single
 - Create a minikube cluster. For the best results use the recommended settings: `minikube start --cpus=4 --memory=4096 --kubernetes-version=1.14.6`.
 - Once created start `minikube tunnel` in a separate terminal.
 - Create a GitHub repo for Riser's state (e.g. https://github.com/your-name/riser-state).
-- Download the *TODO: Link to latest releases* Riser CLI and put it in your path.
+- Download the [latest Riser CLI](https://github.com/riser-platform/riser/releases/) for your platform and put it in your path.
 - Run `riser demo install` and follow the instructions.
 
 ### Things to try
