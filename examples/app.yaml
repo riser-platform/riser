@@ -7,16 +7,7 @@ name: myapp
 # The id of your app. This is provided to you by riser.
 id: "a75d80f9"
 # The docker image, without tag or digest.
-
 image: your/image
-
-# --- Everything below this line is optional --- #
-
-# Optional. Environment variables specified in the form of "key: value". Do not put secrets here.
-environment:
-  DEBUG: true
-  DEFAULT_CACHE_TIMEOUT: "1m"
-  # ETC...
 
 # Settings for controlling how your service is exposed to the outside world.
 # Note: This will be optional in the future for headless apps
@@ -28,6 +19,14 @@ expose:
   containerPort: 8000
   # Optional: The protocol (http|grpc) (default: http)
   protocol: http
+
+# --- Everything below this line is optional --- #
+
+# Optional. Environment variables specified in the form of "key: value". Do not put secrets here.
+environment:
+  DEBUG: true
+  DEFAULT_CACHE_TIMEOUT: "1m"
+  # ETC...
 
 # Optional. The health check section allows you to configure a health check endpoint for your app.
 healthcheck:
