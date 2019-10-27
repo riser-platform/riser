@@ -17,14 +17,7 @@ jobs:
       uses: actions/checkout@v1.0.0
 
     - name: Get dependencies
-      env:
-        GH_TSHAK: ${{ secrets.GH_TSHAK }}
-      run: |
-        git config \
-        --global \
-        url."https://tshak:${GH_TSHAK}@github.com".insteadOf \
-        "https://github.com"
-        go mod download
+      run: go mod download
 
     - name: Lint
       run: |
