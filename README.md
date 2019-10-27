@@ -16,7 +16,7 @@ Riser is an opinionated app platform built on Kubernetes. It provides radically 
 - 100% Open Source. PaaS experience without vendor or cloud lock-in
 - Single view of apps across multiple stages (cluster)
 - Simplified secrets management
-- Loosely coupled. Thanks to a purely GitOps approach, Riser can go down or even be completely removed your workloads continue running
+- Loosely coupled. Thanks to a purely GitOps approach, Riser can go down or even be completely removed. Your workloads continue running and can be managed using traditional Kubernetes tooling
 - Developers only need access to Riser. Kubernetes access is optional for advanced debugging or operational tasks
 
 **[Check out the quickstart!](quickstart.md)**
