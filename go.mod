@@ -12,10 +12,9 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/hashicorp/go-version v1.2.0
 	github.com/pkg/errors v0.8.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.0-20191026161747-d518fbc205a3
+	github.com/riser-platform/riser-server/api/v1/model v0.0.0-20191027161944-82e72ed52387
 	github.com/riser-platform/riser/sdk v0.0.0-00010101000000-000000000000
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
-	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/testify v1.4.0

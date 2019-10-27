@@ -5,4 +5,5 @@ image: buoyantio/emojivoto-voting-svc
 environment:
   GRPC_PORT: 8080
 expose:
+  protocol: grpc
   containerPort: 8080
