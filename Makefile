@@ -43,9 +43,9 @@ update-model:
 	# Github actions passes the full ref so strip it off
 VERSIONCLEAN=$(subst refs/tags/,,$(VERSION))
 release: check-version
-	GOOS=darwin GOARCH=amd64 go build -ldflags="-X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/darwin-amd64/riser"
-	GOOS=linux GOARCH=amd64 go build -ldflags="-X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/linux-amd64/riser"
-	GOOS=windows GOARCH=amd64 go build -ldflags="-X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/windows-amd64/riser.exe"
+	GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s -X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/darwin-amd64/riser"
+	GOOS=linux GOARCH=amd64 go build -ldflags="-w -s -X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/linux-amd64/riser"
+	GOOS=windows GOARCH=amd64 go build -ldflags="-w -s -X 'main.versionString=$(VERSIONCLEAN)'" -o="bin/windows-amd64/riser.exe"
 	zip -r riser-darwin-amd64.zip -j bin/darwin-amd64/riser
 	zip -r riser-linux-amd64.zip -j bin/linux-amd64/riser
 	zip -r riser-windows-amd64.zip -j bin/windows-amd64/riser.exe
