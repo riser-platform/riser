@@ -6,11 +6,13 @@ go 1.13
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.0.4
-	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
 	// Pinning to 25d852a  until they get their release act together or until go-yaml/yaml.v2 supports json tags in which case we can remove this dep
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+	github.com/go-openapi/strfmt v0.19.3 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/hashicorp/go-version v1.2.0
+	github.com/jedib0t/go-pretty v4.3.0+incompatible
+	github.com/mattn/go-runewidth v0.0.5 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/riser-platform/riser-server/api/v1/model v0.0.0-20191027161944-82e72ed52387
 	github.com/riser-platform/riser/sdk v0.0.0-00010101000000-000000000000

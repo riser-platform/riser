@@ -1,41 +1,47 @@
 package table
 
 import (
-	"github.com/alexeyco/simpletable"
+	"github.com/jedib0t/go-pretty/table"
 )
 
+const defaultMaxColumnLength = 50
+
 type Table struct {
-	internal *simpletable.Table
+	internal table.Writer
 }
 
 // Default creates a default table
 func Default() *Table {
-	internal := simpletable.New()
-	internal.SetStyle(simpletable.StyleCompactLite)
+	internal := table.NewWriter()
+	internal.SetStyle(table.StyleLight)
+	internal.Style().Options.DrawBorder = false
+	internal.Style().Options.SeparateColumns = false
 	return &Table{internal}
 }
 
 func (t *Table) Header(values ...string) *Table {
-	t.internal.Header = &simpletable.Header{Cells: []*simpletable.Cell{}}
-	for _, v := range values {
-		t.internal.Header.Cells = append(t.internal.Header.Cells, defaultCell(v))
+	t.internal.AppendHeader(t.createRow(values))
+	columnLengths := []int{}
+	for range values {
+		columnLengths = append(columnLengths, defaultMaxColumnLength)
 	}
+	t.internal.SetAllowedColumnLengths(columnLengths)
 	return t
 }
 
 func (t *Table) AddRow(values ...string) *Table {
-	cells := []*simpletable.Cell{}
-	for _, v := range values {
-		cells = append(cells, defaultCell(v))
-	}
-	t.internal.Body.Cells = append(t.internal.Body.Cells, cells)
+	t.internal.AppendRow(t.createRow(values))
 	return t
 }
 
 func (t *Table) String() string {
-	return t.internal.String()
+	return t.internal.Render()
 }
 
-func defaultCell(text string) *simpletable.Cell {
-	return &simpletable.Cell{Align: simpletable.AlignLeft, Text: text}
+func (t *Table) createRow(values []string) table.Row {
+	row := table.Row{}
+	for _, v := range values {
+		row = append(row, v)
+	}
+	return row
 }
