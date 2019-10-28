@@ -294,20 +294,20 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 		`)
 	}
 
-	ingressIp := ui.StripNewLines(ingressGatewayStep.State("stdout").(string))
+	gatewayIp := ui.StripNewLines(ingressGatewayStep.State("stdout").(string))
 
 	logger.Log().Info("\n" + style.Good("🚀 Everything checks out!") + "\n")
 
-	logger.Log().Info("Gateway IP:\t" + style.Emphasis(ingressIp))
+	logger.Log().Info("Gateway IP:\t" + style.Emphasis(gatewayIp))
 	logger.Log().Info("API Host:\t" + style.Emphasis("api.demo.riser"))
 	logger.Log().Info("Apps host:\t" + style.Emphasis("*.apps.demo.riser"))
 
 	logger.Log().Info("\nInstructions:")
-	logger.Log().Info(fmt.Sprintf("• In your hosts file (e.g. /etc/hosts on OSX) or local DNS server set the IP for the host %s to the ingress IP: %s", style.Emphasis("api.demo.riser"), style.Emphasis(ingressIp)))
-	logger.Log().Info(fmt.Sprintf("  Example /etc/hosts entry:\n  %s", style.Muted(fmt.Sprintf("%s api.demo.riser", ingressIp))))
-	logger.Log().Info("• For easier access to your apps, you may wish to add additional host entries for each app using the format <YOUR-APP>.apps.demo.riser to the same ingress IP, or create a wildcard DNS record for *.apps.demo.riser.")
+	logger.Log().Info(fmt.Sprintf("• In your hosts file (e.g. /etc/hosts on OSX) or local DNS server set the IP for the host %s to the gateway IP: %s", style.Emphasis("api.demo.riser"), style.Emphasis(gatewayIp)))
+	logger.Log().Info(fmt.Sprintf("  Example /etc/hosts entry:\n  %s", style.Muted(fmt.Sprintf("%s api.demo.riser", gatewayIp))))
+	logger.Log().Info("• For easier access to your apps, you may wish to add additional host entries for each app using the format <YOUR-APP>.apps.demo.riser to the same gateway IP, or create a wildcard DNS record for *.apps.demo.riser.")
 	logger.Log().Info("• You may also access your apps by passing a host header. For example, with curl:")
-	logger.Log().Info(style.Muted(fmt.Sprintf("  curl -k -H \"Host: <YOUR-APP>.apps.demo.riser\" https://%s", ingressIp)))
+	logger.Log().Info(style.Muted(fmt.Sprintf("  curl -k -H \"Host: <YOUR-APP>.apps.demo.riser\" https://%s", gatewayIp)))
 	logger.Log().Info(`• Try out the testdummy app!
   - In an empty folder create the app with a default config using "riser apps init testdummy"
   - Edit "app.yaml" and specify "tshak/testdummy" as the docker image
