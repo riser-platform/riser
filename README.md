@@ -6,6 +6,8 @@
 
 Riser is an opinionated app platform built on Kubernetes. It provides radically simplified application deployment and management without vendor lock-in.
 
+[![asciicast](https://asciinema.org/a/277448.svg)](https://asciinema.org/a/277448)
+
 > :warning: This is an experimental project that is in the proof of concept phase. Breaking changes may occur frequently. You're more than welcome to look around and provide feedback, but this project is not recommended for mission critical workloads.
 
 **[Check out the quickstart!](quickstart.md)**
