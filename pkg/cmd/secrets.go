@@ -24,14 +24,14 @@ func newSecretsCommand(currentContext *rc.Context) *cobra.Command {
 func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
 	var appName string
 	cmd := &cobra.Command{
-		Use:   "save (name) (plaintextsecret) (stage)",
+		Use:   "save (stage) (name) (plaintextsecret)",
 		Short: "Creates a new secret or updates an existing one",
-		Long:  "Creates a new secret or updates an existing one. Secrets are maintained seperately per stage.",
+		Long:  "Creates a new secret or updates an existing one. Secrets are stored seperately per app and stage.",
 		Args:  cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
-			secretName := args[0]
-			plainTextSecret := args[1]
-			stageName := args[2]
+			stageName := args[0]
+			secretName := args[1]
+			plainTextSecret := args[2]
 
 			riserClient := getRiserClient(currentContext)
 
