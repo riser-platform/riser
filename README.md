@@ -4,11 +4,11 @@
     <a href="https://github.com/riser-platform/riser"><img alt="GitHub Actions status" src="https://github.com/riser-platform/riser/workflows/Build/badge.svg"></a>
 </p>
 
-Riser is an opinionated app platform built on Kubernetes. It provides radically simplified application deployment and management without vendor lock-in.
+Riser is an opinionated app platform built on Kubernetes. It provides a radically simplified application deployment and management experience. without vendor lock-in.
 
 [![asciicast](https://asciinema.org/a/277448.svg)](https://asciinema.org/a/277448?autoplay=1&cols=160&rows=40)
 
-> :warning: This is an experimental project that is in the proof of concept phase. Breaking changes may occur frequently. You're more than welcome to look around and provide feedback, but this project is not recommended for mission critical workloads.
+> :warning: This is an experimental project with the goal of improving how we deploy and manage common application workloads. You're invited to look around and provide feedback. Until there is a stable release it is not advised to use Riser in production as breaking changes may occur frequently and without warning.
 
 **[Check out the quickstart!](quickstart.md)**
 
@@ -18,14 +18,14 @@ Riser is an opinionated app platform built on Kubernetes. It provides radically 
 - 100% Open Source. PaaS experience without vendor or cloud lock-in
 - Single view of apps across multiple stages (cluster)
 - Simplified secrets management
-- Loosely coupled. Thanks to a purely GitOps approach, Riser can go down or even be completely removed. Your workloads continue running and can be managed using traditional Kubernetes tooling
+- Loosely coupled. Thanks to a purely GitOps approach, Riser can go down or even be completely removed without affecting your apps
 - Developers only need access to Riser. Kubernetes access is optional for advanced debugging or operational tasks
 
 **[Check out the quickstart!](quickstart.md)**
 
-### GitOps
+### More on GitOps
 
-Riser interacts with Kubernetes using a strictly [GitOps](https://thenewstack.io/what-is-gitops-and-why-it-might-be-the-next-big-thing-for-devops/) approach. A git repository (typically referred to as a "state repo") contains all information required to stand up an app. The riser server can be unreachable or even destroyed with no impact to an app. Additionally, Riser does not require any of its own custom types (CRDs) for app. This means that all of the resources in your state repo can be "`kubectl apply -f`'d" to a Kubernetes cluster without Riser and operate as desired. Of course, any supporting infrastructure such as Istio must still be configured.
+Riser interacts with Kubernetes using a strictly [GitOps](https://thenewstack.io/what-is-gitops-and-why-it-might-be-the-next-big-thing-for-devops/) approach. A git repository (typically referred to as a "state repo") contains all information required to stand up an app. The riser server can be unreachable or even destroyed with no impact to your apps. It also designed so that all of the resources in your state repo can be "`kubectl apply -f`'d" to a Kubernetes cluster without any Riser infrastructure running or installed.
 
 ## Known Issues and Limitations
 

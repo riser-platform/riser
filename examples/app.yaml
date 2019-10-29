@@ -13,8 +13,8 @@ image: your/image
 # Note: This will be optional in the future for headless apps
 expose:
   # The port your app listens on.
-  # Your internal URL will be "http://<deploymentName>.apps.svc.cluster.local:<containerPort>"
-  # Your external URL will be "https://<deploymentName>.apps.<yourPublicDomain>" (always port 443)
+  # Your cluster URL will be "http://<deploymentName>.apps.svc.cluster.local:<containerPort>". Use this for talking between apps in the same cluster.
+  # Your external URL will be "https://<deploymentName>.apps.<yourExternalDomain>" (always port 443).
   # Note that while the internal URL is HTTP, the Istio service mesh can be configured to enable end-to-end TLS
   containerPort: 8000
   # Optional: The protocol (http|grpc) (default: http)
