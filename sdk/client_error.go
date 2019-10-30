@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 )
 
@@ -15,8 +14,7 @@ type ClientError struct {
 
 func (e *ClientError) Error() string {
 	if len(e.ValidationErrors) == 0 {
-		// TODO: Do we need the status code here?
-		return fmt.Sprintf("Received HTTP %d (%s) %s", e.StatusCode, http.StatusText(e.StatusCode), e.Message)
+		return fmt.Sprintf("Error: %s", e.Message)
 	} else {
 		builder := strings.Builder{}
 		builder.WriteString(fmt.Sprintf("%s:", e.Message))
