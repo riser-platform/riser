@@ -2,6 +2,7 @@ package steps
 
 import (
 	"fmt"
+	"riser/pkg/logger"
 	"time"
 
 	"github.com/pkg/errors"
@@ -40,6 +41,7 @@ func (step *RetryStep) Exec() error {
 			break
 		}
 
+		logger.Log().Verbose(fmt.Sprintf("Step %q failed and will be retried. Error: %v", step.Name, stepErr))
 		time.Sleep(step.sleepTime)
 	}
 

@@ -261,15 +261,18 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 				"kubectl get po riser-server-0 -n riser-system -o jsonpath='{.status.conditions[?(@.type==\"Ready\")].status}' | grep True")
 		},
 			300,
-			steps.AlwaysRetry()))
+			func(err error) bool {
+				// Abort right away if we can't reach the kube API
+				return !regexp.MustCompile("The connection to the server .+ was refused").MatchString(err.Error())
+			}))
 
 	if err != nil {
 		logger.Log().Error(err.Error())
 		ui.ExitErrorMsg(`Tips:
-• On slower systems this can take longer than expected. You may try running \"riser demo status\" again.
+• On slower systems this can take longer than expected after an installation. You may try running "riser demo status" again after a few minutes.
 • Ensure that your kubernetes context is set to the cluster with the demo installed.
 • Ensure that the riser demo is installed using "riser demo install".
-• Check the pod logs for pods in the "riser-system" namespace.
+• Ensure that riser is set to the "demo" context using "riser context current demo"
 		`)
 	}
 

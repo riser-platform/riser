@@ -1,7 +1,7 @@
 MODELVERSION ?= "latest"
 
 # Run tests.
-test: fmt lint test-cmd
+test: fmt lint tidy test-cmd
 			$(TEST_COMMAND)
 			# Nested go modules are not tested for some reason, so test them separately
 			cd sdk && $(TEST_COMMAND)
@@ -12,6 +12,10 @@ TEST_COMMAND=go test ./...
 else
 TEST_COMMAND=gotestsum
 endif
+
+tidy:
+	go mod tidy
+	cd sdk && go mod tidy
 
 # Bundle static assets
 generate:
