@@ -1,6 +1,7 @@
 package sdk
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/riser-platform/riser-server/api/v1/model"
@@ -8,6 +9,7 @@ import (
 
 type DeploymentsClient interface {
 	Save(deployment *model.DeploymentRequest, dryRun bool) (*model.DeploymentResponse, error)
+	SaveStatus(deploymentName, stageName string, status *model.DeploymentStatusMutable) error
 }
 
 type deploymentsClient struct {
@@ -33,4 +35,13 @@ func (c *deploymentsClient) Save(deployment *model.DeploymentRequest, dryRun boo
 	}
 
 	return responseModel, nil
+}
+
+func (c *deploymentsClient) SaveStatus(deploymentName, stageName string, status *model.DeploymentStatusMutable) error {
+	request, err := c.client.NewRequest(http.MethodPut, fmt.Sprintf("/api/v1/deployments/%s/status/%s", deploymentName, stageName), status)
+	if err != nil {
+		return err
+	}
+	_, err = c.client.Do(request, nil)
+	return err
 }

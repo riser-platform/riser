@@ -52,3 +52,20 @@ func Test_Apps_Create(t *testing.T) {
 	assert.Equal(t, "myapp01", app.Name)
 	assert.Equal(t, "1", app.Id)
 }
+
+func Test_Apps_GetStatus(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/apps/myapp/status", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+
+		response := `{"deployments":[{"deployment":"mydeployment"}]}`
+		fmt.Fprint(w, response)
+	})
+
+	status, err := client.Apps.GetStatus("myapp")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "mydeployment", status.Deployments[0].DeploymentName)
+}

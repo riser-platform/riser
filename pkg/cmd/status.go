@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
+	"riser/pkg/ui/style"
 	"riser/pkg/ui/table"
 	"strings"
 
@@ -21,10 +22,10 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			riserClient := getRiserClient(currentContext)
 
-			status, err := riserClient.Status.Get(appName)
+			status, err := riserClient.Apps.GetStatus(appName)
 			ui.ExitIfErrorMsg(err, "Error getting status")
 
-			drawStatus(status)
+			drawStatus(appName, status)
 		},
 	}
 
@@ -33,14 +34,23 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 	return cmd
 }
 
-func drawStatus(status *model.Status) {
+func drawStatus(appName string, status *model.AppStatus) {
+	if len(status.Deployments) == 0 {
+		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
+		return
+	}
 	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Rollout Details", "Problems")
+	deploymentsPendingObservation := false
 	for _, deploymentStatus := range status.Deployments {
+		if !deploymentObserved(deploymentStatus) {
+			deploymentsPendingObservation = true
+		}
+
 		table.AddRow(
-			deploymentStatus.DeploymentName,
+			formatDeploymentName(deploymentStatus),
 			deploymentStatus.StageName,
 			fmt.Sprintf("%d", deploymentStatus.RolloutRevision),
-			getDockerTag(deploymentStatus.DockerImage),
+			formatDockerTag(deploymentStatus.DockerImage),
 			formatRolloutStatus(deploymentStatus.RolloutStatus),
 			deploymentStatus.RolloutStatusReason,
 			formatProblems(deploymentStatus.Problems))
@@ -49,6 +59,10 @@ func drawStatus(status *model.Status) {
 	fmt.Println(table)
 	fmt.Print("\n")
 
+	if deploymentsPendingObservation {
+		fmt.Println(style.Emphasis("* This deployment has changes that have not yet been observed."))
+	}
+
 	for _, stageStatus := range status.Stages {
 		if !stageStatus.Healthy {
 			fmt.Print(ctc.ForegroundBrightYellow)
@@ -56,14 +70,25 @@ func drawStatus(status *model.Status) {
 			fmt.Print(ctc.Reset)
 		}
 	}
-
 }
 
-func getDockerTag(dockerImage string) string {
+func formatDeploymentName(deploymentStatus model.DeploymentStatus) string {
+	name := deploymentStatus.DeploymentName
+	if !deploymentObserved(deploymentStatus) {
+		name = style.Emphasis("*") + name
+
+	}
+	return name
+}
+
+func deploymentObserved(deploymentStatus model.DeploymentStatus) bool {
+	return deploymentStatus.RiserGeneration == deploymentStatus.ObservedRiserGeneration
+}
+
+func formatDockerTag(dockerImage string) string {
 	idx := strings.Index(dockerImage, ":")
 	if idx == -1 {
-		// This should never happen since we don't allow images without tags or with digests
-		return "Unknown"
+		return style.Warn("Unknown")
 	}
 	return dockerImage[idx+1:]
 }
@@ -95,12 +120,15 @@ func formatProblem(problem model.DeploymentStatusProblem) string {
 }
 
 func formatRolloutStatus(rolloutStatus string) string {
-	if rolloutStatus == model.RolloutStatusInProgress {
-		return fmt.Sprint(ctc.ForegroundBrightCyan, rolloutStatus, ctc.Reset)
-	}
-	if rolloutStatus == model.RolloutStatusFailed {
-		return fmt.Sprint(ctc.ForegroundBrightRed, rolloutStatus, ctc.Reset)
+	formatted := rolloutStatus
+	switch rolloutStatus {
+	case model.RolloutStatusInProgress:
+		formatted = style.Emphasis(rolloutStatus)
+	case model.RolloutStatusFailed:
+		formatted = style.Bad(rolloutStatus)
+	case model.RolloutStatusUnknown:
+		formatted = style.Warn(rolloutStatus)
 	}
 
-	return rolloutStatus
+	return formatted
 }

@@ -30,7 +30,6 @@ type Client struct {
 	Deployments DeploymentsClient
 	Secrets     SecretsClient
 	Stages      StagesClient
-	Status      StatusClient
 	Validate    ValidateClient
 }
 
@@ -47,7 +46,6 @@ func NewClient(baseURI string, apikey string) (*Client, error) {
 	client.Deployments = &deploymentsClient{client: client}
 	client.Secrets = &secretsClient{client: client}
 	client.Stages = &stagesClient{client: client}
-	client.Status = &statusClient{client: client}
 	client.Validate = &validateClient{client: client}
 
 	return client, nil

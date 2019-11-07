@@ -1,6 +1,7 @@
 package sdk
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/riser-platform/riser-server/api/v1/model"
@@ -9,6 +10,7 @@ import (
 type AppsClient interface {
 	List() ([]model.App, error)
 	Create(newApp *model.NewApp) (*model.App, error)
+	GetStatus(appName string) (*model.AppStatus, error)
 }
 
 type appsClient struct {
@@ -42,4 +44,18 @@ func (c *appsClient) Create(newApp *model.NewApp) (*model.App, error) {
 	}
 
 	return app, nil
+}
+
+func (c *appsClient) GetStatus(appName string) (*model.AppStatus, error) {
+	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/apps/%s/status", appName))
+	if err != nil {
+		return nil, err
+	}
+
+	status := &model.AppStatus{}
+	_, err = c.client.Do(request, status)
+	if err != nil {
+		return nil, err
+	}
+	return status, nil
 }

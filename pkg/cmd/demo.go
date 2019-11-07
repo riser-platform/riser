@@ -290,9 +290,9 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 	if err != nil {
 		logger.Log().Error(err.Error())
 		ui.ExitErrorMsg(`Tips:
-• If you're using minikube be sure that "minikube tunnel" is running.
-• Ensure that your kubernetes context is set to the cluster with the demo installed.
+• If you're using minikube be sure that "minikube tunnel" is running. If it wasn't, try running "riser demo status" again to verify your installation.
 • Ensure that the riser demo is installed using "riser demo install".
+• Ensure that your kubernetes context is set to the cluster with the demo installed.
 • Check the service status and pod logs for "istio-ingressgateway" in the "istio-system" namespace.
 		`)
 	}

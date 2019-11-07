@@ -14,11 +14,11 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/mattn/go-runewidth v0.0.5 // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.0-20191027161944-82e72ed52387
+	github.com/riser-platform/riser-server/api/v1/model v0.0.0-20191107095111-a14e32d028a8
 	github.com/riser-platform/riser/sdk v0.0.0-00010101000000-000000000000
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/spf13/cobra v0.0.4
-	github.com/spf13/pflag v1.0.3
+	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.4.0
 	github.com/wzshiming/ctc v1.2.0
 	github.com/wzshiming/winseq v0.0.0-20181031094240-8a45cfbfe1c2 // indirect
