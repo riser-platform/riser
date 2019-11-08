@@ -28,10 +28,11 @@ jobs:
       run: go test ./...
 
   release:
+    name: Create Release
     needs: build
     if: contains(github.ref, 'refs/tags/v')
-    name: Create Release
     runs-on: ubuntu-latest
+    steps:
     - name: Set up Go
       uses: actions/setup-go@v1.1.1
       with:
