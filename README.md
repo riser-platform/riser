@@ -4,7 +4,7 @@
     <a href="https://github.com/riser-platform/riser"><img alt="GitHub Actions status" src="https://github.com/riser-platform/riser/workflows/Build/badge.svg"></a>
 </p>
 
-Riser is an opinionated app platform built on Kubernetes. It provides a radically simplified application deployment and management experience. without vendor lock-in.
+Riser is an opinionated app platform built on Kubernetes. It provides a radically simplified application deployment and management experience without vendor lock-in.
 
 [![asciicast](https://asciinema.org/a/277448.svg)](https://asciinema.org/a/277448?autoplay=1&cols=160&rows=40)
 
@@ -15,11 +15,11 @@ Riser is an opinionated app platform built on Kubernetes. It provides a radicall
 ## Key Features
 
 - Radically simplified deployment and management of [12 factor apps](https://12factor.net/)
-- 100% Open Source. PaaS experience without vendor or cloud lock-in
-- Single view of apps across multiple stages (cluster)
+- PaaS experience without vendor or cloud lock-in
+- Single view of apps across multiple stages (clusters)
 - Simplified secrets management
-- Loosely coupled. Thanks to a purely GitOps approach, Riser can go down or even be completely removed without affecting your apps
-- Developers only need access to Riser. Kubernetes access is optional for advanced debugging or operational tasks
+- GitOps all the way. All state changes happen through git
+- Developers only need access to Riser. Kubernetes cluster access is optional only for advanced debugging or operational tasks
 
 **[Check out the quickstart!](quickstart.md)**
 
