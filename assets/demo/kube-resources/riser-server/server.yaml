@@ -25,7 +25,7 @@ spec:
         - name: us-gcr-io-registry
       containers:
       - name: server
-        image: riserplatform/riser-server:latest
+        image: riserplatform/riser-server:0.0.4
         imagePullPolicy: Always
         resources:
           limits:

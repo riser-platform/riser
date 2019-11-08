@@ -130,7 +130,7 @@ spec:
         envFrom:
         - configMapRef:
             name: riser-riser-controller
-        image: riserplatform/riser-controller:latest
+        image: riserplatform/riser-controller:0.0.1
         name: manager
         resources:
           limits:
