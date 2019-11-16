@@ -23,7 +23,7 @@ The Riser demo is the easiest way to experiment with Riser. The demo is a single
 
 - Check out the documented [app config](examples/app.yaml) for a full list of configuration options.
 - Use `riser help` to explore other help topics.
-- To see how app dependencies work, review the [emojivoto example](examples/emojivoto/README.md)
+- To see how app dependencies work, review the [emojivoto example](examples/emojivoto)
 
 
 
