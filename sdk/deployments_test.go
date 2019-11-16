@@ -64,7 +64,7 @@ func Test_Deployment_SaveStatus(t *testing.T) {
 	defer teardown()
 
 	requestModel := &model.DeploymentStatusMutable{
-		RolloutStatus: "test",
+		ObservedRiserGeneration: 1,
 	}
 
 	mux.HandleFunc("/api/v1/deployments/myapp/status/mystage", func(w http.ResponseWriter, r *http.Request) {

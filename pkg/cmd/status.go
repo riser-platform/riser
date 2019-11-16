@@ -46,13 +46,15 @@ func drawStatus(appName string, status *model.AppStatus) {
 			deploymentsPendingObservation = true
 		}
 
+		// TODO: Update display to support multiple active revisions
+		// Also, revision[0] may not be the latest one!
 		table.AddRow(
 			formatDeploymentName(deploymentStatus),
 			deploymentStatus.StageName,
-			fmt.Sprintf("%d", deploymentStatus.RolloutRevision),
-			formatDockerTag(deploymentStatus.DockerImage),
-			formatRolloutStatus(deploymentStatus.RolloutStatus),
-			deploymentStatus.RolloutStatusReason,
+			fmt.Sprintf("%d", deploymentStatus.Revisions[0].RiserGeneration),
+			formatDockerTag(deploymentStatus.Revisions[0].DockerImage),
+			formatRolloutStatus(deploymentStatus.Revisions[0].RolloutStatus),
+			deploymentStatus.Revisions[0].RolloutStatusReason,
 			formatProblems(deploymentStatus.Problems))
 	}
 
