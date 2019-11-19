@@ -39,7 +39,7 @@ func drawStatus(appName string, status *model.AppStatus) {
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
 	}
-	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Rollout Details", "Problems")
+	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Count", "Problems")
 	deploymentsPendingObservation := false
 	for _, deploymentStatus := range status.Deployments {
 		if !deploymentObserved(deploymentStatus) {
@@ -47,15 +47,16 @@ func drawStatus(appName string, status *model.AppStatus) {
 		}
 
 		// TODO: Update display to support multiple active revisions
-		// Also, revision[0] may not be the latest one!
-		table.AddRow(
-			formatDeploymentName(deploymentStatus),
-			deploymentStatus.StageName,
-			fmt.Sprintf("%d", deploymentStatus.Revisions[0].RiserGeneration),
-			formatDockerTag(deploymentStatus.Revisions[0].DockerImage),
-			formatRolloutStatus(deploymentStatus.Revisions[0].RolloutStatus),
-			deploymentStatus.Revisions[0].RolloutStatusReason,
-			formatProblems(deploymentStatus.Problems))
+		// Also, revision[0] is not necessarily the active revision
+		if len(deploymentStatus.Revisions) > 0 {
+			table.AddRow(
+				formatDeploymentName(deploymentStatus),
+				deploymentStatus.StageName,
+				fmt.Sprintf("%d", deploymentStatus.Revisions[0].RiserGeneration),
+				formatDockerTag(deploymentStatus.Revisions[0].DockerImage),
+				fmt.Sprintf("%d", deploymentStatus.Revisions[0].AvailableReplicas),
+				formatProblems(deploymentStatus.Problems))
+		}
 	}
 
 	fmt.Println(table)
