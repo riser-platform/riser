@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"riser/pkg/rc"
+	"riser/pkg/status"
 	"riser/pkg/ui"
 	"riser/pkg/ui/style"
 	"riser/pkg/ui/table"
@@ -34,27 +35,26 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 	return cmd
 }
 
-func drawStatus(appName string, status *model.AppStatus) {
-	if len(status.Deployments) == 0 {
+func drawStatus(appName string, appStatus *model.AppStatus) {
+	if len(appStatus.Deployments) == 0 {
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
 	}
-	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Count", "Problems")
+	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Replicas", "Problems")
 	deploymentsPendingObservation := false
-	for _, deploymentStatus := range status.Deployments {
+	for _, deploymentStatus := range appStatus.Deployments {
 		if !deploymentObserved(deploymentStatus) {
 			deploymentsPendingObservation = true
 		}
 
-		// TODO: Update display to support multiple active revisions
-		// Also, revision[0] is not necessarily the active revision
+		revision := status.GetLatestReadyRevision(&deploymentStatus)
 		if len(deploymentStatus.Revisions) > 0 {
 			table.AddRow(
 				formatDeploymentName(deploymentStatus),
 				deploymentStatus.StageName,
-				fmt.Sprintf("%d", deploymentStatus.Revisions[0].RiserGeneration),
-				formatDockerTag(deploymentStatus.Revisions[0].DockerImage),
-				fmt.Sprintf("%d", deploymentStatus.Revisions[0].AvailableReplicas),
+				fmt.Sprintf("%d", revision.RiserGeneration),
+				formatDockerTag(revision.DockerImage),
+				fmt.Sprintf("%d", revision.AvailableReplicas),
 				formatProblems(deploymentStatus.Problems))
 		}
 	}
@@ -66,7 +66,7 @@ func drawStatus(appName string, status *model.AppStatus) {
 		fmt.Println(style.Emphasis("* This deployment has changes that have not yet been observed."))
 	}
 
-	for _, stageStatus := range status.Stages {
+	for _, stageStatus := range appStatus.Stages {
 		if !stageStatus.Healthy {
 			fmt.Print(ctc.ForegroundBrightYellow)
 			fmt.Printf("Warning: stage %q is not healthy. %s\n", stageStatus.StageName, stageStatus.Reason)
