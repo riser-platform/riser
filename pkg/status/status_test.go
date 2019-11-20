@@ -1,0 +1,72 @@
+package status
+
+import (
+	"riser/pkg/util"
+	"testing"
+
+	"github.com/riser-platform/riser-server/api/v1/model"
+	"github.com/stretchr/testify/assert"
+)
+
+func Test_GetActiveRevisions_PercentBasedRouting(t *testing.T) {
+	deploymentStatus := &model.DeploymentStatus{
+		DeploymentStatusMutable: model.DeploymentStatusMutable{
+			Revisions: []model.DeploymentRevisionStatus{
+				model.DeploymentRevisionStatus{
+					Name: "rev0",
+				},
+				model.DeploymentRevisionStatus{
+					Name: "rev1",
+				},
+				model.DeploymentRevisionStatus{
+					Name: "rev2",
+				},
+			},
+			Traffic: []model.DeploymentTrafficStatus{
+				model.DeploymentTrafficStatus{
+					RevisionName: "rev1",
+					Percent:      util.PtrInt64(90),
+				},
+				model.DeploymentTrafficStatus{
+					RevisionName: "rev2",
+					Percent:      util.PtrInt64(10),
+				},
+			},
+		},
+	}
+
+	result := GetActiveRevisions(deploymentStatus)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, "rev1", result[0].Name)
+	assert.Equal(t, deploymentStatus.DeploymentStatusMutable.Traffic[0], result[0].Traffic)
+	assert.Equal(t, "rev2", result[1].Name)
+	assert.Equal(t, deploymentStatus.DeploymentStatusMutable.Traffic[1], result[1].Traffic)
+}
+
+// This may not be necessary as recent versions of KNative seems to report 100% in this case.
+func Test_GetActiveRevisions_LatestOnly(t *testing.T) {
+	deploymentStatus := &model.DeploymentStatus{
+		DeploymentStatusMutable: model.DeploymentStatusMutable{
+			Revisions: []model.DeploymentRevisionStatus{
+				model.DeploymentRevisionStatus{
+					Name: "rev0",
+				},
+				model.DeploymentRevisionStatus{
+					Name: "rev1",
+				},
+			},
+			Traffic: []model.DeploymentTrafficStatus{
+				model.DeploymentTrafficStatus{
+					RevisionName: "rev1",
+					Latest:       util.PtrBool(true),
+				},
+			},
+		},
+	}
+
+	result := GetActiveRevisions(deploymentStatus)
+
+	assert.Len(t, result, 1)
+	assert.Equal(t, "rev1", result[0].Name)
+}

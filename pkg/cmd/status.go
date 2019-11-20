@@ -40,26 +40,41 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
 	}
-	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Replicas", "Problems")
+	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Replicas")
 	deploymentsPendingObservation := false
 	for _, deploymentStatus := range appStatus.Deployments {
 		if !deploymentObserved(deploymentStatus) {
 			deploymentsPendingObservation = true
 		}
 
-		revision := status.GetLatestReadyRevision(&deploymentStatus)
-		if len(deploymentStatus.Revisions) > 0 {
-			table.AddRow(
-				formatDeploymentName(deploymentStatus),
-				deploymentStatus.StageName,
-				fmt.Sprintf("%d", revision.RiserGeneration),
-				formatDockerTag(revision.DockerImage),
-				fmt.Sprintf("%d", revision.AvailableReplicas),
-				formatProblems(deploymentStatus.Problems))
+		activeRevisions := status.GetActiveRevisions(&deploymentStatus)
+		if len(activeRevisions) > 0 {
+			first := true
+			for _, activeRevision := range activeRevisions {
+				if first {
+					statusTable.AddRow(
+						formatDeploymentName(deploymentStatus),
+						deploymentStatus.StageName,
+						formatTraffic(&activeRevision.Traffic),
+						fmt.Sprintf("%d", activeRevision.RiserGeneration),
+						formatDockerTag(activeRevision.DockerImage),
+						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
+					)
+				} else {
+					statusTable.AddRow(
+						formatTraffic(&activeRevision.Traffic),
+						fmt.Sprintf("%d", activeRevision.RiserGeneration),
+						formatDockerTag(activeRevision.DockerImage),
+						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
+					)
+				}
+				first = false
+			}
 		}
+
 	}
 
-	fmt.Println(table)
+	fmt.Println(statusTable)
 	fmt.Print("\n")
 
 	if deploymentsPendingObservation {
@@ -73,6 +88,15 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 			fmt.Print(ctc.Reset)
 		}
 	}
+}
+
+func formatTraffic(traffic *model.DeploymentTrafficStatus) string {
+	// TODO: Determine if % is ever nil in practice and display as 100% if latest and only active revision
+	if traffic.Percent != nil {
+		return fmt.Sprintf("%d%%", *traffic.Percent)
+	}
+
+	return "0%"
 }
 
 func formatDeploymentName(deploymentStatus model.DeploymentStatus) string {
