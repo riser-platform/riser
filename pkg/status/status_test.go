@@ -70,3 +70,32 @@ func Test_GetActiveRevisions_LatestOnly(t *testing.T) {
 	assert.Len(t, result, 1)
 	assert.Equal(t, "rev1", result[0].Name)
 }
+
+func Test_GetActiveRevisions_LatestCreatedNoTraffic(t *testing.T) {
+	deploymentStatus := &model.DeploymentStatus{
+		DeploymentStatusMutable: model.DeploymentStatusMutable{
+			LatestCreatedRevisionName: "rev1",
+			Revisions: []model.DeploymentRevisionStatus{
+				model.DeploymentRevisionStatus{
+					Name: "rev0",
+				},
+				model.DeploymentRevisionStatus{
+					Name: "rev1",
+				},
+			},
+			Traffic: []model.DeploymentTrafficStatus{
+				model.DeploymentTrafficStatus{
+					RevisionName: "rev0",
+					Percent:      util.PtrInt64(100),
+				},
+			},
+		},
+	}
+
+	result := GetActiveRevisions(deploymentStatus)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, "rev0", result[0].Name)
+	assert.Equal(t, "rev1", result[1].Name)
+	assert.Empty(t, result[1].Traffic)
+}

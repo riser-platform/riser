@@ -18,8 +18,10 @@ func GetActiveRevisions(deploymentStatus *model.DeploymentStatus) []RevisionStat
 	activeStatuses := []RevisionStatusWithTraffic{}
 	for _, revision := range deploymentStatus.Revisions {
 		for _, traffic := range deploymentStatus.Traffic {
-			if traffic.RevisionName == revision.Name && isActiveOrPendingRouting(&traffic) {
+			if traffic.RevisionName == revision.Name && hasActiveRoute(&traffic) {
 				activeStatuses = append(activeStatuses, RevisionStatusWithTraffic{revision, traffic})
+			} else if revision.Name == deploymentStatus.LatestCreatedRevisionName {
+				activeStatuses = append(activeStatuses, RevisionStatusWithTraffic{DeploymentRevisionStatus: revision})
 			}
 		}
 	}
@@ -27,6 +29,9 @@ func GetActiveRevisions(deploymentStatus *model.DeploymentStatus) []RevisionStat
 	return activeStatuses
 }
 
-func isActiveOrPendingRouting(traffic *model.DeploymentTrafficStatus) bool {
-	return (traffic.Percent != nil && *traffic.Percent > 0) || (traffic.Latest != nil && *traffic.Latest)
+func hasActiveRoute(traffic *model.DeploymentTrafficStatus) bool {
+	// TODO: This is not strictly correct, although it may be fine in practice. Need to test once we implement rollout. In KNative,
+	// it's possible to not define percent and just say "latest=true". However  it appears that while percent is optional it always returns some value
+	// in the status, so we may be able to just remove the latest check alltogether.
+	return traffic.Percent != nil || (traffic.Latest != nil && *traffic.Latest)
 }

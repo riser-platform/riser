@@ -62,6 +62,7 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 					)
 				} else {
 					statusTable.AddRow(
+						"", "",
 						formatTraffic(&activeRevision.Traffic),
 						fmt.Sprintf("%d", activeRevision.RiserGeneration),
 						formatDockerTag(activeRevision.DockerImage),
