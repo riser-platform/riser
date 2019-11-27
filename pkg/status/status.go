@@ -17,12 +17,16 @@ GetActiveRevisions returns all active revisions. An active revision is:
 func GetActiveRevisions(deploymentStatus *model.DeploymentStatus) []RevisionStatusWithTraffic {
 	activeStatuses := []RevisionStatusWithTraffic{}
 	for _, revision := range deploymentStatus.Revisions {
+		hasTrafficStatus := false
 		for _, traffic := range deploymentStatus.Traffic {
 			if traffic.RevisionName == revision.Name && hasActiveRoute(&traffic) {
+				hasTrafficStatus = true
 				activeStatuses = append(activeStatuses, RevisionStatusWithTraffic{revision, traffic})
-			} else if revision.Name == deploymentStatus.LatestCreatedRevisionName {
-				activeStatuses = append(activeStatuses, RevisionStatusWithTraffic{DeploymentRevisionStatus: revision})
 			}
+		}
+
+		if !hasTrafficStatus && revision.Name == deploymentStatus.LatestCreatedRevisionName {
+			activeStatuses = append(activeStatuses, RevisionStatusWithTraffic{DeploymentRevisionStatus: revision})
 		}
 	}
 
