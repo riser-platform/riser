@@ -40,7 +40,7 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
 	}
-	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Replicas")
+	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Pods", "Status")
 	deploymentsPendingObservation := false
 	for _, deploymentStatus := range appStatus.Deployments {
 		if !deploymentObserved(deploymentStatus) {
@@ -59,6 +59,7 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 						fmt.Sprintf("%d", activeRevision.RiserGeneration),
 						formatDockerTag(activeRevision.DockerImage),
 						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
+						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
 					)
 				} else {
 					statusTable.AddRow(
@@ -67,6 +68,7 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 						fmt.Sprintf("%d", activeRevision.RiserGeneration),
 						formatDockerTag(activeRevision.DockerImage),
 						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
+						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
 					)
 				}
 				first = false
