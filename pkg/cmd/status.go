@@ -40,7 +40,7 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
 	}
-	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Pods", "Status")
+	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Pods", "Status", "Problems")
 	deploymentsPendingObservation := false
 	for _, deploymentStatus := range appStatus.Deployments {
 		if !deploymentObserved(deploymentStatus) {
@@ -60,6 +60,7 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 						formatDockerTag(activeRevision.DockerImage),
 						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
 						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
+						formatProblems(activeRevision.Problems),
 					)
 				} else {
 					statusTable.AddRow(
@@ -69,6 +70,7 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 						formatDockerTag(activeRevision.DockerImage),
 						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
 						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
+						formatProblems(activeRevision.Problems),
 					)
 				}
 				first = false
@@ -123,7 +125,7 @@ func formatDockerTag(dockerImage string) string {
 	return dockerImage[idx+1:]
 }
 
-func formatProblems(problems []model.DeploymentStatusProblem) string {
+func formatProblems(problems []model.StatusProblem) string {
 	if len(problems) == 0 {
 		return fmt.Sprint(ctc.ForegroundBrightGreen, "None Found", ctc.Reset)
 	}
@@ -142,7 +144,7 @@ func formatProblems(problems []model.DeploymentStatusProblem) string {
 	return fmt.Sprint(ctc.ForegroundBrightRed, message, ctc.Reset)
 }
 
-func formatProblem(problem model.DeploymentStatusProblem) string {
+func formatProblem(problem model.StatusProblem) string {
 	if problem.Count == 1 {
 		return problem.Message
 	}
