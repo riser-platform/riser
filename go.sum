@@ -130,8 +130,8 @@ github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v0.0.0-20151028094244-d8ed2627bdf0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/riser-platform/riser-server/api/v1/model v0.0.0-20191231160837-2bc69123b600 h1:xxbwV3+CZghmkeX8FL4E9DplJmbe059IxBAq64pDUxs=
-github.com/riser-platform/riser-server/api/v1/model v0.0.0-20191231160837-2bc69123b600/go.mod h1:Q5LMRqsqxdCPygU9c1vGyAdQtzqFbJN1B//ojv0fwrU=
+github.com/riser-platform/riser-server/api/v1/model v0.0.0-20200111094547-4c7604438678 h1:l0uSXbyzMUr42zQhy5SQuCu4EAvchPWpPGd0LR28Cuc=
+github.com/riser-platform/riser-server/api/v1/model v0.0.0-20200111094547-4c7604438678/go.mod h1:Q5LMRqsqxdCPygU9c1vGyAdQtzqFbJN1B//ojv0fwrU=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 h1:bUGsEnyNbVPw06Bs80sCeARAlK8lhwqGyi6UT8ymuGk=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749/go.mod h1:ZY1cvUeJuFPAdZ/B6v7RHavJWZn2YPVFQ1OSXhCGOkg=
