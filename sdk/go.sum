@@ -76,8 +76,8 @@ github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v0.0.0-20151028094244-d8ed2627bdf0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/riser-platform/riser-server/api/v1/model v0.0.0-20200111094547-4c7604438678 h1:l0uSXbyzMUr42zQhy5SQuCu4EAvchPWpPGd0LR28Cuc=
-github.com/riser-platform/riser-server/api/v1/model v0.0.0-20200111094547-4c7604438678/go.mod h1:Q5LMRqsqxdCPygU9c1vGyAdQtzqFbJN1B//ojv0fwrU=
+github.com/riser-platform/riser-server/api/v1/model v0.0.0-20200111113932-354875c8180b h1:q8D2zIl3/T8D0zNy9buMK6rKyws5pptl2zzNfXI7lSY=
+github.com/riser-platform/riser-server/api/v1/model v0.0.0-20200111113932-354875c8180b/go.mod h1:Q5LMRqsqxdCPygU9c1vGyAdQtzqFbJN1B//ojv0fwrU=
 github.com/spf13/pflag v0.0.0-20170130214245-9ff6c6923cff/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=

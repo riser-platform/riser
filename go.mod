@@ -14,7 +14,7 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/mattn/go-runewidth v0.0.5 // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.0-20200111094547-4c7604438678
+	github.com/riser-platform/riser-server/api/v1/model v0.0.0-20200111113932-354875c8180b
 	github.com/riser-platform/riser/sdk v0.0.0-00010101000000-000000000000
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/spf13/cobra v0.0.4
