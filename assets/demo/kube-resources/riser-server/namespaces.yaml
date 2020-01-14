@@ -5,3 +5,10 @@ metadata:
   name: riser-system
   labels:
     istio-injection: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: apps
+  labels:
+    istio-injection: enabled

@@ -1,11 +1,12 @@
 ---
   apiVersion: "apps/v1"
-  kind: "Deployment"
+  kind: "StatefulSet"
   metadata:
     name: "kube-applier"
     namespace: "kube-applier"
   spec:
     replicas: 1
+    serviceName: kube-applier
     selector:
       matchLabels:
         app: kube-applier
@@ -24,7 +25,7 @@
           env:
             - name: LISTEN_PORT
               value: "2020"
-          image: "tshak/kube-applier:v0.2.0-k8s-v1.13.7"
+          image: "tshak/kube-applier:v0.2.0-k8s-v1.15.4"
           ports:
             - containerPort: 2020
           volumeMounts:

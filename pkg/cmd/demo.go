@@ -168,18 +168,23 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 	apiKeyGenStep := steps.NewExecStep("Generate Riser API key", exec.Command("riser", "ops", "generate-apikey"))
 	err = steps.Run(
 		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", gitUrlParsed.String(), "HEAD")),
-		// Install namespaces and istio CRDs separately due to ordering issues (declarative infra... not quite!)
+		// Install namespaces and some CRDs separately due to ordering issues (declarative infra... not quite!)
 		steps.NewExecStep("Apply namespaces and CRDs", exec.Command("kubectl", "apply",
 			"-f", path.Join(demoPath, "kube-resources/riser-server/namespaces.yaml"),
 			"-f", path.Join(demoPath, "kube-resources/istio/0_namespace.yaml"),
 			"-f", path.Join(demoPath, "kube-resources/istio/1_init.yaml"),
+			"-f", path.Join(demoPath, "kube-resources/knative/namespace.yaml"),
+			"-f", path.Join(demoPath, "kube-resources/knative/serving-crds.yaml"),
 		)),
 		steps.NewRetryStep(
 			func() steps.Step {
 				// We don't wait for each specific CRD. In testing we've found these two are the most common ones that aren't immediately ready
 				// May have to adjust over time.
 				return steps.NewShellExecStep("Wait for CRDs",
-					"kubectl wait --for condition=established crd/gateways.networking.istio.io && kubectl wait --for condition=established crd/clusterissuers.certmanager.k8s.io")
+					`kubectl wait --for condition=established crd/gateways.networking.istio.io && \
+					kubectl wait --for condition=established crd/clusterissuers.certmanager.k8s.io && \
+					kubectl wait --for condition=established crd/images.caching.internal.knative.dev
+					`)
 			},
 			120,
 			func(stepErr error) bool {
@@ -206,7 +211,10 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 
 	// Run another group of steps since we rely on the state of previous steps (step runner could support deferred state but this is simpler for now)
 	err = steps.Run(
-		steps.NewShellExecStep("Create riser-server configuration",
+		// This was already applied previously, but the KNative configmaps can get overwritten depending on the order of execution :/
+		steps.NewShellExecStep("Configure riser",
+			fmt.Sprintf("kubectl apply -f %s", path.Join(demoPath, "kube-resources/riser-server/demo.yaml"))),
+		steps.NewShellExecStep("Create riser-server configmap",
 			"kubectl create configmap riser-server --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_GIT_URL=%s", gitUrlNoAuthParsed.String())+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
@@ -235,7 +243,7 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", demoStageName),
 			func() error {
 				secure := false
-				demoContext := &rc.Context{Name: demoStageName, ServerURL: "https://api.demo.riser", Apikey: apiKey, Secure: &secure}
+				demoContext := &rc.Context{Name: demoStageName, ServerURL: "https://riser-server.riser-system.demo.riser", Apikey: apiKey, Secure: &secure}
 				config.SaveContext(demoContext)
 				return rc.SaveRc(config)
 			}),
@@ -269,7 +277,7 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 	if err != nil {
 		logger.Log().Error(err.Error())
 		ui.ExitErrorMsg(`Tips:
-• On slower systems this can take longer than expected after an installation. You may try running "riser demo status" again after a few minutes.
+• On slower systems this can take longer than expected right after an installation. You may try running "riser demo status" again after a few minutes.
 • Ensure that your kubernetes context is set to the cluster with the demo installed.
 • Ensure that the riser demo is installed using "riser demo install".
 • Ensure that riser is set to the "demo" context using "riser context current demo"
@@ -302,12 +310,12 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 	logger.Log().Info("\n" + style.Good("🚀 Everything checks out!") + "\n")
 
 	logger.Log().Info("Gateway IP:\t" + style.Emphasis(gatewayIp))
-	logger.Log().Info("API Host:\t" + style.Emphasis("api.demo.riser"))
+	logger.Log().Info("API Host:\t" + style.Emphasis("riser-server.riser-system.demo.riser"))
 	logger.Log().Info("Apps host:\t" + style.Emphasis("*.apps.demo.riser"))
 
 	logger.Log().Info("\nInstructions:")
-	logger.Log().Info(fmt.Sprintf("• In your hosts file (e.g. /etc/hosts on OSX) or local DNS server set the IP for the host %s to the gateway IP: %s", style.Emphasis("api.demo.riser"), style.Emphasis(gatewayIp)))
-	logger.Log().Info(fmt.Sprintf("  Example /etc/hosts entry:\n  %s", style.Muted(fmt.Sprintf("%s api.demo.riser", gatewayIp))))
+	logger.Log().Info(fmt.Sprintf("• In your hosts file (e.g. /etc/hosts on OSX) or local DNS server set the IP for the host %s to the gateway IP: %s", style.Emphasis("riser-server.riser-system.demo.riser"), style.Emphasis(gatewayIp)))
+	logger.Log().Info(fmt.Sprintf("  Example /etc/hosts entry:\n  %s", style.Muted(fmt.Sprintf("%s riser-server.riser-system.demo.riser", gatewayIp))))
 	logger.Log().Info("• For easier access to your apps, you may wish to add additional host entries for each app using the format <YOUR-APP>.apps.demo.riser to the same gateway IP, or create a wildcard DNS record for *.apps.demo.riser.")
 	logger.Log().Info("• You may also access your apps by passing a host header. For example, with curl:")
 	logger.Log().Info(style.Muted(fmt.Sprintf("  curl -k -H \"Host: <YOUR-APP>.apps.demo.riser\" https://%s", gatewayIp)))

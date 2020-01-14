@@ -1,39 +1,18 @@
 ---
-apiVersion: apps/v1
-kind: StatefulSet
+apiVersion: serving.knative.dev/v1
+kind: Service
 metadata:
   name: riser-server
   namespace: riser-system
-  labels:
-    app: riser-server
-  annotations:
-    sidecar.istio.io/rewriteAppHTTPProbers: "true"
 spec:
-  selector:
-    matchLabels:
-      app: riser-server
-  serviceName: riser-server
   template:
     metadata:
-      labels:
-        app: riser-server
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "1"
     spec:
-      imagePullSecrets:
-        - name: riser-registry
-      terminationGracePeriodSeconds: 10
-      imagePullSecrets:
-        - name: us-gcr-io-registry
       containers:
       - name: server
-        image: riserplatform/riser-server:0.0.5
-        imagePullPolicy: Always
-        resources:
-          limits:
-            cpu: 500m
-            memory: 256Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
         envFrom:
         - configMapRef:
             name: riser-server
@@ -64,20 +43,10 @@ spec:
               name: riser-server
               key: RISER_BOOTSTRAP_APIKEY
               optional: true
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: riser-server
-  namespace: riser-system
-  labels:
-    app: riser-server
-spec:
-  ports:
-  - name: http
-    port: 80
-    targetPort: 8000
-  selector:
-    app: riser-server
+        image: riserplatform/riser-server:0.0.6-alpha-knative
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+
 
 

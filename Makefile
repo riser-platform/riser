@@ -58,4 +58,10 @@ release: check-version
 check-version:
 	@if test -z "${VERSION}"; then echo "Usage: make <target> VERSION=<version>"; exit 1; fi
 
+# Warning! This deletes and recreates the minikube project named "demo"!
+# Useful for testing demo installation from scratch
+minikube-demo:
+	minikube delete -p demo
+	minikube start -p demo
+	riser demo install
 
