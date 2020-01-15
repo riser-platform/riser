@@ -46,7 +46,7 @@ func newInstallDemoCommand(config *rc.RuntimeConfiguration, assets http.FileSyst
 	cmd := &cobra.Command{
 		Use:   "install",
 		Short: "Installs a self-contained riser demo to a k8s cluster (minikube recommended)",
-		Long:  "Install a self-contained riser demo to a k8s cluster (minikube recommended) along with all required infrastructure (istio, postgresql, etc)",
+		Long:  "Install a self-contained riser demo to a k8s cluster (minikube recommended) along with all required infrastructure (knative, istio, postgresql, etc)",
 		Run: func(cmd *cobra.Command, args []string) {
 			demoInstall(config, assets)
 		},
@@ -173,12 +173,12 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 			"-f", path.Join(demoPath, "kube-resources/riser-server/namespaces.yaml"),
 			"-f", path.Join(demoPath, "kube-resources/istio/0_namespace.yaml"),
 			"-f", path.Join(demoPath, "kube-resources/istio/1_init.yaml"),
-			"-f", path.Join(demoPath, "kube-resources/knative/namespace.yaml"),
-			"-f", path.Join(demoPath, "kube-resources/knative/serving-crds.yaml"),
+			"-f", path.Join(demoPath, "knative/namespace.yaml"),
+			"-f", path.Join(demoPath, "knative/serving-crds.yaml"),
 		)),
 		steps.NewRetryStep(
 			func() steps.Step {
-				// We don't wait for each specific CRD. In testing we've found these two are the most common ones that aren't immediately ready
+				// We don't wait for each specific CRD. In testing we've found these are the most common ones that aren't immediately ready
 				// May have to adjust over time.
 				return steps.NewShellExecStep("Wait for CRDs",
 					`kubectl wait --for condition=established crd/gateways.networking.istio.io && \
@@ -191,6 +191,19 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 				return strings.Contains(stepErr.Error(), "Error from server (NotFound)")
 			}),
 		getApiKeyFromRiserSecretStep,
+		// Knative installation is very order dependant, must install istio first.
+		steps.NewExecStep("Apply istio resources", exec.Command("kubectl", "apply",
+			"-f", path.Join(demoPath, "kube-resources/istio"),
+		)),
+		steps.NewRetryStep(func() steps.Step {
+			return steps.NewShellExecStep("Wait for istio pilot", "kubectl get deployment istio-pilot -n istio-system -o jsonpath='{.status.availableReplicas}' | grep ^1$")
+		},
+			180, steps.AlwaysRetry()),
+		steps.NewExecStep("Apply knative resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "knative"))),
+		steps.NewRetryStep(func() steps.Step {
+			return steps.NewShellExecStep("Wait for knative activator", "kubectl get deployment activator -n knative-serving -o jsonpath='{.status.availableReplicas}' | grep ^1$")
+		},
+			180, steps.AlwaysRetry()),
 	)
 	ui.ExitIfError(err)
 
@@ -211,9 +224,6 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 
 	// Run another group of steps since we rely on the state of previous steps (step runner could support deferred state but this is simpler for now)
 	err = steps.Run(
-		// This was already applied previously, but the KNative configmaps can get overwritten depending on the order of execution :/
-		steps.NewShellExecStep("Configure riser",
-			fmt.Sprintf("kubectl apply -f %s", path.Join(demoPath, "kube-resources/riser-server/demo.yaml"))),
 		steps.NewShellExecStep("Create riser-server configmap",
 			"kubectl create configmap riser-server --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_GIT_URL=%s", gitUrlNoAuthParsed.String())+
@@ -226,12 +236,11 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 				"--from-literal=RISER_POSTGRES_USERNAME=riseradmin "+
 				"--from-literal=RISER_POSTGRES_PASSWORD=riserpw "+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
-		// TODO: See idempotent message from riser-server secret
 		steps.NewShellExecStep("Create secret for riser-controller",
 			"kubectl create secret generic riser-controller --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_SERVER_APIKEY=%s ", apiKey)+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
-		steps.NewExecStep("Apply static demo resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
+		steps.NewExecStep("Apply other demo resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
 		steps.NewShellExecStep("Create secret for kube-applier",
 			"kubectl create secret generic kube-applier --namespace=kube-applier "+
 				fmt.Sprintf("--from-literal=GIT_SYNC_REPO=%s", gitUrlParsed.String())+
@@ -246,8 +255,7 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 				demoContext := &rc.Context{Name: demoStageName, ServerURL: "https://riser-server.riser-system.demo.riser", Apikey: apiKey, Secure: &secure}
 				config.SaveContext(demoContext)
 				return rc.SaveRc(config)
-			}),
-	)
+			}))
 
 	ui.ExitIfError(err)
 
@@ -266,7 +274,7 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 		steps.NewRetryStep(func() steps.Step {
 			return steps.NewShellExecStep(
 				"Check riser-server status (this could take a few minutes after installation)",
-				"kubectl get po riser-server-0 -n riser-system -o jsonpath='{.status.conditions[?(@.type==\"Ready\")].status}' | grep True")
+				"kubectl get ksvc riser-server -n riser-system -o jsonpath=\"{.status.conditions[?(@.type==\\\"Ready\\\")].status}\" | grep True")
 		},
 			300,
 			func(err error) bool {
@@ -289,8 +297,7 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 			"Check Istio ingress gateway",
 			"kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}' | grep ^")
 	},
-		120,
-		// If there's an error always retry - Could improve this as obviously there are some errors where we'd want to abort e.g. kubernetes is not reachable
+		60,
 		steps.AlwaysRetry())
 
 	err = steps.Run(ingressGatewayStep)

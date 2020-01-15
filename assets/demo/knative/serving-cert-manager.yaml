@@ -8,7 +8,7 @@ metadata:
   labels:
     networking.knative.dev/certificate-provider: cert-manager
     serving.knative.dev/controller: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: knative-serving-certmanager
 rules:
 - apiGroups:
@@ -130,7 +130,7 @@ kind: ConfigMap
 metadata:
   labels:
     networking.knative.dev/certificate-provider: cert-manager
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: config-certmanager
   namespace: knative-serving
 
@@ -162,7 +162,7 @@ kind: Deployment
 metadata:
   labels:
     networking.knative.dev/certificate-provider: cert-manager
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: networking-certmanager
   namespace: knative-serving
 spec:
@@ -176,7 +176,7 @@ spec:
         sidecar.istio.io/inject: "false"
       labels:
         app: networking-certmanager
-        serving.knative.dev/release: "v0.11.0"
+        serving.knative.dev/release: "v0.11.1"
     spec:
       containers:
       - env:
@@ -190,7 +190,7 @@ spec:
           value: config-observability
         - name: METRICS_DOMAIN
           value: knative.dev/serving
-        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/certmanager@sha256:a4c37a6b13ef60f24dd25a77eba9b41195491fe1f76fdb5b05273a94ed7d7e66
+        image: gcr.io/knative-releases/knative.dev/serving/cmd/networking/certmanager@sha256:72ace17a7d68a1096f435518e9987bf18f655f67baa4ae66b2e17150789ec2c8
         name: networking-certmanager
         ports:
         - containerPort: 9090

@@ -33,7 +33,7 @@ kind: CustomResourceDefinition
 metadata:
   labels:
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: certificates.networking.internal.knative.dev
 spec:
   additionalPrinterColumns:
@@ -65,7 +65,7 @@ metadata:
   labels:
     duck.knative.dev/podspecable: "true"
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: configurations.serving.knative.dev
 spec:
   additionalPrinterColumns:
@@ -136,7 +136,7 @@ kind: CustomResourceDefinition
 metadata:
   labels:
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: ingresses.networking.internal.knative.dev
 spec:
   additionalPrinterColumns:
@@ -170,7 +170,7 @@ kind: CustomResourceDefinition
 metadata:
   labels:
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: metrics.autoscaling.internal.knative.dev
 spec:
   additionalPrinterColumns:
@@ -199,7 +199,7 @@ kind: CustomResourceDefinition
 metadata:
   labels:
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: podautoscalers.autoscaling.internal.knative.dev
 spec:
   additionalPrinterColumns:
@@ -240,7 +240,7 @@ kind: CustomResourceDefinition
 metadata:
   labels:
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: revisions.serving.knative.dev
 spec:
   additionalPrinterColumns:
@@ -291,7 +291,7 @@ metadata:
   labels:
     duck.knative.dev/addressable: "true"
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: routes.serving.knative.dev
 spec:
   additionalPrinterColumns:
@@ -337,7 +337,7 @@ metadata:
     duck.knative.dev/addressable: "true"
     duck.knative.dev/podspecable: "true"
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: services.serving.knative.dev
 spec:
   additionalPrinterColumns:
@@ -388,7 +388,7 @@ kind: CustomResourceDefinition
 metadata:
   labels:
     knative.dev/crd-install: "true"
-    serving.knative.dev/release: "v0.11.0"
+    serving.knative.dev/release: "v0.11.1"
   name: serverlessservices.networking.internal.knative.dev
 spec:
   additionalPrinterColumns:
