@@ -4,11 +4,11 @@
     <a href="https://github.com/riser-platform/riser"><img alt="GitHub Actions status" src="https://github.com/riser-platform/riser/workflows/Build/badge.svg"></a>
 </p>
 
-Riser is an opinionated app platform built on Kubernetes. It provides a radically simplified application deployment and management experience without vendor lock-in.
+Riser is an opinionated app platform built on [Kubernetes](https://kubernetes.io/) and [KNative](https://knative.dev). It provides a radically simplified application deployment and management experience without vendor lock-in.
 
 [![asciicast](https://asciinema.org/a/277448.svg)](https://asciinema.org/a/277448?autoplay=1&cols=160&rows=40)
 
-> :warning: This is an experimental project with the goal of improving how we deploy and manage common application workloads. You're invited to look around and provide feedback. Until there is a stable release it is not advised to use Riser in production as breaking changes may occur frequently and without warning.
+> :warning: This is an experimental project with the goal of improving how we deploy and manage common application workloads. You're invited to look around and provide feedback. It is not yet advised to use Riser in production. Breaking changes may occur frequently and without warning.
 
 **[Check out the quickstart!](quickstart.md)**
 
@@ -19,7 +19,7 @@ Riser is an opinionated app platform built on Kubernetes. It provides a radicall
 - Single view of apps across multiple stages (clusters)
 - Simplified secrets management
 - GitOps all the way. All state changes happen through git
-- Developers only need access to Riser. Kubernetes cluster access is optional only for advanced debugging or operational tasks
+- Developers only need access to Riser. Kubernetes cluster access is optional for e.g. advanced debugging or operational tasks
 
 **[Check out the quickstart!](quickstart.md)**
 
@@ -35,13 +35,13 @@ Riser interacts with Kubernetes using a strictly [GitOps](https://thenewstack.io
 
 ## Development
 
-We are not currently accepting PRs. As the project matures this section will contain more details.
+> Note: We are not currently accepting PRs. As the project matures this section will contain more details.
 
 ### Assets
 
 If you change anything in the `assets` folder, you must run `make generate` to statically bundle them inside the riser binary.
 
-### Related projects
+### Supporting projects
 
 - [Riser Server](https://github.com/riser-platform/riser-server)
 - [Riser Controller](https://github.com/riser-platform/riser-controller)
