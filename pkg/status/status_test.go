@@ -45,7 +45,7 @@ func Test_GetActiveRevisions_PercentBasedRouting(t *testing.T) {
 }
 
 // This may not be necessary as recent versions of KNative seems to report 100% in this case.
-func Test_GetActiveRevisions_LatestOnly(t *testing.T) {
+func Test_GetActiveRevisions_NoTraffic(t *testing.T) {
 	deploymentStatus := &model.DeploymentStatus{
 		DeploymentStatusMutable: model.DeploymentStatusMutable{
 			Revisions: []model.DeploymentRevisionStatus{
@@ -56,19 +56,12 @@ func Test_GetActiveRevisions_LatestOnly(t *testing.T) {
 					Name: "rev1",
 				},
 			},
-			Traffic: []model.DeploymentTrafficStatus{
-				model.DeploymentTrafficStatus{
-					RevisionName: "rev1",
-					Latest:       util.PtrBool(true),
-				},
-			},
 		},
 	}
 
 	result := GetActiveRevisions(deploymentStatus)
 
-	assert.Len(t, result, 1)
-	assert.Equal(t, "rev1", result[0].Name)
+	assert.Len(t, result, 0)
 }
 
 func Test_GetActiveRevisions_LatestCreatedNoTraffic(t *testing.T) {
