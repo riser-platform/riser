@@ -16,8 +16,9 @@ expose:
   # Your cluster local URL will be "http://<deploymentName>.apps.svc.cluster.local". Use this for talking between apps in the same cluster.
   # Your external URL will be "https://<deploymentName>.apps.<yourExternalDomain>"
   containerPort: 8000
-  # Optional: The protocol (http|grpc) (default: http)
+  # Optional: The protocol (http|http2) (default: http)
   # Note: External traffic is always TLS. HTTP will auto redirect to HTTPS.
+  # Note: Traffic will attempt to auto-upgrade to http2. Specifying "http2" adds the "h2c" token, required for protocols like grpc
   protocol: http
 
 # --- Everything below this line is optional --- #
