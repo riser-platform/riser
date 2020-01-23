@@ -270,6 +270,25 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 	err := config.SetCurrentContext(demoStageName)
 	ui.ExitIfErrorMsg(err, "Error loading demo config. Please run \"riser demo install\".")
 
+	ingressGatewayStep := steps.NewRetryStep(func() steps.Step {
+		return steps.NewShellExecStep(
+			"Check istio ingress gateway",
+			"kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}' | grep ^")
+	},
+		60,
+		steps.AlwaysRetry())
+
+	err = steps.Run(ingressGatewayStep)
+
+	if err != nil {
+		logger.Log().Error(err.Error())
+		ui.ExitErrorMsg(`Tips:
+• If you're using minikube be sure that "minikube tunnel" is running and rnu "riser demo status" again.
+• Ensure that your kubernetes context is set to the cluster with the demo installed.
+• Check the service status and pod logs for "istio-ingressgateway" in the "istio-system" namespace.
+		`)
+	}
+
 	err = steps.Run(
 		steps.NewRetryStep(func() steps.Step {
 			return steps.NewShellExecStep(
@@ -289,26 +308,6 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 • Ensure that your kubernetes context is set to the cluster with the demo installed.
 • Ensure that the riser demo is installed using "riser demo install".
 • Ensure that riser is set to the "demo" context using "riser context current demo"
-		`)
-	}
-
-	ingressGatewayStep := steps.NewRetryStep(func() steps.Step {
-		return steps.NewShellExecStep(
-			"Check Istio ingress gateway",
-			"kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}' | grep ^")
-	},
-		60,
-		steps.AlwaysRetry())
-
-	err = steps.Run(ingressGatewayStep)
-
-	if err != nil {
-		logger.Log().Error(err.Error())
-		ui.ExitErrorMsg(`Tips:
-• If you're using minikube be sure that "minikube tunnel" is running. If it wasn't, try running "riser demo status" again to verify your installation.
-• Ensure that the riser demo is installed using "riser demo install".
-• Ensure that your kubernetes context is set to the cluster with the demo installed.
-• Check the service status and pod logs for "istio-ingressgateway" in the "istio-system" namespace.
 		`)
 	}
 
