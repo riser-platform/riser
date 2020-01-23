@@ -21,7 +21,7 @@ func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 	var manualRollout bool
 	cmd := &cobra.Command{
 		Use:   "deploy (docker tag) (stage)",
-		Short: "Creates a new deployment",
+		Short: "Creates or updates a deployment",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			dockerTag := args[0]
