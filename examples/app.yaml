@@ -13,11 +13,12 @@ image: your/image
 # Note: This will be optional in the future for headless apps
 expose:
   # The port your app listens on.
-  # Your cluster URL will be "http://<deploymentName>.apps.svc.cluster.local:<containerPort>". Use this for talking between apps in the same cluster.
-  # Your external URL will be "https://<deploymentName>.apps.<yourExternalDomain>" (always port 443).
-  # Note that while the internal URL is HTTP, the Istio service mesh can be configured to enable end-to-end TLS
+  # Your cluster local URL will be "http://<deploymentName>.apps.svc.cluster.local". Use this for talking between apps in the same cluster.
+  # Your external URL will be "https://<deploymentName>.apps.<yourExternalDomain>"
   containerPort: 8000
-  # Optional: The protocol (http|grpc) (default: http)
+  # Optional: The protocol (http|http2) (default: http)
+  # Note: External traffic is always TLS. HTTP will auto redirect to HTTPS.
+  # Note: Traffic will attempt to auto-upgrade to http2. Specifying "http2" adds the "h2c" token, required for protocols like grpc
   protocol: http
 
 # --- Everything below this line is optional --- #
@@ -37,9 +38,6 @@ healthcheck:
   port: 8000
 
 # Optional. Defaults to Kubernetes cluster/namespace defaults.
-replicas: 1
-
-# Optional. Defaults to Kubernetes cluster/namespace defaults.
 resources:
   # Optional. This sets the maximum number of CPU cores that the app can utilize. Defaults to Kubernetes cluster/namespace defaults.
   cpuCores: 1
@@ -48,9 +46,10 @@ resources:
 
 # Optional. Stage specific settings. Most settings can be overridden except for "name" and "id".
 stages:
-  # e.g. for a stage named "prod" that wishes to set the replica count to "3"
+  # Example: for a stage named "prod" that wishes to set the environment variable "DEBUG" to "false":
   prod:
-    replicas: 3
+    environment:
+      DEBUG: false
 
 
 

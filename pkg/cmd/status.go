@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"riser/pkg/rc"
+	"riser/pkg/status"
 	"riser/pkg/ui"
 	"riser/pkg/ui/style"
 	"riser/pkg/ui/table"
@@ -34,42 +35,73 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 	return cmd
 }
 
-func drawStatus(appName string, status *model.AppStatus) {
-	if len(status.Deployments) == 0 {
+func drawStatus(appName string, appStatus *model.AppStatus) {
+	if len(appStatus.Deployments) == 0 {
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
 	}
-	table := table.Default().Header("Deployment", "Stage", "Rev", "Docker Tag", "Rollout", "Rollout Details", "Problems")
+	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Pods", "Status", "Problems")
 	deploymentsPendingObservation := false
-	for _, deploymentStatus := range status.Deployments {
+	for _, deploymentStatus := range appStatus.Deployments {
 		if !deploymentObserved(deploymentStatus) {
 			deploymentsPendingObservation = true
 		}
 
-		table.AddRow(
-			formatDeploymentName(deploymentStatus),
-			deploymentStatus.StageName,
-			fmt.Sprintf("%d", deploymentStatus.RolloutRevision),
-			formatDockerTag(deploymentStatus.DockerImage),
-			formatRolloutStatus(deploymentStatus.RolloutStatus),
-			deploymentStatus.RolloutStatusReason,
-			formatProblems(deploymentStatus.Problems))
+		activeRevisions := status.GetActiveRevisions(&deploymentStatus)
+		if len(activeRevisions) > 0 {
+			first := true
+			for _, activeRevision := range activeRevisions {
+				if first {
+					statusTable.AddRow(
+						formatDeploymentName(deploymentStatus),
+						deploymentStatus.StageName,
+						formatTraffic(&activeRevision.Traffic),
+						fmt.Sprintf("%d", activeRevision.RiserGeneration),
+						formatDockerTag(activeRevision.DockerImage),
+						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
+						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
+						formatProblems(activeRevision.Problems),
+					)
+				} else {
+					statusTable.AddRow(
+						"", "",
+						formatTraffic(&activeRevision.Traffic),
+						fmt.Sprintf("%d", activeRevision.RiserGeneration),
+						formatDockerTag(activeRevision.DockerImage),
+						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
+						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
+						formatProblems(activeRevision.Problems),
+					)
+				}
+				first = false
+			}
+		}
+
 	}
 
-	fmt.Println(table)
+	fmt.Println(statusTable)
 	fmt.Print("\n")
 
 	if deploymentsPendingObservation {
 		fmt.Println(style.Emphasis("* This deployment has changes that have not yet been observed."))
 	}
 
-	for _, stageStatus := range status.Stages {
+	for _, stageStatus := range appStatus.Stages {
 		if !stageStatus.Healthy {
 			fmt.Print(ctc.ForegroundBrightYellow)
 			fmt.Printf("Warning: stage %q is not healthy. %s\n", stageStatus.StageName, stageStatus.Reason)
 			fmt.Print(ctc.Reset)
 		}
 	}
+}
+
+func formatTraffic(traffic *model.DeploymentTrafficStatus) string {
+	// TODO: Determine if % is ever nil in practice and display as 100% if latest and only active revision
+	if traffic.Percent != nil {
+		return fmt.Sprintf("%d%%", *traffic.Percent)
+	}
+
+	return "0%"
 }
 
 func formatDeploymentName(deploymentStatus model.DeploymentStatus) string {
@@ -93,7 +125,7 @@ func formatDockerTag(dockerImage string) string {
 	return dockerImage[idx+1:]
 }
 
-func formatProblems(problems []model.DeploymentStatusProblem) string {
+func formatProblems(problems []model.StatusProblem) string {
 	if len(problems) == 0 {
 		return fmt.Sprint(ctc.ForegroundBrightGreen, "None Found", ctc.Reset)
 	}
@@ -112,7 +144,7 @@ func formatProblems(problems []model.DeploymentStatusProblem) string {
 	return fmt.Sprint(ctc.ForegroundBrightRed, message, ctc.Reset)
 }
 
-func formatProblem(problem model.DeploymentStatusProblem) string {
+func formatProblem(problem model.StatusProblem) string {
 	if problem.Count == 1 {
 		return problem.Message
 	}
