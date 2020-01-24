@@ -30,7 +30,7 @@ func (c *rolloutsClient) Save(deploymentName, stageName string, trafficRule ...s
 		ruleSplit := strings.Split(rule, ":")
 		rolloutRequest.Traffic = append(rolloutRequest.Traffic,
 			model.TrafficRule{
-				RiserGeneration: mustParseInt(ruleSplit[0]),
+				RiserRevision: mustParseInt(ruleSplit[0]),
 				Percent:         int(mustParseInt(ruleSplit[1])),
 			})
 	}

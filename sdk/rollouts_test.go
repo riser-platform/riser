@@ -16,9 +16,9 @@ func Test_Rollouts_Save(t *testing.T) {
 		rollout := &model.RolloutRequest{}
 		mustUnmarshalR(r.Body, rollout)
 		assert.Len(t, rollout.Traffic, 2)
-		assert.EqualValues(t, 1, rollout.Traffic[0].RiserGeneration)
+		assert.EqualValues(t, 1, rollout.Traffic[0].RiserRevision)
 		assert.EqualValues(t, 10, rollout.Traffic[0].Percent)
-		assert.EqualValues(t, 2, rollout.Traffic[1].RiserGeneration)
+		assert.EqualValues(t, 2, rollout.Traffic[1].RiserRevision)
 		assert.EqualValues(t, 90, rollout.Traffic[1].Percent)
 
 	})
@@ -37,9 +37,9 @@ func Test_Rollouts_Save_ReturnsError_WhenBadRule(t *testing.T) {
 		rollout := &model.RolloutRequest{}
 		mustUnmarshalR(r.Body, rollout)
 		assert.Len(t, rollout.Traffic, 2)
-		assert.EqualValues(t, 1, rollout.Traffic[0].RiserGeneration)
+		assert.EqualValues(t, 1, rollout.Traffic[0].RiserRevision)
 		assert.EqualValues(t, 10, rollout.Traffic[0].Percent)
-		assert.EqualValues(t, 2, rollout.Traffic[1].RiserGeneration)
+		assert.EqualValues(t, 2, rollout.Traffic[1].RiserRevision)
 		assert.EqualValues(t, 90, rollout.Traffic[1].Percent)
 
 	})

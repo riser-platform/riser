@@ -130,13 +130,13 @@ func Test_GetRevisionStatus_SortsByRevision(t *testing.T) {
 		DeploymentStatusMutable: model.DeploymentStatusMutable{
 			Revisions: []model.DeploymentRevisionStatus{
 				model.DeploymentRevisionStatus{
-					RiserGeneration: 0,
+					RiserRevision: 0,
 				},
 				model.DeploymentRevisionStatus{
-					RiserGeneration: 2,
+					RiserRevision: 2,
 				},
 				model.DeploymentRevisionStatus{
-					RiserGeneration: 1,
+					RiserRevision: 1,
 				},
 			},
 		},
@@ -145,7 +145,7 @@ func Test_GetRevisionStatus_SortsByRevision(t *testing.T) {
 	result := GetRevisionStatus(deploymentStatus, false)
 
 	assert.Len(t, result, 3)
-	assert.EqualValues(t, 2, result[0].RiserGeneration)
-	assert.EqualValues(t, 1, result[1].RiserGeneration)
-	assert.EqualValues(t, 0, result[2].RiserGeneration)
+	assert.EqualValues(t, 2, result[0].RiserRevision)
+	assert.EqualValues(t, 1, result[1].RiserRevision)
+	assert.EqualValues(t, 0, result[2].RiserRevision)
 }

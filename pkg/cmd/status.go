@@ -58,7 +58,7 @@ func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppSt
 						formatDeploymentName(deploymentStatus),
 						deploymentStatus.StageName,
 						formatTraffic(&activeRevision.Traffic),
-						fmt.Sprintf("%d", activeRevision.RiserGeneration),
+						fmt.Sprintf("%d", activeRevision.RiserRevision),
 						formatDockerTag(activeRevision.DockerImage),
 						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
 						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
@@ -68,7 +68,7 @@ func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppSt
 					statusTable.AddRow(
 						"", "",
 						formatTraffic(&activeRevision.Traffic),
-						fmt.Sprintf("%d", activeRevision.RiserGeneration),
+						fmt.Sprintf("%d", activeRevision.RiserRevision),
 						formatDockerTag(activeRevision.DockerImage),
 						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
 						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
@@ -116,7 +116,7 @@ func formatDeploymentName(deploymentStatus model.DeploymentStatus) string {
 }
 
 func deploymentObserved(deploymentStatus model.DeploymentStatus) bool {
-	return deploymentStatus.RiserGeneration == deploymentStatus.ObservedRiserGeneration
+	return deploymentStatus.RiserRevision == deploymentStatus.ObservedRiserRevision
 }
 
 func formatDockerTag(dockerImage string) string {

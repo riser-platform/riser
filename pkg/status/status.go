@@ -33,7 +33,7 @@ func GetRevisionStatus(deploymentStatus *model.DeploymentStatus, activeOnly bool
 	}
 
 	sort.Slice(activeStatuses, func(i, j int) bool {
-		return activeStatuses[i].RiserGeneration > activeStatuses[j].RiserGeneration
+		return activeStatuses[i].RiserRevision > activeStatuses[j].RiserRevision
 	})
 
 	return activeStatuses
