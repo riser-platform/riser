@@ -23,6 +23,17 @@ expose:
 
 # --- Everything below this line is optional --- #
 
+# Optional. Configures the autoscaler
+autoscale:
+  # Optional. The default is 0, but effectively may be different per stage depending on cluster level autoscaler settings
+  # and/or resource quotas (default: empty)
+  # Note: A minimum means that if your app is not active there will be zero scheduled pods. This means that a "cold" request
+  # to your app will take a bit longer depending on how quickly your app can startup.
+  min: 0
+  # Optional. Must be greater than autoscale.min. The maximum effective value may be different per stage depending on
+  # cluster level autoscaler settings and/or resource quotas (default: empty)
+  max: 1
+
 # Optional. Environment variables specified in the form of "key: value". Do not put secrets here.
 environment:
   DEBUG: true
@@ -31,7 +42,7 @@ environment:
 
 # Optional. The health check section allows you to configure a health check endpoint for your app.
 healthcheck:
-  # Optional. The path to
+  # Optional. The path to your health check endpoint
   path: "/health"
   # Optional. The port serving your health check endpoint. This only needs to be set if your healthcheck endpoint listens on a different port than your service.
   # Defaults to expose.containerPort
