@@ -17,6 +17,7 @@ import (
 
 func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 	var appName string
+	showAllRevisions := false
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Gets the status for a deployment.",
@@ -26,16 +27,17 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 			status, err := riserClient.Apps.GetStatus(appName)
 			ui.ExitIfErrorMsg(err, "Error getting status")
 
-			drawStatus(appName, status)
+			drawStatus(appName, !showAllRevisions, status)
 		},
 	}
 
 	addAppFlag(cmd.Flags(), &appName)
+	cmd.Flags().BoolVarP(&showAllRevisions, "all-revisions", "", false, "Shows all available revisions. Otherwise only shows the latest revision and older revisions with traffic")
 
 	return cmd
 }
 
-func drawStatus(appName string, appStatus *model.AppStatus) {
+func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppStatus) {
 	if len(appStatus.Deployments) == 0 {
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
@@ -47,10 +49,10 @@ func drawStatus(appName string, appStatus *model.AppStatus) {
 			deploymentsPendingObservation = true
 		}
 
-		activeRevisions := status.GetActiveRevisions(&deploymentStatus)
-		if len(activeRevisions) > 0 {
+		revisions := status.GetRevisionStatus(&deploymentStatus, activeRevisionsOnly)
+		if len(revisions) > 0 {
 			first := true
-			for _, activeRevision := range activeRevisions {
+			for _, activeRevision := range revisions {
 				if first {
 					statusTable.AddRow(
 						formatDeploymentName(deploymentStatus),
