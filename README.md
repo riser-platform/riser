@@ -4,7 +4,7 @@
     <a href="https://github.com/riser-platform/riser"><img alt="GitHub Actions status" src="https://github.com/riser-platform/riser/workflows/Build/badge.svg"></a>
 </p>
 
-Riser is an opinionated app platform built on [Kubernetes](https://kubernetes.io/) and [KNative](https://knative.dev). It provides a radically simplified application deployment and management experience without vendor lock-in.
+Riser is an opinionated app platform built on [Kubernetes](https://kubernetes.io/) and [Knative](https://knative.dev). It provides a radically simplified application deployment and management experience without vendor lock-in.
 
 [![asciicast](https://asciinema.org/a/277448.svg)](https://asciinema.org/a/277448?autoplay=1&cols=160&rows=40)
 
