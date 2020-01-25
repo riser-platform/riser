@@ -23,7 +23,7 @@ func Test_Rollouts_Save(t *testing.T) {
 
 	})
 
-	err := client.Rollouts.Save("myapp", "dev", "1:10", "2:90")
+	err := client.Rollouts.Save("myapp", "dev", "rev-1:10", "rev-2:90")
 
 	assert.NoError(t, err)
 }
@@ -44,7 +44,7 @@ func Test_Rollouts_Save_ReturnsError_WhenBadRule(t *testing.T) {
 
 	})
 
-	err := client.Rollouts.Save("myapp", "dev", "1:10", "bad:90")
+	err := client.Rollouts.Save("myapp", "dev", "rev-1:10", "bad:90")
 
-	assert.Equal(t, `Rules must be in the format of "(rev):(percentage)" e.g. "1:100" routes 100% of traffic to rev 1`, err.Error())
+	assert.Equal(t, `Rules must be in the format of "rev-(rev):(percentage)" e.g. "rev-1:100" routes 100% of traffic to rev 1`, err.Error())
 }

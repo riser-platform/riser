@@ -14,9 +14,9 @@ func newRolloutCommand(currentContext *rc.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "rollout (stage) (trafficRule0) [trafficRuleN...]",
 		Short:   "Manually controls traffic for a deployment's rollout",
-		Long:    "Manually controls traffic for a deployment's rollout. Typically only used when a deployment is deployed with the \"--manual-rollout\" flag. Traffic rules are in the format \"(rev):(%traffic)\" where \"rev\" is the riser revision as shown in \"riser status\"",
+		Long:    "Manually controls traffic for a deployment's rollout. Typically only used when a deployment is deployed with the \"--manual-rollout\" flag. Traffic rules are in the format \"rev-(rev#):(traffic%)\" where \"rev\" is the riser revision as shown in \"riser status\"",
 		Args:    cobra.MinimumNArgs(2),
-		Example: "riser rollout prod 1:90 2:10 // Canary \nriser rollout prod 2:100 // Route all traffic to rev 2",
+		Example: "  riser rollout prod rev-1:90 rev-2:10 // Canary routing 10% of traffic to a new revision \n  riser rollout prod rev-2:100 // Route all traffic to rev 2",
 		Run: func(cmd *cobra.Command, args []string) {
 			stage := args[0]
 			riserClient := getRiserClient(currentContext)
