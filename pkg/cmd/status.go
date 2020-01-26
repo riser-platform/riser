@@ -42,7 +42,7 @@ func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppSt
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
 	}
-	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Pods", "Status", "Problems")
+	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Pods", "Status", "Reason")
 	deploymentsPendingObservation := false
 	for _, deploymentStatus := range appStatus.Deployments {
 		if !deploymentObserved(deploymentStatus) {
@@ -61,8 +61,8 @@ func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppSt
 						fmt.Sprintf("%d", activeRevision.RiserRevision),
 						formatDockerTag(activeRevision.DockerImage),
 						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
-						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
-						formatProblems(activeRevision.Problems),
+						formatRevisionStatus(activeRevision.RevisionStatus),
+						activeRevision.RevisionStatusReason,
 					)
 				} else {
 					statusTable.AddRow(
@@ -71,8 +71,8 @@ func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppSt
 						fmt.Sprintf("%d", activeRevision.RiserRevision),
 						formatDockerTag(activeRevision.DockerImage),
 						fmt.Sprintf("%d", activeRevision.AvailableReplicas),
-						fmt.Sprintf("%s %s", formatRolloutStatus(activeRevision.RolloutStatus), activeRevision.RolloutStatusReason),
-						formatProblems(activeRevision.Problems),
+						formatRevisionStatus(activeRevision.RevisionStatus),
+						activeRevision.RevisionStatusReason,
 					)
 				}
 				first = false
@@ -127,40 +127,16 @@ func formatDockerTag(dockerImage string) string {
 	return dockerImage[idx+1:]
 }
 
-func formatProblems(problems []model.StatusProblem) string {
-	if len(problems) == 0 {
-		return fmt.Sprint(ctc.ForegroundBrightGreen, "None Found", ctc.Reset)
-	}
-
-	message := ""
-	first := true
-	for _, problem := range problems {
-		newline := "\n"
-		if first {
-			newline = ""
-			first = false
-		}
-		message = fmt.Sprintf("%s%s%s", message, newline, formatProblem(problem))
-	}
-
-	return fmt.Sprint(ctc.ForegroundBrightRed, message, ctc.Reset)
-}
-
-func formatProblem(problem model.StatusProblem) string {
-	if problem.Count == 1 {
-		return problem.Message
-	}
-	return fmt.Sprintf("(x%d) %s", problem.Count, problem.Message)
-}
-
-func formatRolloutStatus(rolloutStatus string) string {
+func formatRevisionStatus(rolloutStatus string) string {
 	formatted := rolloutStatus
 	switch rolloutStatus {
-	case model.RolloutStatusInProgress:
+	case model.RevisionStatusReady:
+		formatted = style.Good(rolloutStatus)
+	case model.RevisionStatusWaiting:
 		formatted = style.Emphasis(rolloutStatus)
-	case model.RolloutStatusFailed:
+	case model.RevisionStatusUnhealthy:
 		formatted = style.Bad(rolloutStatus)
-	case model.RolloutStatusUnknown:
+	case model.RevisionStatusUnknown:
 		formatted = style.Warn(rolloutStatus)
 	}
 
