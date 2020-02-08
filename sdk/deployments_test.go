@@ -9,6 +9,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_Deployments_Delete(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/deployments/mydep/mystage", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodDelete, r.Method)
+		fmt.Fprint(w, `{"message": "deleted"}`)
+	})
+
+	result, err := client.Deployments.Delete("mydep", "mystage")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "deleted", result.Message)
+}
+
 func Test_Deployments_Save(t *testing.T) {
 	setup()
 	defer teardown()
@@ -33,7 +48,7 @@ func Test_Deployments_Save(t *testing.T) {
 	assert.Equal(t, "saved", result.Message)
 }
 
-func Test_Deployment_Save_DryRun(t *testing.T) {
+func Test_Deployments_Save_DryRun(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -59,7 +74,7 @@ func Test_Deployment_Save_DryRun(t *testing.T) {
 	assert.EqualValues(t, "test", result.DryRunCommits[0].Message)
 }
 
-func Test_Deployment_SaveStatus(t *testing.T) {
+func Test_Deployments_SaveStatus(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -82,7 +97,7 @@ func Test_Deployment_SaveStatus(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func Test_Deployment_SaveStatus_Error(t *testing.T) {
+func Test_Deployments_SaveStatus_Error(t *testing.T) {
 	setup()
 	defer teardown()
 

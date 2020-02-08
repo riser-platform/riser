@@ -21,7 +21,7 @@ func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 	var manualRollout bool
 	cmd := &cobra.Command{
 		Use:   "deploy (docker tag) (stage)",
-		Short: "Creates or updates a deployment",
+		Short: "Creates a new deployment or revision",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			dockerTag := args[0]
@@ -67,7 +67,7 @@ func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&deploymentName, "name", "n", config.SafeLoadDefaultAppName(), "Optionally name the deployment. The name must follow the format <APP_NAME>-<SUFFIX> (e.g. myapp-mydeployment).")
+	addDeploymentNameFlag(cmd.Flags(), &deploymentName)
 	addAppFilePathFlag(cmd.Flags(), &appFilePath)
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "Prints the deployment but does not create it")
 	cmd.Flags().BoolVarP(&manualRollout, "manual-rollout", "m", false, "When set no traffic routes to the new deployment. Use \"riser rollout\" to manually route traffic.")

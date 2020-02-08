@@ -19,7 +19,7 @@ const AppConfigPath = "./app.yaml"
 func newAppsCommand(currentContext *rc.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apps",
-		Short: "Commands for apps",
+		Short: "Commands for managing apps",
 	}
 
 	cmd.AddCommand(newAppsListCommand(currentContext))

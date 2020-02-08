@@ -25,3 +25,11 @@ func addAppFilePathFlag(flags *pflag.FlagSet, appFilePath *string) {
 		_ = cobra.MarkFlagRequired(flags, "file")
 	}
 }
+
+func addDeploymentNameFlag(flags *pflag.FlagSet, deploymentName *string) {
+	defaultDeploymentName := config.SafeLoadDefaultAppName()
+	flags.StringVarP(deploymentName, "name", "n", defaultDeploymentName, "The name of the deployment (e.g. \"myapp-foo\")")
+	if len(defaultDeploymentName) == 0 {
+		_ = cobra.MarkFlagRequired(flags, "name")
+	}
+}

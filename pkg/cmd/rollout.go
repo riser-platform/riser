@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"riser/pkg/config"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
 
@@ -26,6 +25,6 @@ func newRolloutCommand(currentContext *rc.Context) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&deploymentName, "name", "n", config.SafeLoadDefaultAppName(), "The name of the deployment")
+	addDeploymentNameFlag(cmd.Flags(), &deploymentName)
 	return cmd
 }
