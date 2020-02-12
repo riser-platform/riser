@@ -160,8 +160,6 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 	gitUrlNoAuthParsed, _ := url.Parse(gitUrlParsed.String())
 	gitUrlNoAuthParsed.User = nil
 
-	gitRepoName := strings.Split(gitUrlParsed.Path, "/")[2]
-
 	logger.Log().Info("Installing demo...")
 	getApiKeyFromRiserSecretStep := steps.NewShellExecStep("Check for existing Riser API key",
 		"kubectl get secret riser-server -n riser-system -o jsonpath='{.data.RISER_BOOTSTRAP_APIKEY}' || echo ''")
@@ -240,15 +238,14 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 			"kubectl create secret generic riser-controller --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_SERVER_APIKEY=%s ", apiKey)+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
+		steps.NewShellExecStep("Install flux",
+			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(demoPath, "flux"))),
+		steps.NewShellExecStep("Create secret for flux",
+			"kubectl create secret generic flux-git --namespace=flux "+
+				fmt.Sprintf("--from-literal=GIT_URL=%s ", gitUrlParsed.String())+
+				fmt.Sprintf("--from-literal=GIT_PATH=stages/%s/kube-resources ", demoStageName)+
+				" --dry-run=true -o yaml | kubectl apply -f -"),
 		steps.NewExecStep("Apply other demo resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
-		steps.NewShellExecStep("Create secret for kube-applier",
-			"kubectl create secret generic kube-applier --namespace=kube-applier "+
-				fmt.Sprintf("--from-literal=GIT_SYNC_REPO=%s", gitUrlParsed.String())+
-				" --dry-run=true -o yaml | kubectl apply -f -"),
-		steps.NewShellExecStep("Create kube-applier configuration",
-			"kubectl create configmap kube-applier --namespace kube-applier "+
-				fmt.Sprintf("--from-literal=REPO_PATH=/git-repo/%s/stages/%s/kube-resources", gitRepoName, demoStageName)+
-				" --dry-run=true -o yaml | kubectl apply -f -"),
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", demoStageName),
 			func() error {
 				secure := false

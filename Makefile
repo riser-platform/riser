@@ -60,7 +60,7 @@ check-version:
 
 # Warning! This deletes and recreates the minikube project named "demo"!
 # Useful for testing demo installation from scratch
-minikube-demo:
+minikube-demo: build
 	minikube delete -p demo
 	minikube start -p demo
 	riser demo install

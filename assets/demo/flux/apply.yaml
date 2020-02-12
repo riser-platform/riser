@@ -1,0 +1,226 @@
+---
+# Source: flux/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: release-name-flux-git-deploy
+type: Opaque
+---
+# Source: flux/templates/kube.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-flux-kube-config
+data:
+  config: |
+    apiVersion: v1
+    clusters: []
+    contexts:
+    - context:
+        cluster: ""
+        namespace: default
+        user: ""
+      name: default
+    current-context: default
+    kind: Config
+    preferences: {}
+    users: []
+    
+---
+# Source: flux/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-name-flux
+  labels:
+    app: flux
+    chart: flux-1.2.0
+    release: release-name
+    heritage: Tiller
+---
+# Source: flux/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: release-name-flux
+  labels:
+    app: flux
+    chart: flux-1.2.0
+    release: release-name
+    heritage: Tiller
+rules:
+  - apiGroups:
+      - '*'
+    resources:
+      - '*'
+    verbs:
+      - '*'
+  - nonResourceURLs:
+      - '*'
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: release-name-flux
+  labels:
+    app: flux
+    chart: flux-1.2.0
+    release: release-name
+    heritage: Tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: release-name-flux
+subjects:
+  - name: release-name-flux
+    namespace: "flux"
+    kind: ServiceAccount
+---
+# Source: flux/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-flux
+  labels:
+    app: flux
+    chart: flux-1.2.0
+    release: release-name
+    heritage: Tiller
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3030
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: flux
+    release: release-name
+
+---
+# Source: flux/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-flux
+  labels:
+    app: flux
+    chart: flux-1.2.0
+    release: release-name
+    heritage: Tiller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flux
+      release: release-name
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: flux
+        release: release-name
+    spec:
+      serviceAccountName: release-name-flux
+      volumes:
+      - name: kubedir
+        configMap:
+          name: release-name-flux-kube-config
+      - name: git-key
+        secret:
+          secretName: release-name-flux-git-deploy
+          defaultMode: 0400
+      - name: git-keygen
+        emptyDir:
+          medium: Memory
+      containers:
+        - name: flux
+          image: "docker.io/fluxcd/flux:1.18.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+          - name: http
+            containerPort: 3030
+            protocol: TCP
+          livenessProbe:
+            httpGet:
+              port: 3030
+              path: /api/flux/v6/identity.pub
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 3030
+              path: /api/flux/v6/identity.pub
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          volumeMounts:
+          - name: kubedir
+            mountPath: /root/.kubectl
+          - name: git-key
+            mountPath: /etc/fluxd/ssh
+            readOnly: true
+          - name: git-keygen
+            mountPath: /var/fluxd/keygen
+          env:
+          - name: KUBECONFIG
+            value: /root/.kubectl/config
+          envFrom:
+          - secretRef:
+              name: flux-git
+          args:
+          - --log-format=fmt
+          
+          - --ssh-keygen-dir=/var/fluxd/keygen
+          - --k8s-secret-name=release-name-flux-git-deploy
+          - --memcached-hostname=release-name-flux-memcached
+          - --sync-state=git
+          - --memcached-service=
+          - --git-url=$(GIT_URL)
+          - --git-branch=master
+          - --git-path=$(GIT_PATH)
+          - --git-readonly=true
+          - --git-user=Weave Flux
+          - --git-email=support@weave.works
+          - --git-verify-signatures=false
+          - --git-set-author=false
+          - --git-poll-interval=10s
+          - --git-timeout=20s
+          - --sync-interval=5m
+          - --git-ci-skip=false
+          - --automation-interval=5m
+          - --registry-rps=200
+          - --registry-burst=125
+          - --registry-trace=false
+          - --registry-disable-scanning
+          - --sync-garbage-collection=true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            
+      nodeSelector: 
+        beta.kubernetes.io/os: linux
+
+---
+# Source: flux/templates/gitconfig.yaml
+
+---
+# Source: flux/templates/memcached.yaml
+
+
+---
+# Source: flux/templates/psp.yaml
+
+
+---
+# Source: flux/templates/rbac-role.yaml
+
+---
+# Source: flux/templates/servicemonitor.yaml
+
+
+---
+# Source: flux/templates/ssh.yaml
+
