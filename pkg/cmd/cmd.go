@@ -40,9 +40,10 @@ func Execute(runtime *Runtime) {
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
 	err := cmd.Execute()
-	// Only show err in verbose mode as must errors are cobra
-	// errors and already printed
-	if err != nil && verbose {
-		fmt.Printf("%#v\n", err)
+	if err != nil {
+		if verbose {
+			fmt.Printf("%#v\n", err)
+		}
+		os.Exit(1)
 	}
 }

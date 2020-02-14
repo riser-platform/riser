@@ -22,7 +22,7 @@ func newDeploymentsCommand(currentContext *rc.Context) *cobra.Command {
 }
 
 func newDeploymentsDeleteCommand(currentContext *rc.Context) *cobra.Command {
-
+	noPrompt := false
 	cmd := &cobra.Command{
 		Use:   "delete (deploymentName) (stage)",
 		Short: "Permanentally deletes a deployment and all of its revisions in the specified stage",
@@ -35,10 +35,12 @@ func newDeploymentsDeleteCommand(currentContext *rc.Context) *cobra.Command {
 				Message: fmt.Sprintf("Are you sure you wish to delete the deployment %q in stage %q?", deploymentName, stageName),
 			}
 
-			err := survey.AskOne(prompt, &deleteConfirmed)
-			ui.ExitIfError(err)
-			if !deleteConfirmed {
-				return
+			if !noPrompt {
+				err := survey.AskOne(prompt, &deleteConfirmed)
+				ui.ExitIfError(err)
+				if !deleteConfirmed {
+					return
+				}
 			}
 
 			riserClient := getRiserClient(currentContext)
@@ -48,6 +50,8 @@ func newDeploymentsDeleteCommand(currentContext *rc.Context) *cobra.Command {
 			fmt.Println(result.Message)
 		},
 	}
+
+	cmd.Flags().BoolVar(&noPrompt, "no-prompt", false, "do not prompt for a confirmation")
 
 	return cmd
 }

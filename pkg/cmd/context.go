@@ -75,7 +75,7 @@ func newContextCurrentCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 
 				logger.Log().Info(fmt.Sprintf("Successfully loaded context \"%s\"\n", config.CurrentContextName))
 			} else {
-				logger.Log().Info(fmt.Sprintf("Current Context: \"%s\"\n", config.CurrentContextName))
+				logger.Log().Info(config.CurrentContextName)
 			}
 		},
 	}

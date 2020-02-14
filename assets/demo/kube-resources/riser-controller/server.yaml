@@ -116,7 +116,7 @@ data:
 kind: ConfigMap
 metadata:
   creationTimestamp: null
-  name: riser-riser-controller
+  name: riser-controller
   namespace: riser-system
 ---
 apiVersion: apps/v1
@@ -149,7 +149,7 @@ spec:
               name: riser-controller
         envFrom:
         - configMapRef:
-            name: riser-riser-controller
+            name: riser-controller
         image: riserplatform/riser-controller:0.0.4
         name: manager
         resources:
