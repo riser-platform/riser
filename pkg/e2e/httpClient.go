@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
@@ -12,6 +13,14 @@ import (
 type ingressClient struct {
 	client *http.Client
 }
+
+type httpResult struct {
+	response    *http.Response
+	body        []byte
+	clientError error
+}
+
+type ShouldRetryHttpFunc func(result *httpResult) bool
 
 func NewIngressClient(ingressIP string) *ingressClient {
 	dialer := &net.Dialer{
@@ -35,4 +44,20 @@ func NewIngressClient(ingressIP string) *ingressClient {
 
 func (c *ingressClient) Get(addr string) (*http.Response, error) {
 	return c.client.Get(addr)
+}
+
+// RetryGet retries an HTTP get until retryFn returns false or if the
+// HTTP body can not be read.
+func (c *ingressClient) RetryGet(url string, retryFn ShouldRetryHttpFunc) error {
+	return Retry(func() (bool, error) {
+		response, err := c.Get(url)
+		if err == nil {
+			body, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				return true, err
+			}
+			return retryFn(&httpResult{response, body, err}), err
+		}
+		return retryFn(&httpResult{response: response, clientError: err}), err
+	})
 }

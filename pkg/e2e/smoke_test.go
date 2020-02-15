@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -64,7 +63,10 @@ func Test_Smoke(t *testing.T) {
 
 	appName := fmt.Sprintf("e2e-%s", randomString(6))
 	namespace := "apps"
-	appUrl := fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.ingressDomain)
+	baseAppUrl := fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.ingressDomain)
+	appUrl := func(pathAndQuery string) string {
+		return fmt.Sprintf("%s/%s", baseAppUrl, pathAndQuery)
+	}
 	var appId string
 	step(fmt.Sprintf("create app %q", appName), func() {
 		var err error
@@ -102,33 +104,18 @@ func Test_Smoke(t *testing.T) {
 
 		shellOrFail(t, "cd %s && riser deploy %s %s ", tmpDir, versionA, testContext.riserStage)
 
-		var response *http.Response
-		err = Retry(func() (bool, error) {
-			response, err = httpClient.Get(fmt.Sprintf("%s/version", appUrl))
-			return err == nil, err
+		err = httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
-
-		body, err := ioutil.ReadAll(response.Body)
-		require.NoError(t, err)
-
-		assert.Equal(t, versionA, string(body))
 	})
 
 	versionB := "0.0.16"
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
 		shellOrFail(t, "cd %s && riser deploy %s %s ", tmpDir, versionB, testContext.riserStage)
 
-		err := Retry(func() (bool, error) {
-			response, err := httpClient.Get(fmt.Sprintf("%s/version", appUrl))
-			if err != nil {
-				body, err := ioutil.ReadAll(response.Body)
-				if err != nil {
-					return true, err
-				}
-				return string(body) == versionB, err
-			}
-			return false, err
+		err := httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+			return string(r.body) == versionB
 		})
 		require.NoError(t, err)
 	})
@@ -169,7 +156,7 @@ func step(message string, fn func()) {
 	fmt.Printf("• %s", message)
 	start := time.Now()
 	fn()
-	fmt.Printf(" (took %dms)\n", time.Since(start).Milliseconds())
+	fmt.Printf(" (%dms)\n", time.Since(start).Milliseconds())
 }
 
 func setupSingleStageTestContext(t *testing.T) *singleStageTestContext {
