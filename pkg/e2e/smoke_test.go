@@ -126,6 +126,14 @@ func Test_Smoke(t *testing.T) {
 		require.Equal(t, "val1", envMap["ENV1"])
 	})
 
+	secretName := "secret1"
+	secretValue := "secretVal1"
+	step("create secret", func() {
+		shellOrFail(t, "cd %s && riser secrets save %s %s %s", tmpDir, testContext.riserStage, secretName, secretValue)
+		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
+		// not become available until the secret is present.
+	})
+
 	versionB := "0.0.16"
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
 		shellOrFail(t, "cd %s && riser deploy %s %s ", tmpDir, versionB, testContext.riserStage)
@@ -134,6 +142,17 @@ func Test_Smoke(t *testing.T) {
 			return string(r.body) == versionB
 		})
 		require.NoError(t, err)
+
+		envResponse, err := httpClient.Get(appUrl("/env"))
+		require.NoError(t, err)
+		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
+
+		envBody, err := ioutil.ReadAll(envResponse.Body)
+		require.NoError(t, err)
+
+		envMap := parseTestDummyEnv(envBody)
+		require.Equal(t, "val1", envMap["ENV1"])
+		require.Equal(t, secretValue, envMap[strings.ToUpper(secretName)])
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appName), func() {
