@@ -7,14 +7,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"os"
 	"os/exec"
 	"path"
 	"riser/pkg/rc"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/ghodss/yaml"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/riser-platform/riser-server/api/v1/model"
 	"github.com/riser-platform/riser/sdk"
@@ -83,14 +86,14 @@ func Test_Smoke(t *testing.T) {
 			}
 		}
 		require.NotEmpty(t, appId)
-	})
 
-	versionA := "0.0.15"
-	step(fmt.Sprintf("deploy version %q", versionA), func() {
 		appCfg := model.AppConfig{
 			Name:  appName,
 			Id:    appId,
 			Image: "tshak/testdummy",
+			Environment: map[string]intstr.IntOrString{
+				"env1": intstr.FromString("val1"),
+			},
 			Expose: &model.AppConfigExpose{
 				ContainerPort: 8000,
 			},
@@ -101,13 +104,26 @@ func Test_Smoke(t *testing.T) {
 		appCfgPath := path.Join(tmpDir, "app.yaml")
 		err = ioutil.WriteFile(appCfgPath, appCfgBytes, 0644)
 		require.NoError(t, err)
+	})
 
+	versionA := "0.0.15"
+	step(fmt.Sprintf("deploy version %q", versionA), func() {
 		shellOrFail(t, "cd %s && riser deploy %s %s ", tmpDir, versionA, testContext.riserStage)
 
 		err = httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
+
+		envResponse, err := httpClient.Get(appUrl("/env"))
+		require.NoError(t, err)
+		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
+
+		envBody, err := ioutil.ReadAll(envResponse.Body)
+		require.NoError(t, err)
+
+		envMap := parseTestDummyEnv(envBody)
+		require.Equal(t, "val1", envMap["ENV1"])
 	})
 
 	versionB := "0.0.16"
@@ -147,6 +163,18 @@ func Test_Smoke(t *testing.T) {
 		})
 		assert.NoError(t, err)
 	})
+}
+
+func parseTestDummyEnv(envBody []byte) map[string]string {
+	envMap := map[string]string{}
+	lines := strings.Split(string(envBody), "\n")
+	for _, line := range lines {
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			envMap[parts[0]] = parts[1]
+		}
+	}
+	return envMap
 }
 
 // I had too much friction w/Ginkgo and generally don't like strict BDD. This is trivial and good enough for real time output and timings.
