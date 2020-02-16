@@ -131,7 +131,7 @@ func Test_Smoke(t *testing.T) {
 	secretName := "secret1"
 	secretValue := "secretVal1"
 	step("create secret", func() {
-		shellOrFail(t, "cd %s && riser secrets save %s %s %s", tmpDir, testContext.riserStage, secretName, secretValue)
+		shellOrFail(t, "cd %s && riser secrets save %s %s %s", tmpDir, secretName, secretValue, testContext.riserStage)
 		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
 		// not become available until the secret is present.
 	})

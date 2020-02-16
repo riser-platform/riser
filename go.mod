@@ -17,7 +17,6 @@ require (
 	github.com/riser-platform/riser-server/api/v1/model v0.0.7-0.20200216161232-ffa4afaf4754
 	github.com/riser-platform/riser/sdk v0.0.0-00010101000000-000000000000
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
-	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.4.0
