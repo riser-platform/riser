@@ -14,7 +14,7 @@ require (
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/mattn/go-runewidth v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.7-0.20200127153515-57dc1efd6b94
+	github.com/riser-platform/riser-server/api/v1/model v0.0.7-0.20200216161232-ffa4afaf4754
 	github.com/riser-platform/riser/sdk v0.0.0-00010101000000-000000000000
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/spf13/cobra v0.0.4
@@ -25,6 +25,6 @@ require (
 	golang.org/x/sys v0.0.0-20190902133755-9109b7679e13 // indirect
 	golang.org/x/tools v0.0.0-20190328211700-ab21143f2384 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/yaml.v2 v2.2.4
-	k8s.io/apimachinery v0.17.2
+	gopkg.in/yaml.v2 v2.2.8
+	k8s.io/apimachinery v0.17.3
 )

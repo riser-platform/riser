@@ -5,7 +5,6 @@ import (
 	"riser/pkg/rc"
 	"riser/pkg/ui"
 	"riser/pkg/ui/table"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -24,18 +23,17 @@ func newSecretsCommand(currentContext *rc.Context) *cobra.Command {
 func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
 	var appName string
 	cmd := &cobra.Command{
-		Use:   "save (stage) (name) (plaintextsecret)",
+		Use:   "save (name) (plaintextsecret) (stage)",
 		Short: "Creates a new secret or updates an existing one",
 		Long:  "Creates a new secret or updates an existing one. Secrets are stored seperately per app and stage.",
 		Args:  cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
-			stageName := args[0]
-			secretName := args[1]
-			plainTextSecret := args[2]
+			secretName := args[0]
+			plainTextSecret := args[1]
+			stageName := args[2]
 
 			riserClient := getRiserClient(currentContext)
 
-			// TODO: Prompt to confirm first
 			err := riserClient.Secrets.Save(appName, stageName, secretName, plainTextSecret)
 			ui.ExitIfErrorMsg(err, "Error saving secret")
 
@@ -60,11 +58,11 @@ func newSecretsListCommand(currentContext *rc.Context) *cobra.Command {
 			secretMetas, err := riserClient.Secrets.List(appName, stageName)
 			ui.ExitIfError(err)
 
-			table := table.Default().Header("Name", "Last Updated")
+			table := table.Default().Header("Name", "Rev")
 			for _, secretMeta := range secretMetas {
 				table.AddRow(
 					secretMeta.Name,
-					secretMeta.LastUpdated.In(time.Now().Location()).Format(time.RFC1123))
+					fmt.Sprintf("%d", secretMeta.Revision))
 			}
 
 			fmt.Println(table)

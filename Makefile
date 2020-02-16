@@ -1,4 +1,4 @@
-MODELVERSION ?= "latest"
+MODELVERSION ?= "master"
 
 # Run tests.
 test: fmt lint tidy test-cmd
