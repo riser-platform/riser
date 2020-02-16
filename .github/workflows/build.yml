@@ -59,6 +59,7 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: true
+        allowUpdates: true
 
     - name: Upload Release Asset (darwin-amd64)
       id: upload-release-asset-darwin-amd64
