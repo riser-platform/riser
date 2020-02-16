@@ -67,5 +67,5 @@ minikube-demo: build
 
 # Uses the riser binary in your path. Requires both the riser context and kube context to be configured to the target environment
 e2e:
-	go test -count=1 -v ./pkg/e2e
+	go test -count=1 -tags=e2e -v ./pkg/e2e
 
