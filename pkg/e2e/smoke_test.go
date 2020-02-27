@@ -72,26 +72,17 @@ func Test_Smoke(t *testing.T) {
 	appUrl := func(pathAndQuery string) string {
 		return fmt.Sprintf("%s/%s", baseAppUrl, pathAndQuery)
 	}
-	var appId string
 	step(fmt.Sprintf("create app %q", appName), func() {
 		var err error
 
 		shellOrFail(t, "riser apps new %s", appName)
 
-		apps, err := riserClient.Apps.List()
+		app, err := riserClient.Apps.Get(appName)
 		require.NoError(t, err)
-		// TODO: Add Apps.Get() so that we don't have to do this (although it does add coverage to Apps.List()  :)
-		for _, app := range apps {
-			if app.Name == appName {
-				appId = app.Id
-				break
-			}
-		}
-		require.NotEmpty(t, appId)
 
 		appCfg := model.AppConfig{
+			Id:    app.Id,
 			Name:  appName,
-			Id:    appId,
 			Image: "tshak/testdummy",
 			Environment: map[string]intstr.IntOrString{
 				"env1": intstr.FromString("val1"),
@@ -110,7 +101,7 @@ func Test_Smoke(t *testing.T) {
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s ", tmpDir, versionA, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.riserStage)
 
 		err = httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -138,7 +129,7 @@ func Test_Smoke(t *testing.T) {
 
 	versionB := "0.0.16"
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s ", tmpDir, versionB, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionB, testContext.riserStage)
 
 		err := httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionB

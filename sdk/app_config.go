@@ -4,6 +4,8 @@ import (
 	"io"
 	"text/template"
 
+	"github.com/google/uuid"
+
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +24,7 @@ type AppConfigTemplateData struct {
 }
 
 // DefaultAppConfig generates a default app config yaml for an app
-func DefaultAppConfig(writer io.Writer, appName string, appId string) error {
+func DefaultAppConfig(writer io.Writer, appName string, appId uuid.UUID) error {
 	parsedTemplate, err := template.New("appconfig").Parse(appConfigTemplate)
 	if err != nil {
 		return errors.Wrap(err, "Error parsing app config template")
@@ -30,7 +32,7 @@ func DefaultAppConfig(writer io.Writer, appName string, appId string) error {
 
 	err = parsedTemplate.Execute(writer, AppConfigTemplateData{
 		AppName: appName,
-		AppId:   appId,
+		AppId:   appId.String(),
 	})
 
 	return err

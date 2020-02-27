@@ -10,11 +10,12 @@ require (
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-openapi/strfmt v0.19.3 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
+	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-version v1.2.0
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/mattn/go-runewidth v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.7-0.20200226134906-4b0e8ec083b9
+	github.com/riser-platform/riser-server/api/v1/model v0.0.7-0.20200227122406-6a4e0f5b2dac
 	github.com/riser-platform/riser/sdk v0.0.0-00010101000000-000000000000
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/spf13/cobra v0.0.4

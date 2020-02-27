@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/riser-platform/riser-server/api/v1/model"
 
 	"github.com/ghodss/yaml"
@@ -27,7 +28,7 @@ func LoadApp(pathToAppConfig string) (*model.AppConfigWithOverrides, error) {
 }
 
 // SafeLoadAppName attempts to retrieve the name of the app in the specified path.
-// An empty string is returned if the file does not exist, cannot be be parsed, or if any other error ocurrs.
+// An empty string is returned if the file does not exist, cannot be be parsed, or if any other error occurs.
 func SafeLoadAppName(pathToAppConfig string) string {
 	appConfig, err := LoadApp(pathToAppConfig)
 	if err == nil {
@@ -37,16 +38,39 @@ func SafeLoadAppName(pathToAppConfig string) string {
 }
 
 // SafeLoadDefaultAppName attempts to retrieve the name of the app in the default app config locations
-// Returns an empty string if the file does not exist, cannot be be parsed, or if any other error ocurrs.
+// Returns an empty string if the file does not exist, cannot be be parsed, or if any other error occurs.
 func SafeLoadDefaultAppName() string {
 	for _, pathToAppConfig := range DefaultAppConfigPaths {
-		appName := SafeLoadAppName(pathToAppConfig)
-		if len(appName) > 0 {
-			return appName
+		result := SafeLoadAppName(pathToAppConfig)
+		if result != "" {
+			return result
 		}
 	}
 
 	return ""
+}
+
+// SafeLoadAppId attempts to retrive the id of the app in the specified path
+// Returns nil if the file does not exist, cannot be be parsed, or if any other error occurs.
+func SafeLoadAppId(pathToAppConfig string) *uuid.UUID {
+	appConfig, err := LoadApp(pathToAppConfig)
+	if err == nil {
+		return &appConfig.Id
+	}
+	return nil
+}
+
+// SafeLoadDefaultAppId attempts to retrieve the name of the app in the default app config locations
+// Returns nil if the file does not exist, cannot be be parsed, or if any other error occurs.
+func SafeLoadDefaultAppId() *uuid.UUID {
+	for _, pathToAppConfig := range DefaultAppConfigPaths {
+		result := SafeLoadAppId(pathToAppConfig)
+		if result != nil {
+			return result
+		}
+	}
+
+	return nil
 }
 
 // GetAppConfigPathFromDefaults searches for an app config from the default locations and returns the first found

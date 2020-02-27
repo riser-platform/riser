@@ -10,6 +10,7 @@ import (
 type AppsClient interface {
 	List() ([]model.App, error)
 	Create(newApp *model.NewApp) (*model.App, error)
+	Get(appIdOrName string) (*model.App, error)
 	GetStatus(appName string) (*model.AppStatus, error)
 }
 
@@ -17,7 +18,19 @@ type appsClient struct {
 	client *Client
 }
 
-// TODO: Always return the response?
+func (c *appsClient) Get(appIdOrName string) (*model.App, error) {
+	app := &model.App{}
+	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/apps/%s", appIdOrName))
+	if err != nil {
+		return nil, err
+	}
+	_, err = c.client.Do(request, &app)
+	if err != nil {
+		return nil, err
+	}
+	return app, nil
+}
+
 func (c *appsClient) List() ([]model.App, error) {
 	apps := []model.App{}
 	request, err := c.client.NewGetRequest("/api/v1/apps")
@@ -46,8 +59,8 @@ func (c *appsClient) Create(newApp *model.NewApp) (*model.App, error) {
 	return app, nil
 }
 
-func (c *appsClient) GetStatus(appName string) (*model.AppStatus, error) {
-	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/apps/%s/status", appName))
+func (c *appsClient) GetStatus(appIdOrName string) (*model.AppStatus, error) {
+	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/apps/%s/status", appIdOrName))
 	if err != nil {
 		return nil, err
 	}

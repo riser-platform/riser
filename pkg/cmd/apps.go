@@ -41,7 +41,7 @@ func newAppsListCommand(currentContext *rc.Context) *cobra.Command {
 			table := table.Default().Header("Name", "Id")
 
 			for _, app := range apps {
-				table.AddRow(app.Name, app.Id)
+				table.AddRow(app.Name, app.Id.String())
 			}
 
 			fmt.Println(table)

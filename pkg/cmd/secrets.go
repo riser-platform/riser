@@ -21,7 +21,7 @@ func newSecretsCommand(currentContext *rc.Context) *cobra.Command {
 }
 
 func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
-	var appName string
+	var appIdOrName string
 	cmd := &cobra.Command{
 		Use:   "save (name) (plaintextsecret) (stage)",
 		Short: "Creates a new secret or updates an existing one",
@@ -34,19 +34,22 @@ func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
 
 			riserClient := getRiserClient(currentContext)
 
-			err := riserClient.Secrets.Save(appName, stageName, secretName, plainTextSecret)
+			app, err := riserClient.Apps.Get(appIdOrName)
+			ui.ExitIfError(err)
+
+			err = riserClient.Secrets.Save(app.Id, stageName, secretName, plainTextSecret)
 			ui.ExitIfErrorMsg(err, "Error saving secret")
 
-			fmt.Printf("Secret %q saved. New values will take affect the next time %q in stage %q is deployed\n", secretName, appName, stageName)
+			fmt.Printf("Secret %q saved in stage %q. Changes will take affect for new deployments.\n", secretName, stageName)
 		},
 	}
-	addAppFlag(cmd.Flags(), &appName)
+	addAppFlag(cmd.Flags(), &appIdOrName)
 
 	return cmd
 }
 
 func newSecretsListCommand(currentContext *rc.Context) *cobra.Command {
-	var appName string
+	var appIdOrName string
 	cmd := &cobra.Command{
 		Use:   "list (stage)",
 		Short: "Lists secrets configured for a given stage",
@@ -55,7 +58,10 @@ func newSecretsListCommand(currentContext *rc.Context) *cobra.Command {
 			stageName := args[0]
 			riserClient := getRiserClient(currentContext)
 
-			secretMetas, err := riserClient.Secrets.List(appName, stageName)
+			app, err := riserClient.Apps.Get(appIdOrName)
+			ui.ExitIfError(err)
+
+			secretMetas, err := riserClient.Secrets.List(app.Id, stageName)
 			ui.ExitIfError(err)
 
 			table := table.Default().Header("Name", "Rev")
@@ -69,7 +75,7 @@ func newSecretsListCommand(currentContext *rc.Context) *cobra.Command {
 		},
 	}
 
-	addAppFlag(cmd.Flags(), &appName)
+	addAppFlag(cmd.Flags(), &appIdOrName)
 
 	return cmd
 }

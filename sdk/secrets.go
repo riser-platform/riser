@@ -4,20 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/riser-platform/riser-server/api/v1/model"
 )
 
 type SecretsClient interface {
-	List(appName, stageName string) ([]model.SecretMetaStatus, error)
-	Save(appName, stageName, secretName, plainTextSecret string) error
+	List(appId uuid.UUID, stageName string) ([]model.SecretMetaStatus, error)
+	Save(appId uuid.UUID, stageName, secretName, plainTextSecret string) error
 }
 
 type secretsClient struct {
 	client *Client
 }
 
-func (c *secretsClient) List(appName, stageName string) ([]model.SecretMetaStatus, error) {
-	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/secrets/%s/%s", appName, stageName))
+func (c *secretsClient) List(appId uuid.UUID, stageName string) ([]model.SecretMetaStatus, error) {
+	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/secrets/%s/%s", appId, stageName))
 	if err != nil {
 		return nil, err
 	}
@@ -30,10 +31,10 @@ func (c *secretsClient) List(appName, stageName string) ([]model.SecretMetaStatu
 	return secretMetas, nil
 }
 
-func (c *secretsClient) Save(appName, stageName, secretName, plainTextSecret string) error {
+func (c *secretsClient) Save(appId uuid.UUID, stageName, secretName, plainTextSecret string) error {
 	unsealed := model.UnsealedSecret{
 		SecretMeta: model.SecretMeta{
-			App:   appName,
+			AppId: appId,
 			Stage: stageName,
 			Name:  secretName,
 		},

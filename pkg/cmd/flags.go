@@ -9,10 +9,14 @@ import (
 )
 
 // addAppFlag adds --app flag for the app name
-func addAppFlag(flags *pflag.FlagSet, appName *string) {
-	defaultAppName := config.SafeLoadDefaultAppName()
-	flags.StringVarP(appName, "app", "a", defaultAppName, "The name of the application. Required if no app config is present in the current directory.")
-	if len(defaultAppName) == 0 {
+func addAppFlag(flags *pflag.FlagSet, appIdOrName *string) {
+	defaultAppId := config.SafeLoadDefaultAppId()
+	defaultAppIdStr := ""
+	if defaultAppId != nil {
+		defaultAppIdStr = defaultAppId.String()
+	}
+	flags.StringVarP(appIdOrName, "app", "a", defaultAppIdStr, "The name of the application. Required if no app config is present in the current directory.")
+	if defaultAppId == nil {
 		_ = cobra.MarkFlagRequired(flags, "app")
 	}
 }
