@@ -13,14 +13,14 @@ import (
 var trafficRuleExp = regexp.MustCompile("rev-([0-9]+):([0-9]+)")
 
 type RolloutsClient interface {
-	Save(deploymentName, stageName string, trafficRule ...string) error
+	Save(deploymentName, namespace, stageName string, trafficRule ...string) error
 }
 
 type rolloutsClient struct {
 	client *Client
 }
 
-func (c *rolloutsClient) Save(deploymentName, stageName string, trafficRule ...string) error {
+func (c *rolloutsClient) Save(deploymentName, namespace, stageName string, trafficRule ...string) error {
 	rolloutRequest := model.RolloutRequest{}
 	for _, rule := range trafficRule {
 		if !trafficRuleExp.MatchString(rule) {
@@ -33,7 +33,7 @@ func (c *rolloutsClient) Save(deploymentName, stageName string, trafficRule ...s
 				Percent:       int(mustParseInt(ruleSplit[2])),
 			})
 	}
-	request, err := c.client.NewRequest(http.MethodPut, fmt.Sprintf("/api/v1/rollout/%s/%s", deploymentName, stageName), rolloutRequest)
+	request, err := c.client.NewRequest(http.MethodPut, fmt.Sprintf("/api/v1/rollout/%s/%s/%s", stageName, namespace, deploymentName), rolloutRequest)
 	if err != nil {
 		return err
 	}

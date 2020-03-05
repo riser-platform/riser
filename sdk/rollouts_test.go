@@ -1,17 +1,18 @@
 package sdk
 
 import (
-	"github.com/riser-platform/riser-server/api/v1/model"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/riser-platform/riser-server/api/v1/model"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Rollouts_Save(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/rollout/myapp/dev", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/rollout/dev/myns/myapp", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPut, r.Method)
 		rollout := &model.RolloutRequest{}
 		mustUnmarshalR(r.Body, rollout)
@@ -23,7 +24,7 @@ func Test_Rollouts_Save(t *testing.T) {
 
 	})
 
-	err := client.Rollouts.Save("myapp", "dev", "rev-1:10", "rev-2:90")
+	err := client.Rollouts.Save("myapp", "myns", "dev", "rev-1:10", "rev-2:90")
 
 	assert.NoError(t, err)
 }
