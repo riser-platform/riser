@@ -77,13 +77,14 @@ func Test_Smoke(t *testing.T) {
 
 		shellOrFail(t, "riser apps new %s", appName)
 
-		app, err := riserClient.Apps.Get(appName)
+		app, err := riserClient.Apps.Get(appName, namespace)
 		require.NoError(t, err)
 
 		appCfg := model.AppConfig{
-			Id:    app.Id,
-			Name:  appName,
-			Image: "tshak/testdummy",
+			Id:        app.Id,
+			Name:      model.AppName(appName),
+			Namespace: model.NamespaceName(namespace),
+			Image:     "tshak/testdummy",
 			Environment: map[string]intstr.IntOrString{
 				"env1": intstr.FromString("val1"),
 			},
@@ -153,7 +154,7 @@ func Test_Smoke(t *testing.T) {
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
-			appStatus, err := riserClient.Apps.GetStatus(appName)
+			appStatus, err := riserClient.Apps.GetStatus(appName, namespace)
 			if err != nil {
 				return true, err
 			}
