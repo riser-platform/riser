@@ -63,7 +63,7 @@ func newAppsInitCommand(currentContext *rc.Context) *cobra.Command {
 			ui.ExitIfErrorMsg(err, "Error creating default app config")
 			defer file.Close()
 
-			err = sdk.DefaultAppConfig(file, appName, app.Id)
+			err = sdk.DefaultAppConfig(file, app.Id, appName, namespace)
 			ui.ExitIfErrorMsg(err, "Error creating default app config")
 			logger.Log().Info(fmt.Sprintf("App %s created with a default app config file %q. Please review the TODO's before deploying your app.", style.Emphasis(appName), AppConfigPath))
 		},

@@ -10,7 +10,8 @@ import (
 )
 
 const appConfigTemplate = `name: {{.AppName}}
-id: "{{.AppId}}"
+namespace: {{.AppNamespace}}
+id: {{.AppId}}
 # TODO: Update to use your docker image registry/repo (without tag) here
 image: your/image
 expose:
@@ -19,20 +20,22 @@ expose:
 `
 
 type AppConfigTemplateData struct {
-	AppName string
-	AppId   string
+	AppName      string
+	AppNamespace string
+	AppId        string
 }
 
 // DefaultAppConfig generates a default app config yaml for an app
-func DefaultAppConfig(writer io.Writer, appName string, appId uuid.UUID) error {
+func DefaultAppConfig(writer io.Writer, appId uuid.UUID, appName, appNamespace string) error {
 	parsedTemplate, err := template.New("appconfig").Parse(appConfigTemplate)
 	if err != nil {
 		return errors.Wrap(err, "Error parsing app config template")
 	}
 
 	err = parsedTemplate.Execute(writer, AppConfigTemplateData{
-		AppName: appName,
-		AppId:   appId.String(),
+		AppName:      appName,
+		AppNamespace: appNamespace,
+		AppId:        appId.String(),
 	})
 
 	return err
