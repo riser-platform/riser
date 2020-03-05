@@ -4,11 +4,13 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/google/uuid"
 	"github.com/riser-platform/riser-server/api/v1/model"
 
 	"github.com/ghodss/yaml"
 )
+
+// DefaultNamespace is the default namespace to use when a namespace is not specified.
+const DefaultNamespace = "apps"
 
 var DefaultAppConfigPaths = []string{"./app.yml", "./app.yaml"}
 
@@ -32,7 +34,7 @@ func LoadApp(pathToAppConfig string) (*model.AppConfigWithOverrides, error) {
 func SafeLoadAppName(pathToAppConfig string) string {
 	appConfig, err := LoadApp(pathToAppConfig)
 	if err == nil {
-		return appConfig.Name
+		return string(appConfig.Name)
 	}
 	return ""
 }
@@ -50,27 +52,29 @@ func SafeLoadDefaultAppName() string {
 	return ""
 }
 
-// SafeLoadAppId attempts to retrive the id of the app in the specified path
-// Returns nil if the file does not exist, cannot be be parsed, or if any other error occurs.
-func SafeLoadAppId(pathToAppConfig string) *uuid.UUID {
+// SafeLoadAppNamespace attempts to retrieve the namespace of the app in the specified path.
+// Returns the default namespace "apps" if the namespace is not specified, the file does not exist, cannot be be parsed,
+// or if any other error occurs.
+func SafeLoadAppNamespace(pathToAppConfig string) string {
 	appConfig, err := LoadApp(pathToAppConfig)
 	if err == nil {
-		return &appConfig.Id
+		return string(appConfig.Namespace)
 	}
-	return nil
+	return DefaultNamespace
 }
 
-// SafeLoadDefaultAppId attempts to retrieve the name of the app in the default app config locations
-// Returns nil if the file does not exist, cannot be be parsed, or if any other error occurs.
-func SafeLoadDefaultAppId() *uuid.UUID {
+// SafeLoadDefaultAppNamespace attempts to retrieve the namespace of the app in the default app config locations
+// Returns the default namespace "apps" if the namespace is not specified, the file does not exist, cannot be be parsed,
+// or if any other error occurs.
+func SafeLoadDefaultAppNamespace() string {
 	for _, pathToAppConfig := range DefaultAppConfigPaths {
-		result := SafeLoadAppId(pathToAppConfig)
-		if result != nil {
+		result := SafeLoadAppNamespace(pathToAppConfig)
+		if result != "" {
 			return result
 		}
 	}
 
-	return nil
+	return DefaultNamespace
 }
 
 // GetAppConfigPathFromDefaults searches for an app config from the default locations and returns the first found

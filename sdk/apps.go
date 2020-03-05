@@ -10,17 +10,17 @@ import (
 type AppsClient interface {
 	List() ([]model.App, error)
 	Create(newApp *model.NewApp) (*model.App, error)
-	Get(appIdOrName string) (*model.App, error)
-	GetStatus(appName string) (*model.AppStatus, error)
+	Get(name, namespace string) (*model.App, error)
+	GetStatus(name, namespace string) (*model.AppStatus, error)
 }
 
 type appsClient struct {
 	client *Client
 }
 
-func (c *appsClient) Get(appIdOrName string) (*model.App, error) {
+func (c *appsClient) Get(name, namespace string) (*model.App, error) {
 	app := &model.App{}
-	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/apps/%s", appIdOrName))
+	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/apps/%s/%s", namespace, name))
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (c *appsClient) Create(newApp *model.NewApp) (*model.App, error) {
 	return app, nil
 }
 
-func (c *appsClient) GetStatus(appIdOrName string) (*model.AppStatus, error) {
-	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/apps/%s/status", appIdOrName))
+func (c *appsClient) GetStatus(name, namespace string) (*model.AppStatus, error) {
+	request, err := c.client.NewGetRequest(fmt.Sprintf("/api/v1/apps/%s/%s/status", namespace, name))
 	if err != nil {
 		return nil, err
 	}

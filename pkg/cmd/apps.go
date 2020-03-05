@@ -38,10 +38,10 @@ func newAppsListCommand(currentContext *rc.Context) *cobra.Command {
 			apps, err := riserClient.Apps.List()
 			ui.ExitIfError(err)
 
-			table := table.Default().Header("Name", "Id")
+			table := table.Default().Header("Name", "Namespace", "Id")
 
 			for _, app := range apps {
-				table.AddRow(app.Name, app.Id.String())
+				table.AddRow(string(app.Name), string(app.Namespace), app.Id.String())
 			}
 
 			fmt.Println(table)
@@ -50,13 +50,14 @@ func newAppsListCommand(currentContext *rc.Context) *cobra.Command {
 }
 
 func newAppsInitCommand(currentContext *rc.Context) *cobra.Command {
+	var namespace string
 	cmd := &cobra.Command{
 		Use:   "init (app name)",
 		Short: "Creates a new app with a default app.yaml file",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			appName := args[0]
-			app := createNewApp(currentContext, appName)
+			app := createNewApp(currentContext, appName, namespace)
 
 			file, err := os.OpenFile(AppConfigPath, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0644)
 			ui.ExitIfErrorMsg(err, "Error creating default app config")
@@ -68,26 +69,33 @@ func newAppsInitCommand(currentContext *rc.Context) *cobra.Command {
 		},
 	}
 
+	addNamespaceFlag(cmd.Flags(), &namespace)
+
 	return cmd
 }
 
 func newAppsNewCommand(currentContext *rc.Context) *cobra.Command {
-	return &cobra.Command{
+	var namespace string
+	cmd := &cobra.Command{
 		Use:   "new (app name)",
 		Short: "Creates a new app",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			appName := args[0]
-			app := createNewApp(currentContext, appName)
+			app := createNewApp(currentContext, appName, namespace)
 
 			fmt.Printf("App %s created. Please add the following id to your manifest: %s", app.Name, app.Id)
 		},
 	}
+
+	addNamespaceFlag(cmd.Flags(), &namespace)
+
+	return cmd
 }
 
-func createNewApp(currentContext *rc.Context, appName string) *model.App {
+func createNewApp(currentContext *rc.Context, appName, namespace string) *model.App {
 	riserClient := getRiserClient(currentContext)
-	app, err := riserClient.Apps.Create(&model.NewApp{Name: appName})
+	app, err := riserClient.Apps.Create(&model.NewApp{Name: model.AppName(appName), Namespace: model.NamespaceName(namespace)})
 	ui.ExitIfError(err)
 	return app
 }

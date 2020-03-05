@@ -28,8 +28,8 @@ func Test_Namespaces_List(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, namespaces, 2)
-	assert.Equal(t, "myns01", namespaces[0].Name)
-	assert.Equal(t, "myns02", namespaces[1].Name)
+	assert.EqualValues(t, "myns01", namespaces[0].Name)
+	assert.EqualValues(t, "myns02", namespaces[1].Name)
 }
 
 func Test_Namespaces_Create(t *testing.T) {
@@ -40,7 +40,7 @@ func Test_Namespaces_Create(t *testing.T) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		actualModel := &model.Namespace{}
 		mustUnmarshalR(r.Body, actualModel)
-		assert.Equal(t, "myns", actualModel.Name)
+		assert.EqualValues(t, "myns", actualModel.Name)
 		fmt.Fprint(w, "")
 	})
 

@@ -8,17 +8,17 @@ import (
 )
 
 type DeploymentsClient interface {
-	Delete(deploymentName, stageName string) (*model.DeploymentResponse, error)
+	Delete(deploymentName, namespace, stageName string) (*model.DeploymentResponse, error)
 	Save(deployment *model.DeploymentRequest, dryRun bool) (*model.DeploymentResponse, error)
-	SaveStatus(deploymentName, stageName string, status *model.DeploymentStatusMutable) error
+	SaveStatus(deploymentName, namespace, stageName string, status *model.DeploymentStatusMutable) error
 }
 
 type deploymentsClient struct {
 	client *Client
 }
 
-func (c *deploymentsClient) Delete(deploymentName, stageName string) (*model.DeploymentResponse, error) {
-	request, err := c.client.NewRequest(http.MethodDelete, fmt.Sprintf("/api/v1/deployments/%s/%s", deploymentName, stageName), nil)
+func (c *deploymentsClient) Delete(deploymentName, namespace, stageName string) (*model.DeploymentResponse, error) {
+	request, err := c.client.NewRequest(http.MethodDelete, fmt.Sprintf("/api/v1/deployments/%s/%s/%s", stageName, namespace, deploymentName), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +53,8 @@ func (c *deploymentsClient) Save(deployment *model.DeploymentRequest, dryRun boo
 	return responseModel, nil
 }
 
-func (c *deploymentsClient) SaveStatus(deploymentName, stageName string, status *model.DeploymentStatusMutable) error {
-	request, err := c.client.NewRequest(http.MethodPut, fmt.Sprintf("/api/v1/deployments/%s/status/%s", deploymentName, stageName), status)
+func (c *deploymentsClient) SaveStatus(deploymentName, namespace, stageName string, status *model.DeploymentStatusMutable) error {
+	request, err := c.client.NewRequest(http.MethodPut, fmt.Sprintf("/api/v1/deployments/%s/%s/%s/status", stageName, namespace, deploymentName), status)
 	if err != nil {
 		return err
 	}

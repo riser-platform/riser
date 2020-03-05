@@ -48,7 +48,7 @@ func newNamespacesListCommand(currentContext *rc.Context) *cobra.Command {
 			table := table.Default().Header("Name")
 
 			for _, ns := range namespaces {
-				table.AddRow(ns.Name)
+				table.AddRow(string(ns.Name))
 			}
 
 			fmt.Println(table)

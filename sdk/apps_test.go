@@ -30,9 +30,9 @@ func Test_Apps_List(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, apps, 2)
-	assert.Equal(t, "myapp01", apps[0].Name)
+	assert.EqualValues(t, "myapp01", apps[0].Name)
 	assert.Equal(t, uuid.MustParse("e29bf621-4da7-4df1-8c04-6609b9eb2447"), apps[0].Id)
-	assert.Equal(t, "myapp02", apps[1].Name)
+	assert.EqualValues(t, "myapp02", apps[1].Name)
 	assert.Equal(t, uuid.MustParse("e29bf621-4da7-4df1-8c04-6609b9eb2448"), apps[1].Id)
 }
 
@@ -50,7 +50,7 @@ func Test_Apps_Create(t *testing.T) {
 	app, err := client.Apps.Create(&model.NewApp{Name: "myapp01"})
 
 	assert.NoError(t, err)
-	assert.Equal(t, "myapp01", app.Name)
+	assert.EqualValues(t, "myapp01", app.Name)
 	assert.Equal(t, uuid.MustParse("e29bf621-4da7-4df1-8c04-6609b9eb2447"), app.Id)
 }
 
@@ -58,14 +58,14 @@ func Test_Apps_GetStatus(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/apps/myapp/status", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/apps/myns/myapp/status", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 
 		response := `{"deployments":[{"deployment":"mydeployment"}]}`
 		fmt.Fprint(w, response)
 	})
 
-	status, err := client.Apps.GetStatus("myapp")
+	status, err := client.Apps.GetStatus("myapp", "myns")
 
 	assert.NoError(t, err)
 	assert.Equal(t, "mydeployment", status.Deployments[0].DeploymentName)
@@ -75,15 +75,15 @@ func Test_Apps_Get(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/apps/myapp", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/apps/myns/myapp", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
 
 		response := `{"name": "myapp"}`
 		fmt.Fprint(w, response)
 	})
 
-	app, err := client.Apps.Get("myapp")
+	app, err := client.Apps.Get("myapp", "myns")
 
 	assert.NoError(t, err)
-	assert.Equal(t, "myapp", app.Name)
+	assert.EqualValues(t, "myapp", app.Name)
 }

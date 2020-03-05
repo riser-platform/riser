@@ -22,6 +22,7 @@ func newDeploymentsCommand(currentContext *rc.Context) *cobra.Command {
 }
 
 func newDeploymentsDeleteCommand(currentContext *rc.Context) *cobra.Command {
+	var namespace string
 	noPrompt := false
 	cmd := &cobra.Command{
 		Use:   "delete (deploymentName) (stage)",
@@ -44,7 +45,7 @@ func newDeploymentsDeleteCommand(currentContext *rc.Context) *cobra.Command {
 			}
 
 			riserClient := getRiserClient(currentContext)
-			result, err := riserClient.Deployments.Delete(deploymentName, stageName)
+			result, err := riserClient.Deployments.Delete(deploymentName, namespace, stageName)
 			ui.ExitIfError(err)
 
 			fmt.Println(result.Message)
@@ -52,6 +53,7 @@ func newDeploymentsDeleteCommand(currentContext *rc.Context) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&noPrompt, "no-prompt", false, "do not prompt for a confirmation")
+	addNamespaceFlag(cmd.Flags(), &namespace)
 
 	return cmd
 }

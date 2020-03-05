@@ -29,7 +29,7 @@ func (c *namespacesClient) List() ([]model.Namespace, error) {
 }
 
 func (c *namespacesClient) Create(namespaceName string) error {
-	namespace := &model.Namespace{Name: namespaceName}
+	namespace := &model.Namespace{Name: model.NamespaceName(namespaceName)}
 	request, err := c.client.NewRequest(http.MethodPost, "/api/v1/namespaces", namespace)
 	if err != nil {
 		return err
