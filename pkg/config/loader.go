@@ -53,14 +53,14 @@ func SafeLoadDefaultAppName() string {
 }
 
 // SafeLoadAppNamespace attempts to retrieve the namespace of the app in the specified path.
-// Returns the default namespace "apps" if the namespace is not specified, the file does not exist, cannot be be parsed,
+// Returns an empty string if the namespace is not specified, the file does not exist, cannot be be parsed,
 // or if any other error occurs.
 func SafeLoadAppNamespace(pathToAppConfig string) string {
 	appConfig, err := LoadApp(pathToAppConfig)
 	if err == nil {
 		return string(appConfig.Namespace)
 	}
-	return DefaultNamespace
+	return ""
 }
 
 // SafeLoadDefaultAppNamespace attempts to retrieve the namespace of the app in the default app config locations
