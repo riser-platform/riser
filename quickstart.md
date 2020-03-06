@@ -13,7 +13,7 @@ The Riser demo is the easiest way to experiment with Riser. The demo is a single
 ### Installation
 
 - Enable the minikube ingress addon: `minikube addons enable ingress`
-- Create a minikube cluster. For the best results use the recommended settings: `minikube start --cpus=2 --memory=6144 --kubernetes-version=1.15.4`.
+- Create a minikube cluster. For the best results use the recommended settings: `minikube start --cpus=4 --memory=6144 --kubernetes-version=1.15.4`.
 - Create a GitHub repo for Riser's state (e.g. https://github.com/your-name/riser-state).
 - Download the [latest Riser CLI](https://github.com/riser-platform/riser/releases/) for your platform and put it in your path.
 - Ensure that your minikube is started. In a new terminal window, run `minikube tunnel`. Ensure it establishes the tunnel and let it run in the backround.

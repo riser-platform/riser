@@ -111,17 +111,17 @@ func demoInstall(config *rc.RuntimeConfiguration, assets http.FileSystem) {
 	kcOutput, err := exec.Command("kubectl", "config", "current-context").Output()
 	ui.ExitIfErrorMsg(err, fmt.Sprintf("Error getting current kube context. Maybe the current context is not set?"))
 
-	logger.Log().Warn("The riser demo installs infrastructure that may collide with existing infrastructure (e.g. istio). It is highly recommended that you install the demo into an empty cluster.")
+	logger.Log().Warn("The riser demo installs infrastructure that may collide with existing infrastructure. It is highly recommended that you install the demo into an empty Kubernetes cluster.")
 
 	useKc := false
 	prompt := &survey.Confirm{
-		Message: fmt.Sprintf("Are you sure you wish to install the demo to the %q context?", strings.TrimSpace(string(kcOutput))),
+		Message: fmt.Sprintf("Are you sure you wish to install to the %q kubernetes context?", strings.TrimSpace(string(kcOutput))),
 	}
 	err = survey.AskOne(prompt, &useKc)
 	ui.ExitIfError(err)
 
 	if !useKc {
-		ui.ExitErrorMsg("Please change to the desired kube context and try again")
+		ui.ExitErrorMsg("Please change to the desired kubernetes context and try again")
 	}
 
 	var gitUrl string
