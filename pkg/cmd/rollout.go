@@ -10,6 +10,7 @@ import (
 
 func newRolloutCommand(currentContext *rc.Context) *cobra.Command {
 	var deploymentName string
+	var namespace string
 	cmd := &cobra.Command{
 		Use:     "rollout (stage) (trafficRule0) [trafficRuleN...]",
 		Short:   "Manually controls traffic for a deployment's rollout",
@@ -19,12 +20,13 @@ func newRolloutCommand(currentContext *rc.Context) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			stage := args[0]
 			riserClient := getRiserClient(currentContext)
-			err := riserClient.Rollouts.Save(deploymentName, stage, args[1:]...)
+			err := riserClient.Rollouts.Save(deploymentName, namespace, stage, args[1:]...)
 			ui.ExitIfError(err)
 			fmt.Println("Rollout requested")
 		},
 	}
 
 	addDeploymentNameFlag(cmd.Flags(), &deploymentName)
+	addNamespaceFlag(cmd.Flags(), &namespace)
 	return cmd
 }

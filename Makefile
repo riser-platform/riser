@@ -30,7 +30,7 @@ fmt:
 
 # Run go vet against code
 lint:
-	golangci-lint run
+	golangci-lint run --build-tags=e2e
 	cd sdk && golangci-lint run
 
 # compile and run unit tests on change.

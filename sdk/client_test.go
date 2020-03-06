@@ -9,8 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/riser-platform/riser-server/api/v1/model"
+	"github.com/stretchr/testify/assert"
 )
 
 const testApiKey = "ad4a79e70859f3166d7232c67e6bb6b853fc4ff4"
@@ -35,8 +35,8 @@ func Test_NewRequest(t *testing.T) {
 	setup()
 	defer teardown()
 
-	newApp := &model.NewApp{Name: "myapp"}
-	requestJson := `{	"name": "myapp"}`
+	newApp := &model.NewApp{Name: model.AppName("myapp"), Namespace: model.NamespaceName("myns")}
+	requestJson := `{	"name": "myapp", "namespace": "myns"}`
 
 	request, err := client.NewRequest(http.MethodGet, "/v1/test", newApp)
 	body, _ := ioutil.ReadAll(request.Body)

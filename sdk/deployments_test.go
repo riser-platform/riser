@@ -13,12 +13,12 @@ func Test_Deployments_Delete(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/deployments/mydep/mystage", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/deployments/mystage/myns/mydep", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodDelete, r.Method)
 		fmt.Fprint(w, `{"message": "deleted"}`)
 	})
 
-	result, err := client.Deployments.Delete("mydep", "mystage")
+	result, err := client.Deployments.Delete("mydep", "myns", "mystage")
 
 	assert.NoError(t, err)
 	assert.Equal(t, "deleted", result.Message)
@@ -82,7 +82,7 @@ func Test_Deployments_SaveStatus(t *testing.T) {
 		ObservedRiserRevision: 1,
 	}
 
-	mux.HandleFunc("/api/v1/deployments/myapp/status/mystage", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/deployments/mystage/myns/myapp/status", func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPut, r.Method)
 		actualModel := &model.DeploymentStatusMutable{}
 		mustUnmarshalR(r.Body, actualModel)
@@ -92,7 +92,7 @@ func Test_Deployments_SaveStatus(t *testing.T) {
 		fmt.Fprint(w, response)
 	})
 
-	err := client.Deployments.SaveStatus("myapp", "mystage", requestModel)
+	err := client.Deployments.SaveStatus("myapp", "myns", "mystage", requestModel)
 
 	assert.NoError(t, err)
 }
@@ -103,13 +103,13 @@ func Test_Deployments_SaveStatus_Error(t *testing.T) {
 
 	requestModel := &model.DeploymentStatusMutable{}
 
-	mux.HandleFunc("/api/v1/deployments/myapp/status/mystage", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/deployments/mystage/myns/myapp/status", func(w http.ResponseWriter, r *http.Request) {
 		response := `{"message": "err"}`
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, response)
 	})
 
-	err := client.Deployments.SaveStatus("myapp", "mystage", requestModel)
+	err := client.Deployments.SaveStatus("myapp", "myns", "mystage", requestModel)
 
 	assert.IsType(t, &ClientError{}, err)
 	ce := err.(*ClientError)

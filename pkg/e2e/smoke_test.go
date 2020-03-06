@@ -66,33 +66,25 @@ func Test_Smoke(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	appName := fmt.Sprintf("e2e-%s", randomString(6))
+	appName := fmt.Sprintf("e2e-app-%s", randomString(6))
 	namespace := "apps"
 	baseAppUrl := fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.ingressDomain)
 	appUrl := func(pathAndQuery string) string {
 		return fmt.Sprintf("%s/%s", baseAppUrl, pathAndQuery)
 	}
-	var appId string
 	step(fmt.Sprintf("create app %q", appName), func() {
 		var err error
 
 		shellOrFail(t, "riser apps new %s", appName)
 
-		apps, err := riserClient.Apps.List()
+		app, err := riserClient.Apps.Get(appName, namespace)
 		require.NoError(t, err)
-		// TODO: Add Apps.Get() so that we don't have to do this (although it does add coverage to Apps.List()  :)
-		for _, app := range apps {
-			if app.Name == appName {
-				appId = app.Id
-				break
-			}
-		}
-		require.NotEmpty(t, appId)
 
 		appCfg := model.AppConfig{
-			Name:  appName,
-			Id:    appId,
-			Image: "tshak/testdummy",
+			Id:        app.Id,
+			Name:      model.AppName(appName),
+			Namespace: model.NamespaceName(namespace),
+			Image:     "tshak/testdummy",
 			Environment: map[string]intstr.IntOrString{
 				"env1": intstr.FromString("val1"),
 			},
@@ -110,7 +102,7 @@ func Test_Smoke(t *testing.T) {
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s ", tmpDir, versionA, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.riserStage)
 
 		err = httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -138,7 +130,7 @@ func Test_Smoke(t *testing.T) {
 
 	versionB := "0.0.16"
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s ", tmpDir, versionB, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionB, testContext.riserStage)
 
 		err := httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionB
@@ -162,7 +154,7 @@ func Test_Smoke(t *testing.T) {
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
-			appStatus, err := riserClient.Apps.GetStatus(appName)
+			appStatus, err := riserClient.Apps.GetStatus(appName, namespace)
 			if err != nil {
 				return true, err
 			}
@@ -184,6 +176,95 @@ func Test_Smoke(t *testing.T) {
 		})
 		assert.NoError(t, err)
 	})
+
+	// Just a basic namespace test to start.
+	// TODO: Refactor out into different test that can run in parallel with reusable steps and add secrets and re-deploy testing for more coverage
+
+	namespace = fmt.Sprintf("e2e-ns-%s", randomString(6))
+	baseAppUrl = fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.ingressDomain)
+	appUrl = func(pathAndQuery string) string {
+		return fmt.Sprintf("%s/%s", baseAppUrl, pathAndQuery)
+	}
+
+	step(fmt.Sprintf("create namespace %q", namespace), func() {
+		shellOrFail(t, "cd %s && riser namespaces create %s", tmpDir, namespace)
+	})
+
+	step(fmt.Sprintf("create app %q in namespace %q", appName, namespace), func() {
+		var err error
+
+		shellOrFail(t, "riser apps new %s -n %s", appName, namespace)
+
+		app, err := riserClient.Apps.Get(appName, namespace)
+		require.NoError(t, err)
+
+		appCfg := model.AppConfig{
+			Id:        app.Id,
+			Name:      model.AppName(appName),
+			Namespace: model.NamespaceName(namespace),
+			Image:     "tshak/testdummy",
+			Environment: map[string]intstr.IntOrString{
+				"env1": intstr.FromString("val1"),
+			},
+			Expose: &model.AppConfigExpose{
+				ContainerPort: 8000,
+			},
+		}
+
+		appCfgBytes, err := yaml.Marshal(appCfg)
+		require.NoError(t, err)
+		appCfgPath := path.Join(tmpDir, "app.yaml")
+		err = ioutil.WriteFile(appCfgPath, appCfgBytes, 0644)
+		require.NoError(t, err)
+	})
+
+	step(fmt.Sprintf("deploy version %q", versionA), func() {
+		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.riserStage)
+
+		err = httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+			return string(r.body) == versionA
+		})
+		require.NoError(t, err)
+
+		envResponse, err := httpClient.Get(appUrl("/env"))
+		require.NoError(t, err)
+		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
+
+		envBody, err := ioutil.ReadAll(envResponse.Body)
+		require.NoError(t, err)
+
+		envMap := parseTestDummyEnv(envBody)
+		require.Equal(t, "val1", envMap["ENV1"])
+	})
+
+	step(fmt.Sprintf("delete deployment %q", appName), func() {
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appName, testContext.riserStage)
+
+		// Wait until no deployments in status
+		err := Retry(func() (bool, error) {
+			appStatus, err := riserClient.Apps.GetStatus(appName, namespace)
+			if err != nil {
+				return true, err
+			}
+
+			return len(appStatus.Deployments) == 0, err
+		})
+		require.NoError(t, err)
+
+		// Check kube resources
+		err = Retry(func() (bool, error) {
+			configResult := shellOrFail(t, fmt.Sprintf("kubectl get config %s -n %s --ignore-not-found", appName, namespace))
+			return configResult == "", nil
+		})
+		assert.NoError(t, err)
+
+		err = Retry(func() (bool, error) {
+			routeResult := shellOrFail(t, fmt.Sprintf("kubectl get route %s -n %s --ignore-not-found", appName, namespace))
+			return routeResult == "", nil
+		})
+		assert.NoError(t, err)
+	})
+
 }
 
 func parseTestDummyEnv(envBody []byte) map[string]string {

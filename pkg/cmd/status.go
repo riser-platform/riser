@@ -17,6 +17,7 @@ import (
 
 func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 	var appName string
+	var namespace string
 	showAllRevisions := false
 	cmd := &cobra.Command{
 		Use:   "status",
@@ -24,7 +25,7 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			riserClient := getRiserClient(currentContext)
 
-			status, err := riserClient.Apps.GetStatus(appName)
+			status, err := riserClient.Apps.GetStatus(appName, namespace)
 			ui.ExitIfErrorMsg(err, "Error getting status")
 
 			drawStatus(appName, !showAllRevisions, status)
@@ -32,6 +33,7 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 	}
 
 	addAppFlag(cmd.Flags(), &appName)
+	addNamespaceFlag(cmd.Flags(), &namespace)
 	cmd.Flags().BoolVarP(&showAllRevisions, "all-revisions", "", false, "Shows all available revisions. Otherwise only shows the latest revision and older revisions with traffic")
 
 	return cmd

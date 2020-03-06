@@ -12,7 +12,7 @@ import (
 func addAppFlag(flags *pflag.FlagSet, appName *string) {
 	defaultAppName := config.SafeLoadDefaultAppName()
 	flags.StringVarP(appName, "app", "a", defaultAppName, "The name of the application. Required if no app config is present in the current directory.")
-	if len(defaultAppName) == 0 {
+	if defaultAppName == "" {
 		_ = cobra.MarkFlagRequired(flags, "app")
 	}
 }
@@ -28,8 +28,14 @@ func addAppFilePathFlag(flags *pflag.FlagSet, appFilePath *string) {
 
 func addDeploymentNameFlag(flags *pflag.FlagSet, deploymentName *string) {
 	defaultDeploymentName := config.SafeLoadDefaultAppName()
-	flags.StringVarP(deploymentName, "name", "n", defaultDeploymentName, "The name of the deployment (e.g. \"myapp-foo\")")
+	flags.StringVarP(deploymentName, "name", "", defaultDeploymentName, "The name of the deployment (e.g. \"myapp-foo\")")
 	if len(defaultDeploymentName) == 0 {
 		_ = cobra.MarkFlagRequired(flags, "name")
 	}
+}
+
+// addNamespaceFlag adds the --namespace flag
+func addNamespaceFlag(flags *pflag.FlagSet, namespace *string) {
+	defaultAppNamespace := config.SafeLoadDefaultAppNamespace()
+	flags.StringVarP(namespace, "namespace", "n", defaultAppNamespace, "The namespace for a resource.")
 }
