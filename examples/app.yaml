@@ -4,6 +4,8 @@
 
 # The name of your app. Use "riser apps init" or "riser apps new" to create a new app
 name: myapp
+# The namespace of your app. A namespace must be setup in Riser prior to creating your app. The "apps" namespace is created by default.
+namespace: apps
 # The id of your app. This is provided to you by riser.
 id: "a75d80f9"
 # The docker image, without tag or digest.
@@ -13,8 +15,8 @@ image: your/image
 # Note: This will be optional in the future for headless apps
 expose:
   # The port your app listens on.
-  # Your cluster local URL will be "http://<deploymentName>.apps.svc.cluster.local". Use this for talking between apps in the same cluster.
-  # Your external URL will be "https://<deploymentName>.apps.<yourExternalDomain>"
+  # Your cluster local URL will be "http://<deploymentName>.<namespace>.svc.cluster.local". Use this for talking between apps in the same cluster.
+  # Your external URL will be "https://<deploymentName>.<namespace>.<yourExternalDomain>"
   containerPort: 8000
   # Optional: The protocol (http|http2) (default: http)
   # Note: External traffic is always TLS. HTTP will auto redirect to HTTPS.

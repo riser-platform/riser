@@ -1,4 +1,5 @@
 name: testdummy
+namespace: apps
 # TODO: Update the id to the one provided by your riser instance
 id: 59400add
 image: tshak/testdummy

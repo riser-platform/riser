@@ -1,4 +1,5 @@
 name: emojivoto
+namespace: apps
 # TODO: Change this to the id given to you by "riser apps new emojivoto"
 id: 6dbebf2a
 image: buoyantio/emojivoto-web
