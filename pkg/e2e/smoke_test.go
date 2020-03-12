@@ -40,19 +40,19 @@ func init() {
 }
 
 type singleStageTestContext struct {
-	kubeContext   string
-	riserContext  string
-	riserStage    string
-	ingressIP     string
-	ingressDomain string
+	KubeContext   string
+	RiserContext  string
+	RiserStage    string
+	IngressIP     string
+	IngressDomain string
+	Riser         *sdk.Client
+	Http          *ingressClient
 }
 
 // Initial attempt at e2e testing. Just run through a smoke test of a simple happy path. Lots of refactoring to do as we add more tests.
 // Kube and Riser context must be pointing to the correct location
 func Test_Smoke(t *testing.T) {
 	var testContext *singleStageTestContext
-	var httpClient *ingressClient
-	var riserClient *sdk.Client
 
 	tmpDir, err := ioutil.TempDir(os.TempDir(), "riser-e2e-")
 	require.NoError(t, err)
@@ -60,15 +60,11 @@ func Test_Smoke(t *testing.T) {
 
 	step("setup test context", func() {
 		testContext = setupSingleStageTestContext(t)
-		httpClient = NewIngressClient(testContext.ingressIP)
-		var err error
-		riserClient, err = getRiserClient()
-		require.NoError(t, err)
 	})
 
 	appName := fmt.Sprintf("e2e-app-%s", randomString(6))
 	namespace := "apps"
-	baseAppUrl := fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.ingressDomain)
+	baseAppUrl := fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.IngressDomain)
 	appUrl := func(pathAndQuery string) string {
 		return fmt.Sprintf("%s/%s", baseAppUrl, pathAndQuery)
 	}
@@ -77,7 +73,7 @@ func Test_Smoke(t *testing.T) {
 
 		shellOrFail(t, "riser apps new %s", appName)
 
-		app, err := riserClient.Apps.Get(appName, namespace)
+		app, err := testContext.Riser.Apps.Get(appName, namespace)
 		require.NoError(t, err)
 
 		appCfg := model.AppConfig{
@@ -102,14 +98,14 @@ func Test_Smoke(t *testing.T) {
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.RiserStage)
 
-		err = httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+		err = testContext.Http.RetryGet(appUrl("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
 
-		envResponse, err := httpClient.Get(appUrl("/env"))
+		envResponse, err := testContext.Http.Get(appUrl("/env"))
 		require.NoError(t, err)
 		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
 
@@ -123,21 +119,21 @@ func Test_Smoke(t *testing.T) {
 	secretName := "secret1"
 	secretValue := "secretVal1"
 	step("create secret", func() {
-		shellOrFail(t, "cd %s && riser secrets save %s %s %s", tmpDir, secretName, secretValue, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser secrets save %s %s %s", tmpDir, secretName, secretValue, testContext.RiserStage)
 		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
 		// not become available until the secret is present.
 	})
 
 	versionB := "0.0.16"
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionB, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionB, testContext.RiserStage)
 
-		err := httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+		err := testContext.Http.RetryGet(appUrl("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionB
 		})
 		require.NoError(t, err)
 
-		envResponse, err := httpClient.Get(appUrl("/env"))
+		envResponse, err := testContext.Http.Get(appUrl("/env"))
 		require.NoError(t, err)
 		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
 
@@ -150,11 +146,11 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appName), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appName, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appName, testContext.RiserStage)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
-			appStatus, err := riserClient.Apps.GetStatus(appName, namespace)
+			appStatus, err := testContext.Riser.Apps.GetStatus(appName, namespace)
 			if err != nil {
 				return true, err
 			}
@@ -181,7 +177,7 @@ func Test_Smoke(t *testing.T) {
 	// TODO: Refactor out into different test that can run in parallel with reusable steps and add secrets and re-deploy testing for more coverage
 
 	namespace = fmt.Sprintf("e2e-ns-%s", randomString(6))
-	baseAppUrl = fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.ingressDomain)
+	baseAppUrl = fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.IngressDomain)
 	appUrl = func(pathAndQuery string) string {
 		return fmt.Sprintf("%s/%s", baseAppUrl, pathAndQuery)
 	}
@@ -195,7 +191,7 @@ func Test_Smoke(t *testing.T) {
 
 		shellOrFail(t, "riser apps new %s -n %s", appName, namespace)
 
-		app, err := riserClient.Apps.Get(appName, namespace)
+		app, err := testContext.Riser.Apps.Get(appName, namespace)
 		require.NoError(t, err)
 
 		appCfg := model.AppConfig{
@@ -219,14 +215,14 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.RiserStage)
 
-		err = httpClient.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+		err = testContext.Http.RetryGet(appUrl("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
 
-		envResponse, err := httpClient.Get(appUrl("/env"))
+		envResponse, err := testContext.Http.Get(appUrl("/env"))
 		require.NoError(t, err)
 		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
 
@@ -238,11 +234,11 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appName), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appName, testContext.riserStage)
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appName, testContext.RiserStage)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
-			appStatus, err := riserClient.Apps.GetStatus(appName, namespace)
+			appStatus, err := testContext.Riser.Apps.GetStatus(appName, namespace)
 			if err != nil {
 				return true, err
 			}
@@ -290,13 +286,18 @@ func step(message string, fn func()) {
 }
 
 func setupSingleStageTestContext(t *testing.T) *singleStageTestContext {
-	return &singleStageTestContext{
-		kubeContext:   shellOrFail(t, "kubectl config current-context"),
-		riserContext:  shellOrFail(t, "riser context current"),
-		riserStage:    shellOrFail(t, `kubectl get cm riser-controller -n riser-system -o jsonpath="{.data['RISER_STAGE']}"`),
-		ingressIP:     shellOrFail(t, "kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"),
-		ingressDomain: getRiserDomain(t),
+	riserClient, err := getRiserClient()
+	require.NoError(t, err)
+	ctx := &singleStageTestContext{
+		KubeContext:   shellOrFail(t, "kubectl config current-context"),
+		RiserContext:  shellOrFail(t, "riser context current"),
+		RiserStage:    shellOrFail(t, `kubectl get cm riser-controller -n riser-system -o jsonpath="{.data['RISER_STAGE']}"`),
+		IngressIP:     shellOrFail(t, "kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"),
+		IngressDomain: getRiserDomain(t),
+		Riser:         riserClient,
 	}
+	ctx.Http = NewIngressClient(ctx.IngressIP)
+	return ctx
 }
 
 func getRiserDomain(t *testing.T) string {
