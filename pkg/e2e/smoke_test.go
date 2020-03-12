@@ -62,23 +62,20 @@ func Test_Smoke(t *testing.T) {
 		testContext = setupSingleStageTestContext(t)
 	})
 
-	appName := fmt.Sprintf("e2e-app-%s", randomString(6))
 	namespace := "apps"
-	baseAppUrl := fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.IngressDomain)
-	appUrl := func(pathAndQuery string) string {
-		return fmt.Sprintf("%s/%s", baseAppUrl, pathAndQuery)
-	}
-	step(fmt.Sprintf("create app %q", appName), func() {
+	appContext := newRandomAppContext(t, namespace, testContext.IngressDomain)
+
+	step(fmt.Sprintf("create app %q", appContext.Name), func() {
 		var err error
 
-		shellOrFail(t, "riser apps new %s", appName)
+		shellOrFail(t, "riser apps new %s", appContext.Name)
 
-		app, err := testContext.Riser.Apps.Get(appName, namespace)
+		app, err := testContext.Riser.Apps.Get(appContext.Name, namespace)
 		require.NoError(t, err)
 
 		appCfg := model.AppConfig{
 			Id:        app.Id,
-			Name:      model.AppName(appName),
+			Name:      model.AppName(appContext.Name),
 			Namespace: model.NamespaceName(namespace),
 			Image:     "tshak/testdummy",
 			Environment: map[string]intstr.IntOrString{
@@ -100,12 +97,12 @@ func Test_Smoke(t *testing.T) {
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
 		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.RiserStage)
 
-		err = testContext.Http.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+		err = testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
 
-		envResponse, err := testContext.Http.Get(appUrl("/env"))
+		envResponse, err := testContext.Http.Get(appContext.Url("/env"))
 		require.NoError(t, err)
 		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
 
@@ -128,12 +125,12 @@ func Test_Smoke(t *testing.T) {
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
 		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionB, testContext.RiserStage)
 
-		err := testContext.Http.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionB
 		})
 		require.NoError(t, err)
 
-		envResponse, err := testContext.Http.Get(appUrl("/env"))
+		envResponse, err := testContext.Http.Get(appContext.Url("/env"))
 		require.NoError(t, err)
 		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
 
@@ -145,12 +142,12 @@ func Test_Smoke(t *testing.T) {
 		require.Equal(t, secretValue, envMap[strings.ToUpper(secretName)])
 	})
 
-	step(fmt.Sprintf("delete deployment %q", appName), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appName, testContext.RiserStage)
+	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appContext.Name, testContext.RiserStage)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
-			appStatus, err := testContext.Riser.Apps.GetStatus(appName, namespace)
+			appStatus, err := testContext.Riser.Apps.GetStatus(appContext.Name, namespace)
 			if err != nil {
 				return true, err
 			}
@@ -161,13 +158,13 @@ func Test_Smoke(t *testing.T) {
 
 		// Check kube resources
 		err = Retry(func() (bool, error) {
-			configResult := shellOrFail(t, fmt.Sprintf("kubectl get config %s -n %s --ignore-not-found", appName, namespace))
+			configResult := shellOrFail(t, fmt.Sprintf("kubectl get config %s -n %s --ignore-not-found", appContext.Name, namespace))
 			return configResult == "", nil
 		})
 		assert.NoError(t, err)
 
 		err = Retry(func() (bool, error) {
-			routeResult := shellOrFail(t, fmt.Sprintf("kubectl get route %s -n %s --ignore-not-found", appName, namespace))
+			routeResult := shellOrFail(t, fmt.Sprintf("kubectl get route %s -n %s --ignore-not-found", appContext.Name, namespace))
 			return routeResult == "", nil
 		})
 		assert.NoError(t, err)
@@ -177,26 +174,23 @@ func Test_Smoke(t *testing.T) {
 	// TODO: Refactor out into different test that can run in parallel with reusable steps and add secrets and re-deploy testing for more coverage
 
 	namespace = fmt.Sprintf("e2e-ns-%s", randomString(6))
-	baseAppUrl = fmt.Sprintf("https://%s.%s.%s", appName, namespace, testContext.IngressDomain)
-	appUrl = func(pathAndQuery string) string {
-		return fmt.Sprintf("%s/%s", baseAppUrl, pathAndQuery)
-	}
+	appContext = newRandomAppContext(t, namespace, testContext.IngressDomain)
 
 	step(fmt.Sprintf("create namespace %q", namespace), func() {
 		shellOrFail(t, "cd %s && riser namespaces create %s", tmpDir, namespace)
 	})
 
-	step(fmt.Sprintf("create app %q in namespace %q", appName, namespace), func() {
+	step(fmt.Sprintf("create app %q in namespace %q", appContext.Name, namespace), func() {
 		var err error
 
-		shellOrFail(t, "riser apps new %s -n %s", appName, namespace)
+		shellOrFail(t, "riser apps new %s -n %s", appContext.Name, namespace)
 
-		app, err := testContext.Riser.Apps.Get(appName, namespace)
+		app, err := testContext.Riser.Apps.Get(appContext.Name, namespace)
 		require.NoError(t, err)
 
 		appCfg := model.AppConfig{
 			Id:        app.Id,
-			Name:      model.AppName(appName),
+			Name:      model.AppName(appContext.Name),
 			Namespace: model.NamespaceName(namespace),
 			Image:     "tshak/testdummy",
 			Environment: map[string]intstr.IntOrString{
@@ -217,12 +211,12 @@ func Test_Smoke(t *testing.T) {
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
 		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.RiserStage)
 
-		err = testContext.Http.RetryGet(appUrl("/version"), func(r *httpResult) bool {
+		err = testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
 
-		envResponse, err := testContext.Http.Get(appUrl("/env"))
+		envResponse, err := testContext.Http.Get(appContext.Url("/env"))
 		require.NoError(t, err)
 		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
 
@@ -233,12 +227,12 @@ func Test_Smoke(t *testing.T) {
 		require.Equal(t, "val1", envMap["ENV1"])
 	})
 
-	step(fmt.Sprintf("delete deployment %q", appName), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appName, testContext.RiserStage)
+	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appContext.Name, testContext.RiserStage)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
-			appStatus, err := testContext.Riser.Apps.GetStatus(appName, namespace)
+			appStatus, err := testContext.Riser.Apps.GetStatus(appContext.Name, namespace)
 			if err != nil {
 				return true, err
 			}
@@ -249,13 +243,13 @@ func Test_Smoke(t *testing.T) {
 
 		// Check kube resources
 		err = Retry(func() (bool, error) {
-			configResult := shellOrFail(t, fmt.Sprintf("kubectl get config %s -n %s --ignore-not-found", appName, namespace))
+			configResult := shellOrFail(t, fmt.Sprintf("kubectl get config %s -n %s --ignore-not-found", appContext.Name, namespace))
 			return configResult == "", nil
 		})
 		assert.NoError(t, err)
 
 		err = Retry(func() (bool, error) {
-			routeResult := shellOrFail(t, fmt.Sprintf("kubectl get route %s -n %s --ignore-not-found", appName, namespace))
+			routeResult := shellOrFail(t, fmt.Sprintf("kubectl get route %s -n %s --ignore-not-found", appContext.Name, namespace))
 			return routeResult == "", nil
 		})
 		assert.NoError(t, err)
