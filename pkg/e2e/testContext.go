@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var currentTestContext *singleStageTestContext
+
 type singleStageTestContext struct {
 	KubeContext   string
 	RiserContext  string
@@ -22,6 +24,10 @@ type singleStageTestContext struct {
 }
 
 func setupSingleStageTestContext(t *testing.T) *singleStageTestContext {
+	// Cache since this must not change between tests
+	if currentTestContext != nil {
+		return currentTestContext
+	}
 	riserClient, err := getRiserClient()
 	require.NoError(t, err)
 	ctx := &singleStageTestContext{
@@ -33,7 +39,8 @@ func setupSingleStageTestContext(t *testing.T) *singleStageTestContext {
 		Riser:         riserClient,
 	}
 	ctx.Http = NewIngressClient(ctx.IngressIP)
-	return ctx
+	currentTestContext = ctx
+	return currentTestContext
 }
 
 func getRiserClient() (*sdk.Client, error) {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"path"
 	"strings"
 	"testing"
@@ -25,16 +24,13 @@ import (
 func Test_Smoke(t *testing.T) {
 	var testContext *singleStageTestContext
 
-	tmpDir, err := ioutil.TempDir(os.TempDir(), "riser-e2e-")
-	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
-
 	step("setup test context", func() {
 		testContext = setupSingleStageTestContext(t)
 	})
 
 	namespace := "apps"
 	appContext := newRandomAppContext(t, namespace, testContext.IngressDomain)
+	defer appContext.Cleanup()
 
 	step(fmt.Sprintf("create app %q", appContext.Name), func() {
 		var err error
@@ -59,16 +55,16 @@ func Test_Smoke(t *testing.T) {
 
 		appCfgBytes, err := yaml.Marshal(appCfg)
 		require.NoError(t, err)
-		appCfgPath := path.Join(tmpDir, "app.yaml")
+		appCfgPath := path.Join(appContext.AppDir, "app.yaml")
 		err = ioutil.WriteFile(appCfgPath, appCfgBytes, 0644)
 		require.NoError(t, err)
 	})
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionA, testContext.RiserStage)
 
-		err = testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
+		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
@@ -87,14 +83,14 @@ func Test_Smoke(t *testing.T) {
 	secretName := "secret1"
 	secretValue := "secretVal1"
 	step("create secret", func() {
-		shellOrFail(t, "cd %s && riser secrets save %s %s %s", tmpDir, secretName, secretValue, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser secrets save %s %s %s", appContext.AppDir, secretName, secretValue, testContext.RiserStage)
 		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
 		// not become available until the secret is present.
 	})
 
 	versionB := "0.0.16"
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionB, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionB, testContext.RiserStage)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionB
@@ -114,7 +110,7 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appContext.Name, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserStage)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
@@ -145,19 +141,16 @@ func Test_Smoke(t *testing.T) {
 func Test_Namespace(t *testing.T) {
 	var testContext *singleStageTestContext
 
-	tmpDir, err := ioutil.TempDir(os.TempDir(), "riser-e2e-")
-	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
-
 	step("setup test context", func() {
 		testContext = setupSingleStageTestContext(t)
 	})
 
 	namespace := fmt.Sprintf("e2e-ns-%s", randomString(6))
 	appContext := newRandomAppContext(t, namespace, testContext.IngressDomain)
+	defer appContext.Cleanup()
 
 	step(fmt.Sprintf("create namespace %q", namespace), func() {
-		shellOrFail(t, "cd %s && riser namespaces create %s", tmpDir, namespace)
+		shellOrFail(t, "cd %s && riser namespaces create %s", appContext.AppDir, namespace)
 	})
 
 	step(fmt.Sprintf("create app %q in namespace %q", appContext.Name, namespace), func() {
@@ -183,16 +176,16 @@ func Test_Namespace(t *testing.T) {
 
 		appCfgBytes, err := yaml.Marshal(appCfg)
 		require.NoError(t, err)
-		appCfgPath := path.Join(tmpDir, "app.yaml")
+		appCfgPath := path.Join(appContext.AppDir, "app.yaml")
 		err = ioutil.WriteFile(appCfgPath, appCfgBytes, 0644)
 		require.NoError(t, err)
 	})
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", tmpDir, versionA, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionA, testContext.RiserStage)
 
-		err = testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
+		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
@@ -209,7 +202,7 @@ func Test_Namespace(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", tmpDir, appContext.Name, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserStage)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
