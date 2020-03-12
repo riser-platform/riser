@@ -129,8 +129,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/riser-platform/riser-server/api/v1/model v0.0.10 h1:7ptCJgYjItjg0zku5A74BjAO6Cx3ai0RPh3lRmXsjZ8=
 github.com/riser-platform/riser-server/api/v1/model v0.0.10/go.mod h1:VJBiA4EQ/3bRdiYxaHAwCDm3okRaanVzuvmLzyOF3hA=
-github.com/riser-platform/riser-server/pkg/sdk v0.0.32-pre2 h1:x7i0SNIglCAaKKDPQp15gqzStH1agQC0o+9paJZS0i0=
-github.com/riser-platform/riser-server/pkg/sdk v0.0.32-pre2/go.mod h1:+0WkYBFj75mpTJEN7tQI7ufP87UtVhv2ONWQG/mmxas=
+github.com/riser-platform/riser-server/pkg/sdk v0.0.32 h1:yLmyZcgJZLOyJJl/EXhLlVQ4tGaYdM8ftGedFY4SU3Y=
+github.com/riser-platform/riser-server/pkg/sdk v0.0.32/go.mod h1:+0WkYBFj75mpTJEN7tQI7ufP87UtVhv2ONWQG/mmxas=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 h1:bUGsEnyNbVPw06Bs80sCeARAlK8lhwqGyi6UT8ymuGk=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749/go.mod h1:ZY1cvUeJuFPAdZ/B6v7RHavJWZn2YPVFQ1OSXhCGOkg=
