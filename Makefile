@@ -63,3 +63,7 @@ minikube-demo: build
 e2e:
 	go test -count=1 -tags=e2e -v ./pkg/e2e
 
+# Same as e2e but only runs the base smoke test
+e2e-smoke:
+	go test -count=1 -tags=e2e -run Test_Smoke -v ./pkg/e2e
+
