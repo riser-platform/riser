@@ -43,7 +43,7 @@ spec:
               name: riser-server
               key: RISER_BOOTSTRAP_APIKEY
               optional: true
-        image: riserplatform/riser-server:0.0.10
+        image: riserplatform/riser-server:0.0.12
         ports:
         - containerPort: 8000
           protocol: TCP
