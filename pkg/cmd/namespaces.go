@@ -10,23 +10,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newNamespacesCommand(currentContext *rc.Context) *cobra.Command {
+func newNamespacesCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "namespaces",
 		Short: "Commands for managing namespaces",
 	}
 
-	cmd.AddCommand(newNamespacesCreateCommand(currentContext))
-	cmd.AddCommand(newNamespacesListCommand(currentContext))
+	cmd.AddCommand(newNamespacesCreateCommand(runtimeConfig))
+	cmd.AddCommand(newNamespacesListCommand(runtimeConfig))
 	return cmd
 }
 
-func newNamespacesCreateCommand(currentContext *rc.Context) *cobra.Command {
+func newNamespacesCreateCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	return &cobra.Command{
 		Use:   "create (namespace name)",
 		Short: "Create a new namespace",
 		Args:  cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			namespaceName := args[0]
 			riserClient := getRiserClient(currentContext)
 			err := riserClient.Namespaces.Create(namespaceName)
@@ -36,11 +37,12 @@ func newNamespacesCreateCommand(currentContext *rc.Context) *cobra.Command {
 	}
 }
 
-func newNamespacesListCommand(currentContext *rc.Context) *cobra.Command {
+func newNamespacesListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
 		Short: "List all namespaces",
 		Run: func(*cobra.Command, []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			riserClient := getRiserClient(currentContext)
 			namespaces, err := riserClient.Namespaces.List()
 			ui.ExitIfErrorMsg(err, "error listing namespaces")

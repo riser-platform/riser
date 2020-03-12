@@ -9,18 +9,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newSecretsCommand(currentContext *rc.Context) *cobra.Command {
+func newSecretsCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "secrets",
 		Short: "Commands for secrets",
 	}
 
-	cmd.AddCommand(newSecretsListCommand(currentContext))
-	cmd.AddCommand(newSecretsSaveCommand(currentContext))
+	cmd.AddCommand(newSecretsListCommand(runtimeConfig))
+	cmd.AddCommand(newSecretsSaveCommand(runtimeConfig))
 	return cmd
 }
 
-func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
+func newSecretsSaveCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var appName string
 	var namespace string
 	cmd := &cobra.Command{
@@ -29,6 +29,7 @@ func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
 		Long:  "Creates a new secret or updates an existing one. Secrets are stored seperately per app and stage.",
 		Args:  cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			secretName := args[0]
 			plainTextSecret := args[1]
 			stageName := args[2]
@@ -47,7 +48,7 @@ func newSecretsSaveCommand(currentContext *rc.Context) *cobra.Command {
 	return cmd
 }
 
-func newSecretsListCommand(currentContext *rc.Context) *cobra.Command {
+func newSecretsListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var appName string
 	var namespace string
 	cmd := &cobra.Command{
@@ -55,6 +56,7 @@ func newSecretsListCommand(currentContext *rc.Context) *cobra.Command {
 		Short: "Lists secrets configured for a given stage",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			stageName := args[0]
 			riserClient := getRiserClient(currentContext)
 

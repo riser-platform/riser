@@ -15,7 +15,7 @@ import (
 	"github.com/wzshiming/ctc"
 )
 
-func newStatusCommand(currentContext *rc.Context) *cobra.Command {
+func newStatusCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var appName string
 	var namespace string
 	showAllRevisions := false
@@ -23,6 +23,7 @@ func newStatusCommand(currentContext *rc.Context) *cobra.Command {
 		Use:   "status",
 		Short: "Gets the status for a deployment.",
 		Run: func(cmd *cobra.Command, args []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			riserClient := getRiserClient(currentContext)
 
 			status, err := riserClient.Apps.GetStatus(appName, namespace)

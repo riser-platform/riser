@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newDeployCommand(currentContext *rc.Context) *cobra.Command {
+func newDeployCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var appFilePath string
 	var dryRun bool
 	var deploymentName string
@@ -24,6 +24,7 @@ func newDeployCommand(currentContext *rc.Context) *cobra.Command {
 		Short: "Creates a new deployment or revision",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			dockerTag := args[0]
 			stage := args[1]
 

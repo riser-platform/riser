@@ -9,19 +9,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newDeploymentsCommand(currentContext *rc.Context) *cobra.Command {
+func newDeploymentsCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deployments",
 		Short: "Commands for managing deployments",
 		Long:  "Commands for managing deployments. Use \"riser deploy\" to create a new deployment or revision.",
 	}
 
-	cmd.AddCommand(newDeploymentsDeleteCommand(currentContext))
+	cmd.AddCommand(newDeploymentsDeleteCommand(runtimeConfig))
 
 	return cmd
 }
 
-func newDeploymentsDeleteCommand(currentContext *rc.Context) *cobra.Command {
+func newDeploymentsDeleteCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var namespace string
 	noPrompt := false
 	cmd := &cobra.Command{
@@ -29,6 +29,7 @@ func newDeploymentsDeleteCommand(currentContext *rc.Context) *cobra.Command {
 		Short: "Permanentally deletes a deployment and all of its revisions in the specified stage",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			deleteConfirmed := false
 			deploymentName := args[0]
 			stageName := args[1]

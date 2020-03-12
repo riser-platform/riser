@@ -90,7 +90,7 @@ func newContextListCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			contexts := config.GetContexts()
 			if len(contexts) == 0 {
-				logger.Log().Info("No contexts configured. Use \"riser context add\" to add a new context")
+				logger.Log().Info("No contexts configured. Use \"riser context save\" to add a new context")
 			} else {
 				for _, context := range contexts {
 					logger.Log().Info(context.Name)

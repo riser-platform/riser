@@ -10,12 +10,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newValidateCommand(currentContext *rc.Context) *cobra.Command {
+func newValidateCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var appFilePath string
 	cmd := &cobra.Command{
 		Use:   "validate",
 		Short: "Validates an app config",
 		Run: func(cmd *cobra.Command, args []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			app, err := config.LoadApp(appFilePath)
 			if err == nil {
 				riserClient := getRiserClient(currentContext)

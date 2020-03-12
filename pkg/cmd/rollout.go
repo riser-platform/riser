@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newRolloutCommand(currentContext *rc.Context) *cobra.Command {
+func newRolloutCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var deploymentName string
 	var namespace string
 	cmd := &cobra.Command{
@@ -18,6 +18,7 @@ func newRolloutCommand(currentContext *rc.Context) *cobra.Command {
 		Args:    cobra.MinimumNArgs(2),
 		Example: "  riser rollout prod rev-1:90 rev-2:10 // Canary routing 10% of traffic to a new revision \n  riser rollout prod rev-2:100 // Route all traffic to rev 2",
 		Run: func(cmd *cobra.Command, args []string) {
+			currentContext := safeCurrentContext(runtimeConfig)
 			stage := args[0]
 			riserClient := getRiserClient(currentContext)
 			err := riserClient.Rollouts.Save(deploymentName, namespace, stage, args[1:]...)
