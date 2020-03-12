@@ -7,7 +7,7 @@ import (
 	"riser/pkg/rc"
 	"testing"
 
-	"github.com/riser-platform/riser/sdk"
+	"github.com/riser-platform/riser-server/pkg/sdk"
 	"github.com/stretchr/testify/require"
 )
 

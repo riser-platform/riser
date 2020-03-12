@@ -10,7 +10,7 @@ import (
 	"riser/pkg/ui/table"
 
 	"github.com/riser-platform/riser-server/api/v1/model"
-	"github.com/riser-platform/riser/sdk"
+	"github.com/riser-platform/riser-server/pkg/sdk"
 	"github.com/spf13/cobra"
 )
 

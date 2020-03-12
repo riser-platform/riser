@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/riser-platform/riser/sdk"
+	"github.com/riser-platform/riser-server/pkg/sdk"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
 )
