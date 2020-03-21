@@ -109,7 +109,7 @@ func demoInstall(config *rc.RuntimeConfiguration, assets http.FileSystem) {
 	ui.ExitIfErrorMsg(err, "git must exist in path")
 
 	kcOutput, err := exec.Command("kubectl", "config", "current-context").Output()
-	ui.ExitIfErrorMsg(err, fmt.Sprintf("Error getting current kube context. Maybe the current context is not set?"))
+	ui.ExitIfErrorMsg(err, "Error getting current kube context. Maybe the current context is not set?")
 
 	logger.Log().Warn("The riser demo installs infrastructure that may collide with existing infrastructure. It is highly recommended that you install the demo into an empty Kubernetes cluster.")
 

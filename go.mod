@@ -13,9 +13,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/riser-platform/riser-server/api/v1/model v0.0.10
-	github.com/riser-platform/riser-server/pkg/sdk v0.0.32
+	github.com/riser-platform/riser-server/pkg/sdk v0.0.33
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
-	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.4.0
@@ -25,5 +24,5 @@ require (
 	golang.org/x/tools v0.0.0-20190328211700-ab21143f2384 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.2.8
-	k8s.io/apimachinery v0.17.3
+	k8s.io/apimachinery v0.17.4
 )
