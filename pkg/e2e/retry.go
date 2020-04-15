@@ -9,7 +9,7 @@ import (
 )
 
 const defaultRetryDelay = 1 * time.Second
-const defaultMaxRetries = 30
+const defaultMaxRetries = 60
 
 type RetryFunc func() (abort bool, err error)
 

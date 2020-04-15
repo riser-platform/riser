@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const defaultCommandTimeout = 10 * time.Second
+const defaultCommandTimeout = 20 * time.Second
 
 func shellOrFailTimeout(t *testing.T, timeout time.Duration, format string, args ...interface{}) string {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
