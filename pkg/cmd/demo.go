@@ -160,28 +160,27 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 	gitUrlNoAuthParsed, _ := url.Parse(gitUrlParsed.String())
 	gitUrlNoAuthParsed.User = nil
 
-	logger.Log().Info("Installing demo...")
+	logger.Log().Info("Installing demo")
 	getApiKeyFromRiserSecretStep := steps.NewShellExecStep("Check for existing Riser API key",
 		"kubectl get secret riser-server -n riser-system -o jsonpath='{.data.RISER_BOOTSTRAP_APIKEY}' || echo ''")
 	apiKeyGenStep := steps.NewExecStep("Generate Riser API key", exec.Command("riser", "ops", "generate-apikey"))
 	err = steps.Run(
 		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", gitUrlParsed.String(), "HEAD")),
 		// Install namespaces and some CRDs separately due to ordering issues (declarative infra... not quite!)
-		steps.NewExecStep("Apply namespaces and CRDs", exec.Command("kubectl", "apply",
+		steps.NewExecStep("Apply prerequisites", exec.Command("kubectl", "apply",
+			"-f", path.Join(demoPath, "kube-resources/istio/istio_operator.yaml"),
 			"-f", path.Join(demoPath, "kube-resources/riser-server/namespaces.yaml"),
-			"-f", path.Join(demoPath, "kube-resources/istio/0_namespace.yaml"),
-			"-f", path.Join(demoPath, "kube-resources/istio/1_init.yaml"),
 			"-f", path.Join(demoPath, "knative/namespace.yaml"),
 			"-f", path.Join(demoPath, "knative/serving-crds.yaml"),
+			"-f", path.Join(demoPath, "cert-manager/cert-manager.yaml"),
 		)),
 		steps.NewRetryStep(
 			func() steps.Step {
 				// We don't wait for each specific CRD. In testing we've found these are the most common ones that aren't immediately ready
 				// May have to adjust over time.
 				return steps.NewShellExecStep("Wait for CRDs",
-					`kubectl wait --for condition=established crd/gateways.networking.istio.io && \
-					kubectl wait --for condition=established crd/clusterissuers.certmanager.k8s.io && \
-					kubectl wait --for condition=established crd/images.caching.internal.knative.dev
+					`kubectl wait --for condition=established crd/clusterissuers.cert-manager.io && \
+					kubectl wait --for condition=established crd/istiooperators.install.istio.io
 					`)
 			},
 			120,
@@ -194,12 +193,15 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 			"-f", path.Join(demoPath, "kube-resources/istio"),
 		)),
 		steps.NewRetryStep(func() steps.Step {
-			return steps.NewShellExecStep("Wait for istio pilot", "kubectl get deployment istio-pilot -n istio-system -o jsonpath='{.status.availableReplicas}' | grep ^1$")
+			return steps.NewShellExecStep("Wait for istio", "kubectl get deployment istiod -n istio-system -o jsonpath='{.status.availableReplicas}' | grep ^1$")
 		},
 			180, steps.AlwaysRetry()),
 		steps.NewExecStep("Apply knative resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "knative"))),
+		// Due to race condition with applying ksvc too early: https://github.com/knative/serving/issues/7576
 		steps.NewRetryStep(func() steps.Step {
-			return steps.NewShellExecStep("Wait for knative activator", "kubectl get deployment activator -n knative-serving -o jsonpath='{.status.availableReplicas}' | grep ^1$")
+			return steps.NewShellExecStep("Wait for knative",
+				`kubectl get deployment controller -n knative-serving -o jsonpath='{.status.availableReplicas}' | grep ^1$ && \
+				 kubectl get deployment activator -n knative-serving -o jsonpath='{.status.availableReplicas}' | grep ^1$`)
 		},
 			180, steps.AlwaysRetry()),
 	)
@@ -280,7 +282,7 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 	if err != nil {
 		logger.Log().Error(err.Error())
 		ui.ExitErrorMsg(`Tips:
-• If you're using minikube be sure that "minikube tunnel" is running and rnu "riser demo status" again.
+• If you're using minikube be sure that "minikube tunnel" is running and run "riser demo status" again.
 • Ensure that your kubernetes context is set to the cluster with the demo installed.
 • Check the service status and pod logs for "istio-ingressgateway" in the "istio-system" namespace.
 		`)

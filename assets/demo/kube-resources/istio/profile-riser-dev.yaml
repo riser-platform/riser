@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-system
+  labels:
+    istio-injection: disabled
+---
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: riser-dev-controlplane
+  namespace: istio-system
+spec:
+  addonComponents:
+    kiali:
+      enabled: false
+    prometheus:
+      enabled: false
+  components:
+    ingressGateways:
+    - enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+      name: istio-ingressgateway
+    - enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+        # HACK since labels aren't supported here yet: https://github.com/istio/istio/issues/19263#issuecomment-605319996
+        overlays:
+          - kind: Service
+            name: cluster-local-gateway
+            patches:
+              - path: metadata.labels.istio
+                value: cluster-local-gateway
+          - kind: Deployment
+            name: cluster-local-gateway
+            patches:
+              - path: spec.selector.matchLabels.istio
+                value: cluster-local-gateway
+              - path: spec.template.metadata.labels.istio
+                value: cluster-local-gateway
+      name: cluster-local-gateway
+      namespace: istio-system
+    pilot:
+      k8s:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+    telemetry:
+      enabled: false
+  values:
+    gateways:
+      istio-ingressgateway:
+        sds:
+          enabled: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+    global:
+      controlPlaneSecurityEnabled: false
+      defaultPodDisruptionBudget:
+        enabled: false
+      mtls:
+        enabled: false
+      proxy:
+        resources:
+          requests:
+            cpu: 10m
+    tracing:
+      enabled: false
+
