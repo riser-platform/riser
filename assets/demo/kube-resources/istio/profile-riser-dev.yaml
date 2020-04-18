@@ -31,22 +31,10 @@ spec:
           requests:
             cpu: 50m
             memory: 128Mi
-        # HACK since labels aren't supported here yet: https://github.com/istio/istio/issues/19263#issuecomment-605319996
-        overlays:
-          - kind: Service
-            name: cluster-local-gateway
-            patches:
-              - path: metadata.labels.istio
-                value: cluster-local-gateway
-          - kind: Deployment
-            name: cluster-local-gateway
-            patches:
-              - path: spec.selector.matchLabels.istio
-                value: cluster-local-gateway
-              - path: spec.template.metadata.labels.istio
-                value: cluster-local-gateway
       name: cluster-local-gateway
       namespace: istio-system
+      label:
+        istio: cluster-local-gateway
     pilot:
       k8s:
         resources:
