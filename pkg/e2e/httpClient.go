@@ -48,8 +48,9 @@ func (c *ingressClient) Get(addr string) (*http.Response, error) {
 	return c.client.Get(addr)
 }
 
-// RetryGet retries an HTTP get until retryFn returns false or if the
-// HTTP body can not be read.
+// TODO: This is confusing. Should invert the boolean
+// RetryGet retries an HTTP get until retryFn returns true or if the
+// HTTP body cannot be read.
 func (c *ingressClient) RetryGet(url string, retryFn ShouldRetryHttpFunc) error {
 	return Retry(func() (bool, error) {
 		response, err := c.Get(url)

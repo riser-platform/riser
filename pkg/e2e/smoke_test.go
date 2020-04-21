@@ -109,6 +109,31 @@ func Test_Smoke(t *testing.T) {
 		require.Equal(t, secretValue, envMap[strings.ToUpper(secretName)])
 	})
 
+	step("rollout 50/50 with previous deployment", func() {
+		shellOrFail(t, "cd %s && riser rollout %s r1:50 r2:50", appContext.AppDir, testContext.RiserStage)
+		// Wait until we get one hit from versionA to ensure that the rollout is working before we start taking samples
+		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
+			return string(r.body) == versionA
+		})
+		require.NoError(t, err)
+
+		const samples = 100
+		sum := 0.0
+		for i := 0; i < samples; i++ {
+			err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
+				if string(r.body) == versionB {
+					sum += 1.0
+				}
+				return true
+			})
+			require.NoError(t, err)
+		}
+
+		mean := sum / float64(samples)
+		// Approximate that the traffic splitting is correct. We are just validating e2e configuration, not the precision of istio's traffic splitting.
+		assert.InDelta(t, 0.5, mean, 0.2, "%v")
+	})
+
 	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
 		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserStage)
 
