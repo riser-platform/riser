@@ -245,7 +245,7 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 		steps.NewShellExecStep("Create secret for flux",
 			"kubectl create secret generic flux-git --namespace=flux "+
 				fmt.Sprintf("--from-literal=GIT_URL=%s ", gitUrlParsed.String())+
-				fmt.Sprintf("--from-literal=GIT_PATH=stages/%s/kube-resources ", demoStageName)+
+				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", demoStageName)+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
 		steps.NewExecStep("Apply other demo resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", demoStageName),
