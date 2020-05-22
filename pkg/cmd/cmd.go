@@ -29,7 +29,7 @@ func Execute(runtime *Runtime) {
 	cmd.AddCommand(newNamespacesCommand(runtime.Configuration))
 	cmd.AddCommand(newOpsCommand())
 	cmd.AddCommand(newRolloutCommand(runtime.Configuration))
-	cmd.AddCommand(newStagesCommand(runtime.Configuration))
+	cmd.AddCommand(newEnvironmentsCommand(runtime.Configuration))
 	cmd.AddCommand(newSecretsCommand(runtime.Configuration))
 	cmd.AddCommand(newStatusCommand(runtime.Configuration))
 	cmd.AddCommand(newValidateCommand(runtime.Configuration))

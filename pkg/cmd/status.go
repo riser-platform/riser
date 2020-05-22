@@ -45,7 +45,7 @@ func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppSt
 		fmt.Printf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", appName)
 		return
 	}
-	statusTable := table.Default().Header("Deployment", "Stage", "Traffic", "Rev", "Docker Tag", "Pods", "Status", "Reason")
+	statusTable := table.Default().Header("Deployment", "Env", "Traffic", "Rev", "Docker Tag", "Pods", "Status", "Reason")
 	deploymentsPendingObservation := false
 	for _, deploymentStatus := range appStatus.Deployments {
 		if !deploymentObserved(deploymentStatus) {
@@ -59,7 +59,7 @@ func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppSt
 				if first {
 					statusTable.AddRow(
 						formatDeploymentName(deploymentStatus),
-						deploymentStatus.StageName,
+						deploymentStatus.EnvironmentName,
 						formatTraffic(&activeRevision.Traffic),
 						fmt.Sprintf("%d", activeRevision.RiserRevision),
 						formatDockerTag(activeRevision.DockerImage),
@@ -91,10 +91,10 @@ func drawStatus(appName string, activeRevisionsOnly bool, appStatus *model.AppSt
 		fmt.Println(style.Emphasis("* This deployment has changes that have not yet been observed."))
 	}
 
-	for _, stageStatus := range appStatus.Stages {
-		if !stageStatus.Healthy {
+	for _, environmentStatus := range appStatus.Environments {
+		if !environmentStatus.Healthy {
 			fmt.Print(ctc.ForegroundBrightYellow)
-			fmt.Printf("Warning: stage %q is not healthy. %s\n", stageStatus.StageName, stageStatus.Reason)
+			fmt.Printf("Warning: environment %q is not healthy. %s\n", environmentStatus.EnvironmentName, environmentStatus.Reason)
 			fmt.Print(ctc.Reset)
 		}
 	}

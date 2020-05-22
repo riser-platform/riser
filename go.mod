@@ -10,23 +10,23 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/hashicorp/go-version v1.2.0
+	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/mattn/go-runewidth v0.0.7 // indirect
+	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.10
-	github.com/riser-platform/riser-server/pkg/sdk v0.0.33
+	github.com/riser-platform/riser-server/api/v1/model v0.0.11-0.20200522094011-3be589845297
+	github.com/riser-platform/riser-server/pkg/sdk v0.0.34-0.20200522094011-3be589845297
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
-	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.4.0
 	github.com/wzshiming/ctc v1.2.0
 	github.com/wzshiming/winseq v0.0.0-20181031094240-8a45cfbfe1c2 // indirect
 	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413 // indirect
-	golang.org/x/sys v0.0.0-20190912141932-bc967efca4b8 // indirect
 	golang.org/x/tools v0.0.0-20190729092621-ff9f1409240a // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.2.8
-	k8s.io/apimachinery v0.17.4
+	k8s.io/apimachinery v0.18.3
 )

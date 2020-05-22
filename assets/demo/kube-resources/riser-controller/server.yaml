@@ -112,7 +112,7 @@ subjects:
 apiVersion: v1
 data:
   RISER_SERVER_URL: http://riser-server.riser-system.svc.cluster.local
-  RISER_STAGE: demo
+  RISER_ENVIRONMENT: demo
 kind: ConfigMap
 metadata:
   creationTimestamp: null

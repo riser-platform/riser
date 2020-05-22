@@ -20,13 +20,13 @@ func newDeployCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var deploymentName string
 	var manualRollout bool
 	cmd := &cobra.Command{
-		Use:   "deploy (docker tag) (stage)",
+		Use:   "deploy (docker tag) (targetEnvironment)",
 		Short: "Creates a new deployment or revision",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			currentContext := safeCurrentContext(runtimeConfig)
 			dockerTag := args[0]
-			stage := args[1]
+			environment := args[1]
 
 			app, err := config.LoadApp(appFilePath)
 			ui.ExitIfErrorMsg(err, "Error loading app config")
@@ -34,7 +34,7 @@ func newDeployCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 			deployment := &model.DeploymentRequest{
 				DeploymentMeta: model.DeploymentMeta{
 					Name:          deploymentName,
-					Stage:         stage,
+					Environment:   environment,
 					Docker:        model.DeploymentDocker{Tag: dockerTag},
 					ManualRollout: manualRollout,
 				},

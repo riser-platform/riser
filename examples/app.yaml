@@ -27,12 +27,12 @@ expose:
 
 # Optional. Configures the autoscaler
 autoscale:
-  # Optional. The default is 0, but effectively may be different per stage depending on cluster level autoscaler settings
+  # Optional. The default is 0, but effectively may be different per environment depending on cluster level autoscaler settings
   # and/or resource quotas (default: empty)
   # Note: A minimum means that if your app is not active there will be zero scheduled pods. This means that a "cold" request
   # to your app will take a bit longer depending on how quickly your app can startup.
   min: 0
-  # Optional. Must be greater than autoscale.min. The maximum effective value may be different per stage depending on
+  # Optional. Must be greater than autoscale.min. The maximum effective value may be different per environment depending on
   # cluster level autoscaler settings and/or resource quotas (default: empty)
   max: 1
 
@@ -57,12 +57,12 @@ resources:
   # Optional. This sets the maximum amount of memory that an app can utilize. If this limit is reached the app will receive an OOM signal. Defaults to Kubernetes cluster/namespace defaults.
   memoryMB: 128
 
-# Optional. Stage specific settings. Most settings can be overridden except for "name" and "id".
-stages:
-  # Example: for a stage named "prod" that wishes to set the environment variable "DEBUG" to "false":
+# Optional. Environment specific settings. Most settings can be overridden except for "name" and "id".
+environmentOverrides:
+  # Example: for an environment named "prod" that wishes to set the environment variable "DEBUG" to "false":
   prod:
     environment:
-      DEBUG: false
+      DEBUG: "false"
 
 
 

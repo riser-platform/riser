@@ -30,14 +30,15 @@ lint:
 	golangci-lint run --build-tags=e2e
 
 # compile and run unit tests on change.
-# requires filewatcher and gotestsum
+# requires fswatch and gotestsum
 watch:
-	filewatcher gotestsum
+	fswatch -l 1 -o . | xargs -n1 -I{} gotestsum
 
 # updates to the latest SDK
 # Note: As of go 1.13 GOSUMDB returns a 410. Disabling until we figure out why.
 update-sdk:
-	GOSUMDB=off go get -u github.com/riser-platform/riser-server/pkg/sdk@$(SDKVERSION) && go mod tidy
+	GOSUMDB=off go get -u github.com/riser-platform/riser-server/pkg/sdk@$(SDKVERSION)
+	go mod tidy
 
 	# Github actions passes the full ref so strip it off
 VERSIONCLEAN=$(subst refs/tags/,,$(VERSION))

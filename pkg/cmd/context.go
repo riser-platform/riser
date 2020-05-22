@@ -13,7 +13,7 @@ func newContextCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "context",
 		Short: "Commands related to managing contexts.",
-		Long:  "Commands related to managing contexts. Contexts are used to manage switching between multiple riser instances. Since Riser manages apps across multiple stages (clusters), this is typically only used for demo or development purposes.",
+		Long:  "Commands related to managing contexts. Contexts are used to manage switching between multiple riser instances. Since Riser manages apps across multiple environments (clusters), this is typically only used for demo or development purposes.",
 	}
 
 	cmd.AddCommand(newContextSaveCommand(config))

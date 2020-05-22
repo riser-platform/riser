@@ -28,7 +28,7 @@ import (
 )
 
 const ApiKeySizeBytes = 20
-const demoStageName = "demo"
+const demoEnvironmentName = "demo"
 
 func newDemoCommand(config *rc.RuntimeConfiguration, assets http.FileSystem) *cobra.Command {
 	cmd := &cobra.Command{
@@ -245,13 +245,13 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 		steps.NewShellExecStep("Create secret for flux",
 			"kubectl create secret generic flux-git --namespace=flux "+
 				fmt.Sprintf("--from-literal=GIT_URL=%s ", gitUrlParsed.String())+
-				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", demoStageName)+
+				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", demoEnvironmentName)+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
 		steps.NewExecStep("Apply other demo resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(demoPath, "kube-resources"))),
-		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", demoStageName),
+		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", demoEnvironmentName),
 			func() error {
 				secure := false
-				demoContext := &rc.Context{Name: demoStageName, ServerURL: "https://riser-server.riser-system.demo.riser", Apikey: apiKey, Secure: &secure}
+				demoContext := &rc.Context{Name: demoEnvironmentName, ServerURL: "https://riser-server.riser-system.demo.riser", Apikey: apiKey, Secure: &secure}
 				config.SaveContext(demoContext)
 				return rc.SaveRc(config)
 			}))
@@ -266,7 +266,7 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 
 func demoStatus(config *rc.RuntimeConfiguration) {
 	logger.Log().Warn(`If you're using minikube be sure that "minikube tunnel" is running.`)
-	err := config.SetCurrentContext(demoStageName)
+	err := config.SetCurrentContext(demoEnvironmentName)
 	ui.ExitIfErrorMsg(err, "Error loading demo config. Please run \"riser demo install\".")
 
 	ingressGatewayStep := steps.NewRetryStep(func() steps.Step {

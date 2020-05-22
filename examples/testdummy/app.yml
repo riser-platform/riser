@@ -1,15 +1,17 @@
 name: testdummy
 namespace: apps
-# TODO: Update the id to the one provided by your riser instance
-id: 59400add
+# TODO: Update the id  provided by Riser
+id: 91d10594-7083-425a-ad93-fe5099348d52
 image: tshak/testdummy
-replicas: 2
 healthcheck:
   path: /health
 expose:
   containerPort: 8000
+autoscale:
+  min: 0
 
-stages:
-  dev:
-    replicas: 1
+environmentOverrides:
+  prod:
+    autoscale:
+      min: 2
 

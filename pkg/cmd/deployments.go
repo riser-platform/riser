@@ -25,16 +25,16 @@ func newDeploymentsDeleteCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.
 	var namespace string
 	noPrompt := false
 	cmd := &cobra.Command{
-		Use:   "delete (deploymentName) (stage)",
-		Short: "Permanentally deletes a deployment and all of its revisions in the specified stage",
+		Use:   "delete (deploymentName) (targetEnvironment)",
+		Short: "Permanentally deletes a deployment and all of its revisions in the specified environment",
 		Args:  cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			currentContext := safeCurrentContext(runtimeConfig)
 			deleteConfirmed := false
 			deploymentName := args[0]
-			stageName := args[1]
+			environmentName := args[1]
 			prompt := &survey.Confirm{
-				Message: fmt.Sprintf("Are you sure you wish to delete the deployment %q in stage %q?", deploymentName, stageName),
+				Message: fmt.Sprintf("Are you sure you wish to delete the deployment %q in environment %q?", deploymentName, environmentName),
 			}
 
 			if !noPrompt {
@@ -46,7 +46,7 @@ func newDeploymentsDeleteCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.
 			}
 
 			riserClient := getRiserClient(currentContext)
-			result, err := riserClient.Deployments.Delete(deploymentName, namespace, stageName)
+			result, err := riserClient.Deployments.Delete(deploymentName, namespace, environmentName)
 			ui.ExitIfError(err)
 
 			fmt.Println(result.Message)

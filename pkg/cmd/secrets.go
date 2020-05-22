@@ -24,22 +24,22 @@ func newSecretsSaveCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Comman
 	var appName string
 	var namespace string
 	cmd := &cobra.Command{
-		Use:   "save (name) (plaintextsecret) (stage)",
+		Use:   "save (name) (plaintextsecret) (targetEnvironment)",
 		Short: "Creates a new secret or updates an existing one",
-		Long:  "Creates a new secret or updates an existing one. Secrets are stored seperately per app and stage.",
+		Long:  "Creates a new secret or updates an existing one. Secrets are stored seperately per app and environment.",
 		Args:  cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
 			currentContext := safeCurrentContext(runtimeConfig)
 			secretName := args[0]
 			plainTextSecret := args[1]
-			stageName := args[2]
+			environmentName := args[2]
 
 			riserClient := getRiserClient(currentContext)
 
-			err := riserClient.Secrets.Save(appName, namespace, stageName, secretName, plainTextSecret)
+			err := riserClient.Secrets.Save(appName, namespace, environmentName, secretName, plainTextSecret)
 			ui.ExitIfErrorMsg(err, "Error saving secret")
 
-			fmt.Printf("Secret %q saved in stage %q. Changes will take affect for new deployments.\n", secretName, stageName)
+			fmt.Printf("Secret %q saved in environment %q. Changes will take affect for new deployments.\n", secretName, environmentName)
 		},
 	}
 	addAppFlag(cmd.Flags(), &appName)
@@ -52,15 +52,15 @@ func newSecretsListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Comman
 	var appName string
 	var namespace string
 	cmd := &cobra.Command{
-		Use:   "list (stage)",
-		Short: "Lists secrets configured for a given stage",
+		Use:   "list (environment)",
+		Short: "Lists secrets configured for a given environment",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			currentContext := safeCurrentContext(runtimeConfig)
-			stageName := args[0]
+			environmentName := args[0]
 			riserClient := getRiserClient(currentContext)
 
-			secretMetas, err := riserClient.Secrets.List(appName, namespace, stageName)
+			secretMetas, err := riserClient.Secrets.List(appName, namespace, environmentName)
 			ui.ExitIfError(err)
 
 			table := table.Default().Header("Name", "Rev")

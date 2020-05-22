@@ -11,32 +11,32 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var currentTestContext *singleStageTestContext
+var currentTestContext *singleEnvTestContext
 
-type singleStageTestContext struct {
-	KubeContext   string
-	RiserContext  string
-	RiserStage    string
-	IngressIP     string
-	IngressDomain string
-	Riser         *sdk.Client
-	Http          *ingressClient
+type singleEnvTestContext struct {
+	KubeContext      string
+	RiserContext     string
+	RiserEnvironment string
+	IngressIP        string
+	IngressDomain    string
+	Riser            *sdk.Client
+	Http             *ingressClient
 }
 
-func setupSingleStageTestContext(t *testing.T) *singleStageTestContext {
+func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 	// Cache since this must not change between tests
 	if currentTestContext != nil {
 		return currentTestContext
 	}
 	riserClient, err := getRiserClient()
 	require.NoError(t, err)
-	ctx := &singleStageTestContext{
-		KubeContext:   shellOrFail(t, "kubectl config current-context"),
-		RiserContext:  shellOrFail(t, "riser context current"),
-		RiserStage:    shellOrFail(t, `kubectl get cm riser-controller -n riser-system -o jsonpath="{.data['RISER_STAGE']}"`),
-		IngressIP:     shellOrFail(t, "kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"),
-		IngressDomain: getRiserDomain(t),
-		Riser:         riserClient,
+	ctx := &singleEnvTestContext{
+		KubeContext:      shellOrFail(t, "kubectl config current-context"),
+		RiserContext:     shellOrFail(t, "riser context current"),
+		RiserEnvironment: shellOrFail(t, `kubectl get cm riser-controller -n riser-system -o jsonpath="{.data['RISER_ENVIRONMENT']}"`),
+		IngressIP:        shellOrFail(t, "kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"),
+		IngressDomain:    getRiserDomain(t),
+		Riser:            riserClient,
 	}
 	ctx.Http = NewIngressClient(ctx.IngressIP)
 	currentTestContext = ctx

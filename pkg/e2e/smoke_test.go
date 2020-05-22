@@ -22,10 +22,10 @@ import (
 // Initial attempt at e2e testing. Just run through a smoke test of a simple happy path. Lots of refactoring to do as we add more tests.
 // Kube and Riser context must be pointing to the correct location
 func Test_Smoke(t *testing.T) {
-	var testContext *singleStageTestContext
+	var testContext *singleEnvTestContext
 
 	step("setup test context", func() {
-		testContext = setupSingleStageTestContext(t)
+		testContext = setupSingleEnvTestContext(t)
 	})
 
 	namespace := "apps"
@@ -62,7 +62,7 @@ func Test_Smoke(t *testing.T) {
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionA, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionA, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -83,14 +83,14 @@ func Test_Smoke(t *testing.T) {
 	secretName := "secret1"
 	secretValue := "secretVal1"
 	step("create secret", func() {
-		shellOrFail(t, "cd %s && riser secrets save %s %s %s", appContext.AppDir, secretName, secretValue, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser secrets save %s %s %s", appContext.AppDir, secretName, secretValue, testContext.RiserEnvironment)
 		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
 		// not become available until the secret is present.
 	})
 
 	versionB := "0.0.16"
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionB, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionB, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionB
@@ -110,7 +110,7 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	step("rollout 50/50 with previous deployment", func() {
-		shellOrFail(t, "cd %s && riser rollout %s r1:50 r2:50", appContext.AppDir, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser rollout %s r1:50 r2:50", appContext.AppDir, testContext.RiserEnvironment)
 		// Wait until we get one hit from versionA to ensure that the rollout is working before we start taking samples
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -135,7 +135,7 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
@@ -164,10 +164,10 @@ func Test_Smoke(t *testing.T) {
 }
 
 func Test_Namespace(t *testing.T) {
-	var testContext *singleStageTestContext
+	var testContext *singleEnvTestContext
 
 	step("setup test context", func() {
-		testContext = setupSingleStageTestContext(t)
+		testContext = setupSingleEnvTestContext(t)
 	})
 
 	namespace := fmt.Sprintf("e2e-ns-%s", randomString(6))
@@ -208,7 +208,7 @@ func Test_Namespace(t *testing.T) {
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionA, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionA, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -227,7 +227,7 @@ func Test_Namespace(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserStage)
+		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
