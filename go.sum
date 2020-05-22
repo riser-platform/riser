@@ -151,8 +151,8 @@ github.com/riser-platform/riser-server/api/v1/model v0.0.10 h1:7ptCJgYjItjg0zku5
 github.com/riser-platform/riser-server/api/v1/model v0.0.10/go.mod h1:VJBiA4EQ/3bRdiYxaHAwCDm3okRaanVzuvmLzyOF3hA=
 github.com/riser-platform/riser-server/api/v1/model v0.0.11-0.20200522094011-3be589845297 h1:o1ErB3UsWsFAtYJVEGlnQOlCAW8SbhHHlORJE2L/YM8=
 github.com/riser-platform/riser-server/api/v1/model v0.0.11-0.20200522094011-3be589845297/go.mod h1:HdFiUNYm4n3GHqcHGjHr4lr/PPlftsoJS2pQkYkiUfo=
-github.com/riser-platform/riser-server/pkg/sdk v0.0.34-0.20200522094011-3be589845297 h1:Or2C12/HbcIWItdvlJyq5KWBaULUz8PaGAWPiH6Y4mo=
-github.com/riser-platform/riser-server/pkg/sdk v0.0.34-0.20200522094011-3be589845297/go.mod h1:+0WkYBFj75mpTJEN7tQI7ufP87UtVhv2ONWQG/mmxas=
+github.com/riser-platform/riser-server/pkg/sdk v0.0.34 h1:v77CoDtrMa0RPDZsTrVpGtEs4kSSI9I90wyP/+HmIyY=
+github.com/riser-platform/riser-server/pkg/sdk v0.0.34/go.mod h1:+0WkYBFj75mpTJEN7tQI7ufP87UtVhv2ONWQG/mmxas=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 h1:bUGsEnyNbVPw06Bs80sCeARAlK8lhwqGyi6UT8ymuGk=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749/go.mod h1:ZY1cvUeJuFPAdZ/B6v7RHavJWZn2YPVFQ1OSXhCGOkg=

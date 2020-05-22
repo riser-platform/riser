@@ -137,9 +137,7 @@ spec:
         control-plane: controller-manager
     spec:
       containers:
-      - args:
-        - --enable-leader-election
-        command:
+      - command:
         - /manager
         env:
         - name: RISER_SERVER_APIKEY
@@ -150,7 +148,7 @@ spec:
         envFrom:
         - configMapRef:
             name: riser-controller
-        image: riserplatform/riser-controller:0.0.6
+        image: riserplatform/riser-controller:0.0.7
         name: manager
         resources:
           limits:
