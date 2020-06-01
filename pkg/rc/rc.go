@@ -121,6 +121,7 @@ func (rc *RuntimeConfiguration) GetContexts() []Context {
 	return values
 }
 
+// TODO: Rename to SetContext
 // SaveContext adds or updates a context and sets the current context to the recently saved context
 func (rc *RuntimeConfiguration) SaveContext(context *Context) {
 	if rc.contextMap == nil {
@@ -161,7 +162,7 @@ func toContextMap(contexts []Context) map[string]Context {
 }
 
 func getRcPath() (string, error) {
-	// TODO: Provide a flag for al alternate path
+	// TODO: Provide a flag for alternate path
 	home := os.Getenv("HOME")
 	if home != "" {
 		return path.Join(home, ".riserrc"), nil

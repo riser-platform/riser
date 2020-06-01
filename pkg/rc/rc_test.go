@@ -30,8 +30,8 @@ func Test_GetRcPath_ErrorIfNoHome(t *testing.T) {
 func Test_CurrentContext_ReturnsCurrentContext(t *testing.T) {
 	rc := RuntimeConfiguration{
 		contextMap: toContextMap([]Context{
-			Context{Name: "a"},
-			Context{Name: "b"},
+			{Name: "a"},
+			{Name: "b"},
 		}),
 		CurrentContextName: "b",
 	}
@@ -45,7 +45,7 @@ func Test_CurrentContext_ReturnsCurrentContext(t *testing.T) {
 func Test_CurrentContext_ReturnsErr_WhenNoCurrentContext(t *testing.T) {
 	rc := RuntimeConfiguration{
 		contextMap: toContextMap([]Context{
-			Context{Name: "a"},
+			{Name: "a"},
 		}),
 	}
 
@@ -69,8 +69,8 @@ func Test_CurrentContext_ReturnsError_WhenCurrentContextDoesNotExist(t *testing.
 func Test_SetCurrentContext(t *testing.T) {
 	rc := RuntimeConfiguration{
 		contextMap: toContextMap([]Context{
-			Context{Name: "a"},
-			Context{Name: "b"},
+			{Name: "a"},
+			{Name: "b"},
 		}),
 
 		CurrentContextName: "a",
@@ -85,7 +85,7 @@ func Test_SetCurrentContext(t *testing.T) {
 func Test_SetCurrentContext_ReturnsError_WhenInvalidContext(t *testing.T) {
 	rc := RuntimeConfiguration{
 		contextMap: toContextMap([]Context{
-			Context{Name: "a"},
+			{Name: "a"},
 		}),
 
 		CurrentContextName: "a",
@@ -138,7 +138,7 @@ func Test_SaveContext_AddsNewContext(t *testing.T) {
 func Test_SaveContext_SavesIfContextExists(t *testing.T) {
 	rc := &RuntimeConfiguration{
 		contextMap: toContextMap([]Context{
-			Context{Name: "a", ServerURL: "URLa"},
+			{Name: "a", ServerURL: "URLa"},
 		}),
 
 		CurrentContextName: "a",
@@ -171,8 +171,8 @@ func Test_SaveContext_SetsCurrentContext_WhenNotSet(t *testing.T) {
 func Test_RemoveContext(t *testing.T) {
 	rc := RuntimeConfiguration{
 		contextMap: toContextMap([]Context{
-			Context{Name: "a"},
-			Context{Name: "b"},
+			{Name: "a"},
+			{Name: "b"},
 		}),
 
 		CurrentContextName: "a",

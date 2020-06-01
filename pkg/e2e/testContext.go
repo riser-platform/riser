@@ -48,6 +48,7 @@ func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 		Riser:            riserClient,
 	}
 
+	// TODO: Or do we just require a valid riser context?
 	if strings.TrimSpace(ctx.RiserContext) == "" {
 		ctx.RiserContext = setupE2ERiserContext(t)
 	}
