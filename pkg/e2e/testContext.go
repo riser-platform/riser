@@ -4,11 +4,20 @@ package e2e
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"riser/pkg/rc"
+	"strings"
 	"testing"
 
 	"github.com/riser-platform/riser-server/pkg/sdk"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	RiserApiKeyEnv           = "RISER_API_KEY"
+	DefaultRiserServerDomain = "riser-server.riser-system.svc.cluster.local"
+	DefaultRiserContextName  = "e2e"
 )
 
 var currentTestContext *singleEnvTestContext
@@ -38,9 +47,27 @@ func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 		IngressDomain:    getRiserDomain(t),
 		Riser:            riserClient,
 	}
+
+	if strings.TrimSpace(ctx.RiserContext) == "" {
+		ctx.RiserContext = setupE2ERiserContext(t)
+	}
+
 	ctx.Http = NewIngressClient(ctx.IngressIP)
 	currentTestContext = ctx
 	return currentTestContext
+}
+
+func setupE2ERiserContext(t *testing.T) string {
+	apiKey := os.Getenv(RiserApiKeyEnv)
+	if apiKey == "" {
+		t.Fatalf("No riser context. Must specify %s", RiserApiKeyEnv)
+	}
+	shellOrFail(t, fmt.Sprintf("riser context save %s %s %s",
+		DefaultRiserContextName,
+		DefaultRiserServerDomain,
+		apiKey))
+
+	return DefaultRiserContextName
 }
 
 func getRiserClient() (*sdk.Client, error) {
