@@ -113,12 +113,7 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 
 	logger.Log().Info("Installing demo")
 
-	err = infra.Deploy(&infra.DeployConfig{
-		Assets:          assets,
-		GitUrl:          gitUrlParsed,
-		EnvironmentName: "demo",
-		RiserConfig:     config,
-	})
+	err = infra.NewDeployment(assets, config, gitUrlParsed).Deploy()
 	ui.ExitIfError(err)
 
 	logger.Log().Info(style.Good("Installation Complete!"))

@@ -19,32 +19,46 @@ import (
 	"github.com/shurcooL/httpfs/vfsutil"
 )
 
-type DeployConfig struct {
-	Assets          http.FileSystem
-	GitUrl          *url.URL
+const (
+	DefaultEnvironmentName = "Demo"
+)
+
+type Deployment struct {
+	Assets      http.FileSystem
+	GitUrl      *url.URL
+	RiserConfig *rc.RuntimeConfiguration
+	// Optional
 	EnvironmentName string
-	RiserConfig     *rc.RuntimeConfiguration
 }
 
-// Deploy deploys Riser k8s manifests for the demo and for e2e tests
-func Deploy(deployConfig *DeployConfig) error {
-	assetPath, err := outputDeployAssetsToTempDir(deployConfig.Assets)
+func NewDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration, gitUrl *url.URL) *Deployment {
+	return &Deployment{
+		Assets:          assets,
+		RiserConfig:     riserConfig,
+		GitUrl:          gitUrl,
+		EnvironmentName: DefaultEnvironmentName,
+	}
+}
+
+// Deploy deploys Riser k8s manifests for the demo and for e2e tests.
+func (deployment *Deployment) Deploy() error {
+	assetPath, err := outputDeployAssetsToTempDir(deployment.Assets)
 	if err != nil {
 		return errors.Wrap(err, "Error writing assets to temp dir")
 	}
 	defer os.RemoveAll(assetPath)
 
-	gitUrlPassword, _ := deployConfig.GitUrl.User.Password()
+	gitUrlPassword, _ := deployment.GitUrl.User.Password()
 
 	// Riser-server takes the repo URL w/o auth.
-	gitUrlNoAuthParsed, _ := url.Parse(deployConfig.GitUrl.String())
+	gitUrlNoAuthParsed, _ := url.Parse(deployment.GitUrl.String())
 	gitUrlNoAuthParsed.User = nil
 
 	getApiKeyFromRiserSecretStep := steps.NewShellExecStep("Check for existing Riser API key",
 		"kubectl get secret riser-server -n riser-system -o jsonpath='{.data.RISER_BOOTSTRAP_APIKEY}' || echo ''")
 	apiKeyGenStep := steps.NewExecStep("Generate Riser API key", exec.Command("riser", "ops", "generate-apikey"))
 	err = steps.Run(
-		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", deployConfig.GitUrl.String(), "HEAD")),
+		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", deployment.GitUrl.String(), "HEAD")),
 		// Install namespaces and some CRDs separately due to ordering issues (declarative infra... not quite!)
 		steps.NewExecStep("Apply prerequisites", exec.Command("kubectl", "apply",
 			"-f", path.Join(assetPath, "kube-resources/istio/istio_operator.yaml"),
@@ -110,7 +124,7 @@ func Deploy(deployConfig *DeployConfig) error {
 		steps.NewShellExecStep("Create secret for riser-server",
 			"kubectl create secret generic riser-server --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_BOOTSTRAP_APIKEY=%s ", apiKey)+
-				fmt.Sprintf("--from-literal=RISER_GIT_USERNAME=%s ", deployConfig.GitUrl.User.Username())+
+				fmt.Sprintf("--from-literal=RISER_GIT_USERNAME=%s ", deployment.GitUrl.User.Username())+
 				fmt.Sprintf("--from-literal=RISER_GIT_PASSWORD=%s ", gitUrlPassword)+
 				"--from-literal=RISER_POSTGRES_USERNAME=riseradmin "+
 				"--from-literal=RISER_POSTGRES_PASSWORD=riserpw "+
@@ -123,16 +137,16 @@ func Deploy(deployConfig *DeployConfig) error {
 			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(assetPath, "flux"))),
 		steps.NewShellExecStep("Create secret for flux",
 			"kubectl create secret generic flux-git --namespace=flux "+
-				fmt.Sprintf("--from-literal=GIT_URL=%s ", deployConfig.GitUrl.String())+
-				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", deployConfig.EnvironmentName)+
+				fmt.Sprintf("--from-literal=GIT_URL=%s ", deployment.GitUrl.String())+
+				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", deployment.EnvironmentName)+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
 		steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "kube-resources"))),
-		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployConfig.EnvironmentName),
+		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
 			func() error {
 				secure := false
-				newRiserContext := &rc.Context{Name: deployConfig.EnvironmentName, ServerURL: "https://riser-server.riser-system.demo.riser", Apikey: apiKey, Secure: &secure}
-				deployConfig.RiserConfig.SaveContext(newRiserContext)
-				return rc.SaveRc(deployConfig.RiserConfig)
+				newRiserContext := &rc.Context{Name: deployment.EnvironmentName, ServerURL: "https://riser-server.riser-system.demo.riser", Apikey: apiKey, Secure: &secure}
+				deployment.RiserConfig.SaveContext(newRiserContext)
+				return rc.SaveRc(deployment.RiserConfig)
 			}),
 	)
 

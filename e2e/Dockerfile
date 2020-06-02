@@ -12,5 +12,4 @@ RUN go mod download
 
 COPY . .
 
-# TODO: create way to download specific versions
 RUN go build -o /bin/riser
