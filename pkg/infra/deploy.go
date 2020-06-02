@@ -29,6 +29,7 @@ type Deployment struct {
 	RiserConfig *rc.RuntimeConfiguration
 	// Optional
 	EnvironmentName string
+	KubeDeployer    KubeDeployer
 }
 
 func NewDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration, gitUrl *url.URL) *Deployment {
@@ -37,11 +38,16 @@ func NewDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration,
 		RiserConfig:     riserConfig,
 		GitUrl:          gitUrl,
 		EnvironmentName: DefaultEnvironmentName,
+		KubeDeployer:    &NoopDeployer{},
 	}
 }
 
 // Deploy deploys Riser k8s manifests for the demo and for e2e tests.
 func (deployment *Deployment) Deploy() error {
+	err := deployment.KubeDeployer.Deploy()
+	if err != nil {
+		return errors.Wrap(err, "Error deploying kubernetes")
+	}
 	assetPath, err := outputDeployAssetsToTempDir(deployment.Assets)
 	if err != nil {
 		return errors.Wrap(err, "Error writing assets to temp dir")
