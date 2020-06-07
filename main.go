@@ -1,6 +1,7 @@
 package main
 
 import (
+	"riser/pkg/assets"
 	"riser/pkg/cmd"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
@@ -20,7 +21,7 @@ func main() {
 
 	// Main execution path
 	cmd.Execute(&cmd.Runtime{
-		Assets:        Assets,
+		Assets:        assets.Assets,
 		Version:       currentVersion,
 		Configuration: config,
 	})

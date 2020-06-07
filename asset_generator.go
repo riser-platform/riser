@@ -12,8 +12,8 @@ const assetDir = "./assets"
 
 func main() {
 	err := vfsgen.Generate(http.Dir(assetDir), vfsgen.Options{
-		Filename:     "assets.go",
-		PackageName:  "main",
+		Filename:     "pkg/assets/assets.go",
+		PackageName:  "assets",
 		VariableName: "Assets",
 	})
 	if err != nil {
