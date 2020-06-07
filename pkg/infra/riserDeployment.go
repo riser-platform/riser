@@ -23,7 +23,7 @@ const (
 	DefaultEnvironmentName = "Demo"
 )
 
-type Deployment struct {
+type RiserDeployment struct {
 	Assets      http.FileSystem
 	GitUrl      *url.URL
 	RiserConfig *rc.RuntimeConfiguration
@@ -32,8 +32,8 @@ type Deployment struct {
 	KubeDeployer    KubeDeployer
 }
 
-func NewDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration, gitUrl *url.URL) *Deployment {
-	return &Deployment{
+func NewRiserDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration, gitUrl *url.URL) *RiserDeployment {
+	return &RiserDeployment{
 		Assets:          assets,
 		RiserConfig:     riserConfig,
 		GitUrl:          gitUrl,
@@ -43,16 +43,16 @@ func NewDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration,
 }
 
 // Deploy deploys Riser k8s manifests for the demo and for e2e tests.
-func (deployment *Deployment) Deploy() error {
-	err := deployment.KubeDeployer.Deploy()
-	if err != nil {
-		return errors.Wrap(err, "Error deploying kubernetes")
-	}
+func (deployment *RiserDeployment) Deploy() error {
+	// TODO: Use Steps
 	assetPath, err := outputDeployAssetsToTempDir(deployment.Assets)
 	if err != nil {
 		return errors.Wrap(err, "Error writing assets to temp dir")
 	}
 	defer os.RemoveAll(assetPath)
+
+	err = deployment.KubeDeployer.Deploy()
+	ui.ExitIfErrorMsg(err, "Error deploying kubernetes")
 
 	gitUrlPassword, _ := deployment.GitUrl.User.Password()
 

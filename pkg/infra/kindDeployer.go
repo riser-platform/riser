@@ -2,10 +2,11 @@ package infra
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
-
-	"github.com/pkg/errors"
 )
+
+const WaitForClusterDuration = "5m"
 
 type KindDeployer struct {
 	NodeImage string
@@ -17,14 +18,20 @@ func NewKindDeployer(nodeImage, name string) *KindDeployer {
 }
 
 func (deployer *KindDeployer) Deploy() error {
-	args := []string{"create", "cluster", fmt.Sprintf("--image=%s", deployer.NodeImage), fmt.Sprintf("--name=%s", deployer.Name)}
+	args := []string{"create", "cluster",
+		fmt.Sprintf("--image=%s", deployer.NodeImage),
+		fmt.Sprintf("--name=%s", deployer.Name),
+		fmt.Sprintf("--wait=%s", WaitForClusterDuration)}
 	cmd := exec.Command("kind", args...)
-	output, _ := cmd.CombinedOutput()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
 
-	err := cmd.Run()
-	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("Error executing kind: %v", string(output)))
-	}
-
-	return nil
+func (deployer *KindDeployer) Destroy() error {
+	args := []string{"delete", "cluster", fmt.Sprintf("--name=%s", deployer.Name)}
+	cmd := exec.Command("kind", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
