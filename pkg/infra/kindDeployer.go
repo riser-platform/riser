@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
+
+	"github.com/pkg/errors"
 )
 
 const WaitForClusterDuration = "5m"
@@ -18,20 +21,51 @@ func NewKindDeployer(nodeImage, name string) *KindDeployer {
 }
 
 func (deployer *KindDeployer) Deploy() error {
+	clusterExists, err := checkClusterExists(deployer.Name)
+	if err != nil {
+		return errors.Wrap(err, "Error checking cluster existence")
+	}
+	if clusterExists {
+		return nil
+	}
+
 	args := []string{"create", "cluster",
 		fmt.Sprintf("--image=%s", deployer.NodeImage),
 		fmt.Sprintf("--name=%s", deployer.Name),
 		fmt.Sprintf("--wait=%s", WaitForClusterDuration)}
-	cmd := exec.Command("kind", args...)
+	err = execStreamOutput("kind", args...)
+	return err
+}
+
+func (deployer *KindDeployer) Destroy() error {
+	args := []string{"delete", "cluster", fmt.Sprintf("--name=%s", deployer.Name)}
+	return execStreamOutput("kind", args...)
+}
+
+func (deployer *KindDeployer) LoadLocalDockerImage(imageName string) error {
+	args := []string{"load", "docker-image", fmt.Sprintf("--name=%s", deployer.Name), imageName}
+	return execStreamOutput("kind", args...)
+}
+
+func execStreamOutput(cmdName string, arg ...string) error {
+	cmd := exec.Command(cmdName, arg...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
-func (deployer *KindDeployer) Destroy() error {
-	args := []string{"delete", "cluster", fmt.Sprintf("--name=%s", deployer.Name)}
-	cmd := exec.Command("kind", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+func checkClusterExists(name string) (bool, error) {
+	cmd := exec.Command("kind", "get", "clusters")
+	outBytes, err := cmd.Output()
+	if err != nil {
+		return false, err
+	}
+
+	for _, clusterName := range strings.Split(string(outBytes), "\n") {
+		if clusterName == name {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

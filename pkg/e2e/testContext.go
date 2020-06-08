@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	RiserApiKeyEnv           = "RISER_API_KEY"
-	DefaultRiserServerDomain = "riser-server.riser-system.svc.cluster.local"
-	DefaultRiserContextName  = "e2e"
+	RiserApiKeyEnv          = "RISER_APIKEY"
+	DefaultRiserServerUrl   = "http://riser-server.riser-system.svc.cluster.local"
+	DefaultRiserContextName = "e2e"
 )
 
 var currentTestContext *singleEnvTestContext
@@ -37,20 +37,28 @@ func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 	if currentTestContext != nil {
 		return currentTestContext
 	}
-	riserClient, err := getRiserClient()
-	require.NoError(t, err)
-	ctx := &singleEnvTestContext{
-		KubeContext:      shellOrFail(t, "kubectl config current-context"),
-		RiserContext:     shellOrFail(t, "riser context current"),
-		RiserEnvironment: shellOrFail(t, `kubectl get cm riser-controller -n riser-system -o jsonpath="{.data['RISER_ENVIRONMENT']}"`),
-		IngressIP:        shellOrFail(t, "kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"),
-		IngressDomain:    getRiserDomain(t),
-		Riser:            riserClient,
+	// Use riser context current by default. If it doesn't exist, construct one
+	// TODO: Allow alternate riserrc file
+	riserContext := shellOrFail(t, "riser context current")
+	if strings.TrimSpace(riserContext) == "" {
+		riserContext = setupE2ERiserContext(t)
 	}
 
-	// TODO: Or do we just require a valid riser context?
-	if strings.TrimSpace(ctx.RiserContext) == "" {
-		ctx.RiserContext = setupE2ERiserContext(t)
+	riserClient, err := getRiserClient()
+	require.NoError(t, err)
+
+	ingressIp := shellOrFail(t, "kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}'")
+	if ingressIp == "" {
+		ingressIp = shellOrFail(t, "kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.spec.clusterIP}'")
+		t.Log("Warning: istio gateway loadbalancer IP not found. Proceeding with clusterIP.")
+	}
+
+	ctx := &singleEnvTestContext{
+		RiserContext:     riserContext,
+		RiserEnvironment: shellOrFail(t, `kubectl get cm riser-controller -n riser-system -o jsonpath="{.data['RISER_ENVIRONMENT']}"`),
+		IngressIP:        ingressIp,
+		IngressDomain:    getRiserDomain(t),
+		Riser:            riserClient,
 	}
 
 	ctx.Http = NewIngressClient(ctx.IngressIP)
@@ -61,11 +69,11 @@ func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 func setupE2ERiserContext(t *testing.T) string {
 	apiKey := os.Getenv(RiserApiKeyEnv)
 	if apiKey == "" {
-		t.Fatalf("No riser context. Must specify %s", RiserApiKeyEnv)
+		t.Fatalf("No riser context found. Either create a riser context or specify the env var %s to use the default riser e2e context", RiserApiKeyEnv)
 	}
 	shellOrFail(t, fmt.Sprintf("riser context save %s %s %s",
 		DefaultRiserContextName,
-		DefaultRiserServerDomain,
+		DefaultRiserServerUrl,
 		apiKey))
 
 	return DefaultRiserContextName
