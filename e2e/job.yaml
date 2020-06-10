@@ -30,10 +30,11 @@ kind: Job
 metadata:
   name: riser-e2e
   namespace: riser-e2e
-  labels:
-    app: riser-e2e
 spec:
   template:
+    metadata:
+      labels:
+        app: riser-e2e
     spec:
       serviceAccountName: riser-e2e
       activeDeadlineSeconds: 600

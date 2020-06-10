@@ -109,16 +109,6 @@ subjects:
   name: default
   namespace: riser-system
 ---
-apiVersion: v1
-data:
-  RISER_SERVER_URL: http://riser-server.riser-system.svc.cluster.local
-  RISER_ENVIRONMENT: demo
-kind: ConfigMap
-metadata:
-  creationTimestamp: null
-  name: riser-controller
-  namespace: riser-system
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:

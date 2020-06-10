@@ -78,13 +78,15 @@ func main() {
 					"kubectl create secret generic riser-e2e --namespace=riser-e2e "+
 						fmt.Sprintf("--from-literal=RISER_APIKEY=%s --dry-run=true -o yaml | kubectl apply -f -", riserCtx.Apikey)).Exec()
 			}),
-			steps.NewFuncStep("Executing e2e tests", func() error {
-				// TODO: Put job yaml in assets or generate in code
-				jobCmd := exec.Command("kubectl", "apply", "-f", "./e2e/job.yaml")
-				jobCmd.Stdout = os.Stdout
-				jobCmd.Stderr = os.Stderr
-				return jobCmd.Run()
-			}),
+			steps.NewShellExecStep("Deploy e2e tests", "kubectl apply -f ./e2e/job.yaml"),
+			steps.NewRetryStep(func() steps.Step {
+				return steps.NewFuncStep("Observe test results", func() error {
+					jobCmd := exec.Command("kubectl", "logs", "-l=app=riser-e2e", "--namespace=riser-e2e", "-f", "-c=riser-e2e")
+					// Stream logs to stdout
+					jobCmd.Stdout = os.Stdout
+					return jobCmd.Run()
+				})
+			}, 30, steps.AlwaysRetry()),
 		)
 		ui.ExitIfError(err)
 	}

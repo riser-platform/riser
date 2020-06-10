@@ -147,6 +147,11 @@ func (deployment *RiserDeployment) Deploy() error {
 				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", deployment.EnvironmentName)+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
 		steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "kube-resources"))),
+		steps.NewShellExecStep("Configure Riser", fmt.Sprintf(
+			`kubectl create configmap riser-controller --namespace=riser-system \
+			--from-literal=RISER_SERVER_URL=http://riser-server.riser-system.svc.cluster.local \
+			--from-literal=RISER_ENVIRONMENT=%s \
+			--dry-run=true -o yaml | kubectl apply -f -`, deployment.EnvironmentName)),
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
 			func() error {
 				secure := false
