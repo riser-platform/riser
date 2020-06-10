@@ -80,14 +80,29 @@ func main() {
 			}),
 			steps.NewShellExecStep("Deploy e2e tests", "kubectl apply -f ./e2e/job.yaml"),
 			steps.NewRetryStep(func() steps.Step {
-				return steps.NewFuncStep("Observe test results", func() error {
-					jobCmd := exec.Command("kubectl", "logs", "-l=app=riser-e2e", "--namespace=riser-e2e", "-f", "-c=riser-e2e")
+				return steps.NewFuncStep("Stream test results", func() error {
+					jobCmd := exec.Command("kubectl", "logs", "-l=job-name=riser-e2e", "--namespace=riser-e2e", "-f", "-c=riser-e2e")
 					// Stream logs to stdout
 					jobCmd.Stdout = os.Stdout
 					return jobCmd.Run()
 				})
 			}, 30, steps.AlwaysRetry()),
+			// The job won't terminate because of the istio sidecar (https://github.com/kubernetes/kubernetes/issues/25908)
+			// Grab the container exitCode to determine success or not.
+			steps.NewFuncStep("Check test results", func() error {
+				jobCmd := exec.Command("sh", "-c", `kubectl get po -l job-name=riser-e2e -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="riser-e2e")].state.terminated.exitCode}'`)
+				output, err := jobCmd.CombinedOutput()
+				if err != nil {
+					return fmt.Errorf("Error executing command: %s", string(output))
+				}
+				if string(output) == "0" {
+					return nil
+				}
+
+				return fmt.Errorf("Received unexpected output: %s", output)
+			}),
 		)
+
 		ui.ExitIfError(err)
 	}
 
