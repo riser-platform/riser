@@ -14,5 +14,5 @@ RUN go mod download
 COPY . .
 
 ENV CGO_ENABLED=0
-RUN go build -o /bin/riser
+RUN go build -o /bin/riser -tags=e2e
 

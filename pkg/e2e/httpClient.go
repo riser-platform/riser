@@ -1,5 +1,4 @@
 // +build e2e
-
 package e2e
 
 import (
@@ -9,6 +8,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -28,20 +28,28 @@ func NewIngressClient(ingressIP string) *ingressClient {
 	dialer := &net.Dialer{
 		Timeout: 5 * time.Second,
 	}
-	return &ingressClient{
+	transport := &http.Transport{
+		// Since we don't necessarily have DNS setup for the cluster
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			// TODO: Make the domain configurable
+			if regexp.MustCompile(".+demo.riser:443$").Match([]byte(addr)) {
+				return dialer.DialContext(ctx, network, fmt.Sprintf("%s:443", ingressIP))
+			}
+			return dialer.DialContext(ctx, network, addr)
+		},
+		ForceAttemptHTTP2:   true,
+		TLSHandshakeTimeout: 5 * time.Second,
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+	}
+
+	ingressClient := &ingressClient{
 		client: &http.Client{
-			Timeout: 10 * time.Second,
-			Transport: &http.Transport{
-				DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-					// For all requests to use the ingress IP address since we don't necessarily have DNS setup for the cluster
-					return dialer.DialContext(ctx, network, fmt.Sprintf("%s:443", ingressIP))
-				},
-				ForceAttemptHTTP2:   true,
-				TLSHandshakeTimeout: 5 * time.Second,
-				TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
-			},
+			Timeout:   10 * time.Second,
+			Transport: transport,
 		},
 	}
+
+	return ingressClient
 }
 
 func (c *ingressClient) Get(addr string) (*http.Response, error) {
