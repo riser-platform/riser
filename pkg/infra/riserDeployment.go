@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	DefaultEnvironmentName = "Demo"
+	DefaultEnvironmentName = "demo"
 )
 
 type RiserDeployment struct {
