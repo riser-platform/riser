@@ -97,12 +97,8 @@ func (deployment *RiserDeployment) Deploy() error {
 			180, steps.AlwaysRetry()),
 		steps.NewExecStep("Apply knative resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "knative"))),
 		// Due to race condition with applying ksvc too early: https://github.com/knative/serving/issues/7576
-		steps.NewRetryStep(func() steps.Step {
-			return steps.NewShellExecStep("Wait for knative",
-				`kubectl get deployment controller -n knative-serving -o jsonpath='{.status.availableReplicas}' | grep ^1$ && \
-				 kubectl get deployment activator -n knative-serving -o jsonpath='{.status.availableReplicas}' | grep ^1$`)
-		},
-			180, steps.AlwaysRetry()),
+		steps.NewShellExecStep("Wait for knative",
+			"kubectl wait --timeout=300s --for=condition=available --namespace knative-serving deployment --all"),
 	)
 	ui.ExitIfError(err)
 
@@ -123,7 +119,7 @@ func (deployment *RiserDeployment) Deploy() error {
 
 	// Run another group of steps since we rely on the state of previous steps (step runner could support deferred state but this is simpler for now)
 	err = steps.Run(
-		steps.NewShellExecStep("Create riser-server configmap",
+		steps.NewShellExecStep("Configure riser-server",
 			"kubectl create configmap riser-server --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_GIT_URL=%s", gitUrlNoAuthParsed.String())+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
@@ -135,6 +131,11 @@ func (deployment *RiserDeployment) Deploy() error {
 				"--from-literal=RISER_POSTGRES_USERNAME=riseradmin "+
 				"--from-literal=RISER_POSTGRES_PASSWORD=riserpw "+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
+		steps.NewShellExecStep("Configure riser-controller", fmt.Sprintf(
+			`kubectl create configmap riser-controller --namespace=riser-system \
+					--from-literal=RISER_SERVER_URL=http://riser-server.riser-system.svc.cluster.local \
+					--from-literal=RISER_ENVIRONMENT=%s \
+					--dry-run=true -o yaml | kubectl apply -f -`, deployment.EnvironmentName)),
 		steps.NewShellExecStep("Create secret for riser-controller",
 			"kubectl create secret generic riser-controller --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_SERVER_APIKEY=%s ", apiKey)+
@@ -147,11 +148,7 @@ func (deployment *RiserDeployment) Deploy() error {
 				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", deployment.EnvironmentName)+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
 		steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "kube-resources"))),
-		steps.NewShellExecStep("Configure Riser", fmt.Sprintf(
-			`kubectl create configmap riser-controller --namespace=riser-system \
-			--from-literal=RISER_SERVER_URL=http://riser-server.riser-system.svc.cluster.local \
-			--from-literal=RISER_ENVIRONMENT=%s \
-			--dry-run=true -o yaml | kubectl apply -f -`, deployment.EnvironmentName)),
+		// TODO: We should allow the apikey to be specified as part of the RiserDeployment and let the caller save the context if required
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
 			func() error {
 				secure := false
@@ -159,6 +156,7 @@ func (deployment *RiserDeployment) Deploy() error {
 				deployment.RiserConfig.SaveContext(newRiserContext)
 				return rc.SaveRc(deployment.RiserConfig)
 			}),
+		steps.NewShellExecStep("Wait for riser-server", "kubectl wait --for=condition=ready --timeout=120s ksvc/riser-server -n riser-system"),
 	)
 
 	return err

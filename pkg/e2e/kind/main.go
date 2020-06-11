@@ -78,7 +78,8 @@ func main() {
 					"kubectl create secret generic riser-e2e --namespace=riser-e2e "+
 						fmt.Sprintf("--from-literal=RISER_APIKEY=%s --dry-run=true -o yaml | kubectl apply -f -", riserCtx.Apikey)).Exec()
 			}),
-			steps.NewShellExecStep("Deploy e2e tests", "kubectl apply -f ./e2e/job.yaml"),
+			steps.NewShellExecStep("Deploy e2e tests", "kubectl delete job riser-e2e --namespace=riser-e2e --ignore-not-found=true && kubectl apply -f ./e2e/job.yaml"),
+			steps.NewShellExecStep("Wait for test run to start", "kubectl wait --namespace=riser-e2e --for=condition=initialized --timeout=30s -l job-name=riser-e2e pod -c istio-proxy"),
 			steps.NewRetryStep(func() steps.Step {
 				return steps.NewFuncStep("Stream test results", func() error {
 					jobCmd := exec.Command("kubectl", "logs", "-l=job-name=riser-e2e", "--namespace=riser-e2e", "-f", "-c=riser-e2e")
@@ -90,7 +91,7 @@ func main() {
 			// The job won't terminate because of the istio sidecar (https://github.com/kubernetes/kubernetes/issues/25908)
 			// Grab the container exitCode to determine success or not.
 			steps.NewFuncStep("Check test results", func() error {
-				jobCmd := exec.Command("sh", "-c", `kubectl get po -l job-name=riser-e2e -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="riser-e2e")].state.terminated.exitCode}'`)
+				jobCmd := exec.Command("sh", "-c", `kubectl get po --namespace=riser-e2e -l job-name=riser-e2e -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="riser-e2e")].state.terminated.exitCode}'`)
 				output, err := jobCmd.CombinedOutput()
 				if err != nil {
 					return fmt.Errorf("Error executing command: %s", string(output))
