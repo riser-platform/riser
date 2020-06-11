@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -56,9 +57,11 @@ func execStreamOutput(cmdName string, arg ...string) error {
 
 func checkClusterExists(name string) (bool, error) {
 	cmd := exec.Command("kind", "get", "clusters")
+	stderr := &bytes.Buffer{}
+	cmd.Stderr = stderr
 	outBytes, err := cmd.Output()
 	if err != nil {
-		return false, err
+		return false, errors.Wrap(err, stderr.String())
 	}
 
 	for _, clusterName := range strings.Split(string(outBytes), "\n") {
