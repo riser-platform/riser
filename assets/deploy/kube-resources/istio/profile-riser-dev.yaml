@@ -1,3 +1,4 @@
+# https://istio.io/docs/reference/config/istio.operator.v1alpha1/
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -43,6 +44,7 @@ spec:
             memory: 128Mi
     telemetry:
       enabled: false
+  # https://istio.io/docs/reference/config/installation-options/
   values:
     gateways:
       istio-ingressgateway:
