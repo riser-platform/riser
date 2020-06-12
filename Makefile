@@ -1,5 +1,7 @@
 SDKVERSION ?= "master"
 
+.PHONY: e2e
+
 # Run tests.
 test: fmt lint tidy test-cmd
 	$(TEST_COMMAND)

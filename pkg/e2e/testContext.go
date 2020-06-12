@@ -63,6 +63,16 @@ func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 
 	ctx.Http = NewIngressClient(ctx.IngressIP)
 	currentTestContext = ctx
+
+	// Validate riser environment is setup
+	err = Retry(func() (bool, error) {
+		// ... grep until we support json output
+		_, err = shell("riser environments list | grep %s", ctx.RiserEnvironment)
+		return err == nil, err
+	})
+	if err != nil {
+		t.Fatalf("Environment %q does not exist in riser: %v", ctx.RiserEnvironment, err)
+	}
 	return currentTestContext
 }
 

@@ -35,6 +35,10 @@ func shellOrFailContext(t *testing.T, ctx context.Context, format string, args .
 	return output
 }
 
+func shell(format string, args ...interface{}) (string, error) {
+	return shellContext(context.Background(), format, args...)
+}
+
 func shellContext(ctx context.Context, format string, args ...interface{}) (string, error) {
 	command := fmt.Sprintf(format, args...)
 	c := exec.CommandContext(ctx, "sh", "-c", command)
