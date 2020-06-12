@@ -138,7 +138,7 @@ spec:
         envFrom:
         - configMapRef:
             name: riser-controller
-        image: riserplatform/riser-controller:0.0.8
+        image: ${RISER_CONTROLLER_IMAGE}
         name: manager
         resources:
           limits:

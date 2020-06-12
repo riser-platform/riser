@@ -27,11 +27,15 @@ func main() {
 	var kindName string
 	var gitUrlRaw string
 	var destroy bool
+	var riserServerImage string
+	var riserControllerImage string
 	cmd := &cobra.Command{}
 	cmd.Flags().StringVar(&kindNodeImage, "image", DefaultKindNodeImage, "node docker image to use for booting the cluster")
 	cmd.Flags().StringVar(&kindName, "name", DefaultKindName, "cluster context and riser context name")
 	cmd.Flags().StringVar(&gitUrlRaw, "git-url", "", "the git url for the state repo")
 	cmd.Flags().BoolVar(&destroy, "destroy", false, "destroy the cluster if it already exists")
+	cmd.Flags().StringVar(&riserServerImage, "riser-server-image", infra.DefaultServerImage, "the riser server image")
+	cmd.Flags().StringVar(&riserControllerImage, "riser-controller-image", infra.DefaultControllerImage, "the riser controller image")
 	err := cobra.MarkFlagRequired(cmd.Flags(), "git-url")
 	ui.ExitIfError(err)
 
@@ -66,6 +70,8 @@ func main() {
 					config,
 					gitUrl)
 				riserDeployment.EnvironmentName = kindName
+				riserDeployment.ServerImage = riserServerImage
+				riserDeployment.ControllerImage = riserControllerImage
 				err = riserDeployment.Deploy()
 				if err != nil {
 					return err

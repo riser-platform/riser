@@ -21,6 +21,8 @@ import (
 
 const (
 	DefaultEnvironmentName = "demo"
+	DefaultServerImage     = "riserplatform/riser-server:0.0.17"
+	DefaultControllerImage = "riserplatform/riser-controller:0.0.8"
 )
 
 type RiserDeployment struct {
@@ -30,6 +32,8 @@ type RiserDeployment struct {
 	// Optional
 	EnvironmentName string
 	KubeDeployer    KubeDeployer
+	ServerImage     string
+	ControllerImage string
 }
 
 func NewRiserDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration, gitUrl *url.URL) *RiserDeployment {
@@ -39,13 +43,18 @@ func NewRiserDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfigura
 		GitUrl:          gitUrl,
 		EnvironmentName: DefaultEnvironmentName,
 		KubeDeployer:    &NoopDeployer{},
+		ServerImage:     DefaultServerImage,
+		ControllerImage: DefaultControllerImage,
 	}
 }
 
 // Deploy deploys Riser k8s manifests for the demo and for e2e tests.
 func (deployment *RiserDeployment) Deploy() error {
-	// TODO: Use Steps
-	assetPath, err := outputDeployAssetsToTempDir(deployment.Assets)
+	templateVars := map[string]string{
+		"RISER_SERVER_IMAGE":     deployment.ServerImage,
+		"RISER_CONTROLLER_IMAGE": deployment.ControllerImage,
+	}
+	assetPath, err := outputDeployAssetsToTempDir(deployment.Assets, templateVars)
 	if err != nil {
 		return errors.Wrap(err, "Error writing assets to temp dir")
 	}
@@ -147,6 +156,7 @@ func (deployment *RiserDeployment) Deploy() error {
 				fmt.Sprintf("--from-literal=GIT_URL=%s ", deployment.GitUrl.String())+
 				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", deployment.EnvironmentName)+
 				" --dry-run=true -o yaml | kubectl apply -f -"),
+
 		steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "kube-resources"))),
 		// TODO: We should allow the apikey to be specified as part of the RiserDeployment and let the caller save the context if required
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
@@ -162,7 +172,7 @@ func (deployment *RiserDeployment) Deploy() error {
 	return err
 }
 
-func outputDeployAssetsToTempDir(assets http.FileSystem) (assetPath string, err error) {
+func outputDeployAssetsToTempDir(assets http.FileSystem, templateVars map[string]string) (assetPath string, err error) {
 	baseDir, err := ioutil.TempDir(os.TempDir(), "riser-deploy")
 	if err != nil {
 		return "", errors.Wrap(err, "Error creating temp dir")
@@ -182,6 +192,12 @@ func outputDeployAssetsToTempDir(assets http.FileSystem) (assetPath string, err 
 			err = os.MkdirAll(path.Dir(targetDir), 0777)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("can't create dir %q", path.Dir(targetDir)))
+			}
+
+			if path.Ext(targetDir) == ".yaml" {
+				b = []byte(os.Expand(string(b), func(v string) string {
+					return templateVars[v]
+				}))
 			}
 			err = ioutil.WriteFile(targetDir, b, 0777)
 			if err != nil {
