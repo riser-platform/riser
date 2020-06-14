@@ -20,7 +20,7 @@ import (
 
 const (
 	DefaultEnvironmentName = "demo"
-	DefaultServerImage     = "riserplatform/riser-server:0.0.18"
+	DefaultServerImage     = "riserplatform/riser-server:0.0.23"
 	DefaultControllerImage = "riserplatform/riser-controller:0.0.8"
 )
 
@@ -138,7 +138,6 @@ func (deployment *RiserDeployment) Deploy() error {
 				"--from-literal=RISER_POSTGRES_USERNAME=riseradmin "+
 				"--from-literal=RISER_POSTGRES_PASSWORD=riserpw "+
 				" --dry-run=client -o yaml | kubectl apply -f -"),
-		// TODO: Add option to specify git SSH key.
 		// Empty secret must exist since there's a volume mount that expects it
 		steps.NewShellExecStep("Create secret for git",
 			fmt.Sprintf("kubectl create secret generic riser-git-deploy %s --namespace=riser-system --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),

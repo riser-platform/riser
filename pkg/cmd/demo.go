@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
 	"os/exec"
 	"regexp"
 	"riser/pkg/infra"
@@ -15,8 +17,8 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	validation "github.com/go-ozzo/ozzo-validation"
-	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/spf13/cobra"
+	giturls "github.com/whilp/git-urls"
 )
 
 const ApiKeySizeBytes = 20
@@ -81,12 +83,12 @@ func demoInstall(config *rc.RuntimeConfiguration, assets http.FileSystem) {
 	}
 
 	var gitUrl string
+	var gitUrlParsed *url.URL
 	gitUrlPrompt := &survey.Input{
 		Message: "Enter the GitHub URL (including auth if private) for the riser state repo.",
 		Help: ui.StripNewLines(`
-The riser state repo contains all kubernetes state for riser apps and infrastructure. This repo should never hold any secrets, but you may still wish for it to be private.
-For private repos it's recommended that you use a Personal Access Token with repo full access. For example: https://oauthtoken:YOUR-TOKEN-HERE@github.com/your/repo.
-See https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line for more information on creating a GitHub Personal Access Token
+The riser state repo contains all kubernetes state for riser apps and infrastructure. Riser never stores plaintext secrets, but you may still wish for the repo to be private.
+For private repos it's recommended that you use a deploy key (e.g. git@github.com:your/repo) or a Personal Access Token with repo write access (e.g. https://YOUR-TOKEN@github.com/your/repo).
 `),
 	}
 
@@ -94,9 +96,10 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 		err = survey.AskOne(gitUrlPrompt, &gitUrl, survey.WithValidator(func(ans interface{}) error {
 			return validation.Validate(ans,
 				validation.Required,
-				is.URL,
-				// This pattern assumes the <host>/<org>/<repoName> format which works with GitHub, BitBucket, and GitLab.
-				validation.Match(regexp.MustCompile("https://.+/.+/.+")).Error("Repo URL must be in the format: https://<host>/<org>/<repoName>"))
+				validation.By(func(v interface{}) error {
+					gitUrlParsed, err = giturls.Parse(v.(string))
+					return err
+				}))
 		}))
 		if err == nil {
 			break
@@ -106,9 +109,35 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 		}
 	}
 
+	var gitSshKeyPath string
+	if gitUrlParsed.Scheme != "https" {
+		gitSshPrompt := &survey.Input{
+			Message: "Enter the path to your git ssh or deploy private key.",
+			Help:    ui.StripNewLines("If using a deploy key, it must have write access to the repo."),
+		}
+		for {
+			err = survey.AskOne(gitSshPrompt, &gitSshKeyPath, survey.WithValidator(func(ans interface{}) error {
+				return validation.Validate(ans,
+					validation.Required,
+					validation.By(func(v interface{}) error {
+						_, err := os.Stat(v.(string))
+						return err
+					}))
+			}))
+			if err == nil {
+				break
+			}
+			if err.Error() == "interrupt" {
+				ui.ExitErrorMsg("aborted")
+			}
+		}
+	}
+
 	logger.Log().Info("Installing demo")
 
-	err = infra.NewRiserDeployment(assets, config, gitUrl).Deploy()
+	deployment := infra.NewRiserDeployment(assets, config, gitUrl)
+	deployment.GitSSHKeyPath = gitSshKeyPath
+	err = deployment.Deploy()
 	ui.ExitIfError(err)
 
 	logger.Log().Info(style.Good("Installation Complete!"))
