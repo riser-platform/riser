@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"os/exec"
 	"riser/pkg/assets"
@@ -25,14 +24,16 @@ const (
 func main() {
 	var kindNodeImage string
 	var kindName string
-	var gitUrlRaw string
+	var gitUrl string
+	var gitSSHKeyPath string
 	var destroy bool
 	var riserServerImage string
 	var riserControllerImage string
 	cmd := &cobra.Command{}
 	cmd.Flags().StringVar(&kindNodeImage, "image", DefaultKindNodeImage, "node docker image to use for booting the cluster")
 	cmd.Flags().StringVar(&kindName, "name", DefaultKindName, "cluster context and riser context name")
-	cmd.Flags().StringVar(&gitUrlRaw, "git-url", "", "the git url for the state repo")
+	cmd.Flags().StringVar(&gitUrl, "git-url", "", "the git url for the state repo")
+	cmd.Flags().StringVar(&gitSSHKeyPath, "git-ssh-key-path", "", "optional path to a git ssh key.")
 	cmd.Flags().BoolVar(&destroy, "destroy", false, "destroy the cluster if it already exists")
 	cmd.Flags().StringVar(&riserServerImage, "riser-server-image", infra.DefaultServerImage, "the riser server image")
 	cmd.Flags().StringVar(&riserControllerImage, "riser-controller-image", infra.DefaultControllerImage, "the riser controller image")
@@ -40,9 +41,6 @@ func main() {
 	ui.ExitIfError(err)
 
 	cmd.Run = func(_ *cobra.Command, args []string) {
-		gitUrl, err := url.Parse(gitUrlRaw)
-		ui.ExitIfErrorMsg(err, "Error parsing git url")
-
 		// TODO: Add support for alternate rc path
 		config, err := rc.LoadRc()
 		ui.ExitIfError(err)
@@ -63,7 +61,7 @@ func main() {
 				// TODO: Add support for loading a published container or a different local container name
 				return kindDeployment.LoadLocalDockerImage("riser.dev/riser-e2e:local")
 			}),
-			steps.NewShellExecStep("Create riser-e2e namespace", "kubectl create namespace riser-e2e --dry-run=true -o yaml | kubectl apply -f -"),
+			steps.NewShellExecStep("Create riser-e2e namespace", "kubectl create namespace riser-e2e --dry-run=client -o yaml | kubectl apply -f -"),
 			steps.NewFuncStep("Deploying Riser", func() error {
 				riserDeployment := infra.NewRiserDeployment(
 					assets.Assets,
@@ -72,6 +70,7 @@ func main() {
 				riserDeployment.EnvironmentName = kindName
 				riserDeployment.ServerImage = riserServerImage
 				riserDeployment.ControllerImage = riserControllerImage
+				riserDeployment.GitSSHKeyPath = gitSSHKeyPath
 				err = riserDeployment.Deploy()
 				if err != nil {
 					return err
@@ -82,7 +81,7 @@ func main() {
 				}
 				return steps.NewShellExecStep("Create secret for e2e tests",
 					"kubectl create secret generic riser-e2e --namespace=riser-e2e "+
-						fmt.Sprintf("--from-literal=RISER_APIKEY=%s --dry-run=true -o yaml | kubectl apply -f -", riserCtx.Apikey)).Exec()
+						fmt.Sprintf("--from-literal=RISER_APIKEY=%s --dry-run=client -o yaml | kubectl apply -f -", riserCtx.Apikey)).Exec()
 			}),
 			steps.NewShellExecStep("Deploy e2e tests", "kubectl delete job riser-e2e --namespace=riser-e2e --ignore-not-found=true && kubectl apply -f ./e2e/job.yaml"),
 			steps.NewShellExecStep("Wait for test run to start", "kubectl wait --namespace=riser-e2e --for=condition=initialized --timeout=30s -l job-name=riser-e2e pod"),

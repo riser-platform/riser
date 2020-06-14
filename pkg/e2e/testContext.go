@@ -61,6 +61,10 @@ func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 		Riser:            riserClient,
 	}
 
+	if ctx.RiserEnvironment == "" {
+		t.Fatal("RISER_ENVIRONMENT not specified in riser-controller")
+	}
+
 	ctx.Http = NewIngressClient(ctx.IngressIP)
 	currentTestContext = ctx
 
@@ -73,6 +77,7 @@ func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 	if err != nil {
 		t.Fatalf("Environment %q does not exist in riser: %v", ctx.RiserEnvironment, err)
 	}
+
 	return currentTestContext
 }
 

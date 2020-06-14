@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"os/exec"
 	"regexp"
 	"riser/pkg/infra"
@@ -107,13 +106,9 @@ See https://help.github.com/en/articles/creating-a-personal-access-token-for-the
 		}
 	}
 
-	gitUrlParsed, err := url.Parse(gitUrl)
-	// Should never happen since the URL is validated above
-	ui.ExitIfError(err)
-
 	logger.Log().Info("Installing demo")
 
-	err = infra.NewRiserDeployment(assets, config, gitUrlParsed).Deploy()
+	err = infra.NewRiserDeployment(assets, config, gitUrl).Deploy()
 	ui.ExitIfError(err)
 
 	logger.Log().Info(style.Good("Installation Complete!"))

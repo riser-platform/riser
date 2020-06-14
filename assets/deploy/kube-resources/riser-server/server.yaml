@@ -13,20 +13,18 @@ spec:
     spec:
       containers:
       - name: server
+        volumeMounts:
+        - name: git-key
+          mountPath: /etc/riser/kube/ssh
         envFrom:
         - configMapRef:
             name: riser-server
         env:
-        - name: RISER_GIT_PASSWORD
+        - name: RISER_GIT_URL
           valueFrom:
             secretKeyRef:
               name: riser-server
-              key: RISER_GIT_PASSWORD
-        - name: RISER_GIT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: riser-server
-              key: RISER_GIT_USERNAME
+              key: RISER_GIT_URL
         - name: RISER_POSTGRES_USERNAME
           valueFrom:
             secretKeyRef:
@@ -47,6 +45,12 @@ spec:
         ports:
         - containerPort: 8000
           protocol: TCP
+      volumes:
+      - name: git-key
+        secret:
+          secretName: riser-git-deploy
+          defaultMode: 0400
+
 
 
 

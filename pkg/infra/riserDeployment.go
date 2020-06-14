@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -26,9 +25,10 @@ const (
 )
 
 type RiserDeployment struct {
-	Assets      http.FileSystem
-	GitUrl      *url.URL
-	RiserConfig *rc.RuntimeConfiguration
+	Assets        http.FileSystem
+	GitUrl        string
+	GitSSHKeyPath string
+	RiserConfig   *rc.RuntimeConfiguration
 	// Optional
 	EnvironmentName string
 	KubeDeployer    KubeDeployer
@@ -36,7 +36,7 @@ type RiserDeployment struct {
 	ControllerImage string
 }
 
-func NewRiserDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration, gitUrl *url.URL) *RiserDeployment {
+func NewRiserDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration, gitUrl string) *RiserDeployment {
 	return &RiserDeployment{
 		Assets:          assets,
 		RiserConfig:     riserConfig,
@@ -63,17 +63,11 @@ func (deployment *RiserDeployment) Deploy() error {
 	err = deployment.KubeDeployer.Deploy()
 	ui.ExitIfErrorMsg(err, "Error deploying kubernetes")
 
-	gitUrlPassword, _ := deployment.GitUrl.User.Password()
-
-	// Riser-server takes the repo URL w/o auth.
-	gitUrlNoAuthParsed, _ := url.Parse(deployment.GitUrl.String())
-	gitUrlNoAuthParsed.User = nil
-
 	getApiKeyFromRiserSecretStep := steps.NewShellExecStep("Check for existing Riser API key",
 		"kubectl get secret riser-server -n riser-system -o jsonpath='{.data.RISER_BOOTSTRAP_APIKEY}' || echo ''")
 	apiKeyGenStep := steps.NewExecStep("Generate Riser API key", exec.Command("riser", "ops", "generate-apikey"))
 	err = steps.Run(
-		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", deployment.GitUrl.String(), "HEAD")),
+		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", deployment.GitUrl, "HEAD")),
 		// Install namespaces and some CRDs separately due to ordering issues (declarative infra... not quite!)
 		steps.NewExecStep("Apply prerequisites", exec.Command("kubectl", "apply",
 			"-f", path.Join(assetPath, "kube-resources/istio/istio_operator.yaml"),
@@ -81,6 +75,7 @@ func (deployment *RiserDeployment) Deploy() error {
 			"-f", path.Join(assetPath, "knative/namespace.yaml"),
 			"-f", path.Join(assetPath, "knative/serving-crds.yaml"),
 			"-f", path.Join(assetPath, "cert-manager/cert-manager.yaml"),
+			"-f", path.Join(assetPath, "flux/namespace.yaml"),
 		)),
 		steps.NewRetryStep(
 			func() steps.Step {
@@ -126,39 +121,46 @@ func (deployment *RiserDeployment) Deploy() error {
 		apiKey = apiKeyGenStep.State("stdout").(string)
 	}
 
+	gitDeployKeyArg := ""
+	if deployment.GitSSHKeyPath != "" {
+		gitDeployKeyArg = fmt.Sprintf("--from-file=identity=%s", deployment.GitSSHKeyPath)
+	}
+
 	// Run another group of steps since we rely on the state of previous steps (step runner could support deferred state but this is simpler for now)
 	err = steps.Run(
 		steps.NewShellExecStep("Configure riser-server",
-			"kubectl create configmap riser-server --namespace=riser-system "+
-				fmt.Sprintf("--from-literal=RISER_GIT_URL=%s", gitUrlNoAuthParsed.String())+
-				" --dry-run=true -o yaml | kubectl apply -f -"),
+			"kubectl create configmap riser-server --namespace=riser-system --from-literal=RISER_GIT_SSH_KEY_PATH=/etc/riser/ssh/identity "+
+				"--dry-run=client -o yaml | kubectl apply -f -"),
 		steps.NewShellExecStep("Create secret for riser-server",
 			"kubectl create secret generic riser-server --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_BOOTSTRAP_APIKEY=%s ", apiKey)+
-				fmt.Sprintf("--from-literal=RISER_GIT_USERNAME=%s ", deployment.GitUrl.User.Username())+
-				fmt.Sprintf("--from-literal=RISER_GIT_PASSWORD=%s ", gitUrlPassword)+
+				fmt.Sprintf("--from-literal=RISER_GIT_URL=%s ", deployment.GitUrl)+
 				"--from-literal=RISER_POSTGRES_USERNAME=riseradmin "+
 				"--from-literal=RISER_POSTGRES_PASSWORD=riserpw "+
-				" --dry-run=true -o yaml | kubectl apply -f -"),
+				" --dry-run=client -o yaml | kubectl apply -f -"),
+		// TODO: Add option to specify git SSH key.
+		// Empty secret must exist since there's a volume mount that expects it
+		steps.NewShellExecStep("Create secret for git",
+			fmt.Sprintf("kubectl create secret generic riser-git-deploy %s --namespace=riser-system --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
 		steps.NewShellExecStep("Configure riser-controller", fmt.Sprintf(
 			`kubectl create configmap riser-controller --namespace=riser-system \
 					--from-literal=RISER_SERVER_URL=http://riser-server.riser-system.svc.cluster.local \
 					--from-literal=RISER_ENVIRONMENT=%s \
-					--dry-run=true -o yaml | kubectl apply -f -`, deployment.EnvironmentName)),
+					--dry-run=client -o yaml | kubectl apply -f -`, deployment.EnvironmentName)),
 		steps.NewShellExecStep("Create secret for riser-controller",
 			"kubectl create secret generic riser-controller --namespace=riser-system "+
 				fmt.Sprintf("--from-literal=RISER_SERVER_APIKEY=%s ", apiKey)+
-				" --dry-run=true -o yaml | kubectl apply -f -"),
-		steps.NewShellExecStep("Install flux",
-			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(assetPath, "flux"))),
+				" --dry-run=client -o yaml | kubectl apply -f -"),
 		steps.NewShellExecStep("Create secret for flux",
 			"kubectl create secret generic flux-git --namespace=flux "+
-				fmt.Sprintf("--from-literal=GIT_URL=%s ", deployment.GitUrl.String())+
+				fmt.Sprintf("--from-literal=GIT_URL=%s ", deployment.GitUrl)+
 				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", deployment.EnvironmentName)+
-				" --dry-run=true -o yaml | kubectl apply -f -"),
-
+				" --dry-run=client -o yaml | kubectl apply -f -"),
+		steps.NewShellExecStep("Create flux git key secret",
+			fmt.Sprintf("kubectl create secret generic flux-git-deploy %s --namespace=flux --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
+		steps.NewShellExecStep("Install flux",
+			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(assetPath, "flux"))),
 		steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "kube-resources"))),
-		// TODO: We should allow the apikey to be specified as part of the RiserDeployment and let the caller save the context if required
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
 			func() error {
 				secure := false
@@ -167,6 +169,7 @@ func (deployment *RiserDeployment) Deploy() error {
 				return rc.SaveRc(deployment.RiserConfig)
 			}),
 		steps.NewShellExecStep("Wait for riser-server", "kubectl wait --for=condition=ready --timeout=120s ksvc/riser-server -n riser-system"),
+		steps.NewShellExecStep("Wait for riser-controller", "kubectl wait --for=condition=available --timeout=120s deployment/riser-controller-manager -n riser-system"),
 	)
 
 	return err

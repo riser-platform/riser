@@ -10,13 +10,6 @@ metadata:
     release: flux
     heritage: Helm
 ---
-# Source: flux/templates/secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: flux-git-deploy
-type: Opaque
----
 # Source: flux/templates/kube.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -170,29 +163,19 @@ spec:
               name: flux-git
           args:
           - --log-format=fmt
-
           - --ssh-keygen-dir=/var/fluxd/keygen
           - --ssh-keygen-format=RFC4716
           - --k8s-secret-name=flux-git-deploy
-          - --memcached-hostname=flux-memcached
-          - --sync-state=git
           - --memcached-service=
           - --git-url=$(GIT_URL)
           - --git-branch=main
           - --git-path=$(GIT_PATH)
           - --git-readonly=true
-          - --git-user=Weave Flux
-          - --git-email=support@weave.works
           - --git-verify-signatures=false
-          - --git-set-author=false
           - --git-poll-interval=10s
           - --git-timeout=20s
           - --sync-interval=5m
-          - --git-ci-skip=false
           - --automation-interval=5m
-          - --registry-rps=200
-          - --registry-burst=125
-          - --registry-trace=false
           - --registry-disable-scanning
           - --sync-garbage-collection=true
           resources:
