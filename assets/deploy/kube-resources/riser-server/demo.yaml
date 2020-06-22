@@ -8,30 +8,6 @@ metadata:
 data:
   demo.riser: ""
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config-network
-  namespace: knative-serving
-data:
-  autoTLS: Enabled
-  httpProtocol: Redirected
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config-certmanager
-  namespace: knative-serving
-  labels:
-    networking.knative.dev/certificate-provider: cert-manager
-data:
-  issuerRef: |
-    kind: ClusterIssuer
-    name: selfsigning-issuer
-  solverConfig: |
-    dns01:
-      provider: default
----
 apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:

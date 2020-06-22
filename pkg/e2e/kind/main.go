@@ -62,6 +62,7 @@ func main() {
 				return kindDeployment.LoadLocalDockerImage("riser.dev/riser-e2e:local")
 			}),
 			steps.NewShellExecStep("Create riser-e2e namespace", "kubectl create namespace riser-e2e --dry-run=client -o yaml | kubectl apply -f -"),
+			steps.NewShellExecStep("Add istio-injection label", "kubectl label namespace riser-e2e istio-injection=enabled --overwrite=true"),
 			steps.NewFuncStep("Deploying Riser", func() error {
 				riserDeployment := infra.NewRiserDeployment(
 					assets.Assets,

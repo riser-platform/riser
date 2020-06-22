@@ -72,7 +72,6 @@ func (deployment *RiserDeployment) Deploy() error {
 		steps.NewExecStep("Apply prerequisites", exec.Command("kubectl", "apply",
 			"-f", path.Join(assetPath, "kube-resources/istio/istio_operator.yaml"),
 			"-f", path.Join(assetPath, "kube-resources/riser-server/namespaces.yaml"),
-			"-f", path.Join(assetPath, "knative/namespace.yaml"),
 			"-f", path.Join(assetPath, "knative/serving-crds.yaml"),
 			"-f", path.Join(assetPath, "cert-manager/cert-manager.yaml"),
 			"-f", path.Join(assetPath, "flux/namespace.yaml"),
