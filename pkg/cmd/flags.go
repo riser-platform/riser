@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"riser/pkg/config"
+	"riser/pkg/ui"
+
+	validation "github.com/go-ozzo/ozzo-validation/v3"
 
 	"github.com/spf13/cobra"
 
@@ -38,4 +41,31 @@ func addDeploymentNameFlag(flags *pflag.FlagSet, deploymentName *string) {
 func addNamespaceFlag(flags *pflag.FlagSet, namespace *string) {
 	defaultAppNamespace := config.SafeLoadDefaultAppNamespace()
 	flags.StringVarP(namespace, "namespace", "n", defaultAppNamespace, "The namespace for a resource.")
+}
+
+// addOutputFlag adds the --output flag and sets the output format in the ui package
+func addOutputFlag(flags *pflag.FlagSet) {
+	flags.VarP(&OutputFormat{val: ui.OutputFormatHuman}, "output", "o", "Output format. One of: human|json")
+}
+
+type OutputFormat struct {
+	val string
+}
+
+func (outputFormat *OutputFormat) String() string {
+	return outputFormat.val
+}
+
+func (outputFormat *OutputFormat) Set(inVal string) error {
+	err := validation.Validate(inVal, validation.In(ui.OutputFormatHuman, ui.OutputFormatJson).Error("Must be one of: human|json"))
+	if err != nil {
+		return err
+	}
+	outputFormat.val = inVal
+	ui.SetOutputFormat(inVal)
+	return nil
+}
+
+func (outputFormat *OutputFormat) Type() string {
+	return "string"
 }

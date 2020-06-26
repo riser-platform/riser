@@ -16,7 +16,7 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	validation "github.com/go-ozzo/ozzo-validation"
+	validation "github.com/go-ozzo/ozzo-validation/v3"
 	"github.com/spf13/cobra"
 	giturls "github.com/whilp/git-urls"
 )

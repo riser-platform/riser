@@ -7,7 +7,6 @@ import (
 	"riser/pkg/rc"
 	"riser/pkg/ui"
 	"riser/pkg/ui/style"
-	"riser/pkg/ui/table"
 
 	"github.com/riser-platform/riser-server/api/v1/model"
 	"github.com/riser-platform/riser-server/pkg/sdk"
@@ -30,7 +29,7 @@ func newAppsCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 }
 
 func newAppsListCommand(config *rc.RuntimeConfiguration) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all apps",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -38,16 +37,19 @@ func newAppsListCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 			riserClient := getRiserClient(currentContext)
 			apps, err := riserClient.Apps.List()
 			ui.ExitIfError(err)
-
-			table := table.Default().Header("Name", "Namespace", "Id")
+			view := ui.NewBasicTableView()
+			view.Header("Name", "Namespace", "Id")
 
 			for _, app := range apps {
-				table.AddRow(string(app.Name), string(app.Namespace), app.Id.String())
+				view.AddRow(app.Name, app.Namespace, app.Id)
 			}
 
-			fmt.Println(table)
+			ui.RenderView(view)
 		},
 	}
+
+	addOutputFlag(cmd.Flags())
+	return cmd
 }
 
 func newAppsInitCommand(config *rc.RuntimeConfiguration) *cobra.Command {
