@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"fmt"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
-	"riser/pkg/ui/table"
 
 	"github.com/spf13/cobra"
 )
@@ -22,7 +20,7 @@ func newEnvironmentsCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Comma
 }
 
 func newEnvironmentsListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "Lists all available environments",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -31,13 +29,18 @@ func newEnvironmentsListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.C
 			environments, err := riserClient.Environments.List()
 			ui.ExitIfError(err)
 
-			table := table.Default().Header("Name")
+			view := &ui.BasicTableView{}
+			view.Header("Name")
 
 			for _, environment := range environments {
-				table.AddRow(environment.Name)
+				view.AddRow(environment.Name)
 			}
 
-			fmt.Println(table)
+			ui.RenderView(view)
 		},
 	}
+
+	addOutputFlag(cmd.Flags())
+
+	return cmd
 }
