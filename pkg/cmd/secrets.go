@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
-	"riser/pkg/ui/table"
 
 	"github.com/spf13/cobra"
 )
@@ -63,19 +62,22 @@ func newSecretsListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Comman
 			secretMetas, err := riserClient.Secrets.List(appName, namespace, environmentName)
 			ui.ExitIfError(err)
 
-			table := table.Default().Header("Name", "Rev")
+			view := &ui.BasicTableView{}
+			view.Header("Name", "Rev")
+
 			for _, secretMeta := range secretMetas {
-				table.AddRow(
+				view.AddRow(
 					secretMeta.Name,
 					fmt.Sprintf("%d", secretMeta.Revision))
 			}
 
-			fmt.Println(table)
+			ui.RenderView(view)
 		},
 	}
 
 	addAppFlag(cmd.Flags(), &appName)
 	addNamespaceFlag(cmd.Flags(), &namespace)
+	addOutputFlag(cmd.Flags())
 
 	return cmd
 }

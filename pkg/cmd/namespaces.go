@@ -45,7 +45,7 @@ func newNamespacesListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Com
 			namespaces, err := riserClient.Namespaces.List()
 			ui.ExitIfErrorMsg(err, "error listing namespaces")
 
-			view := ui.NewBasicTableView()
+			view := &ui.BasicTableView{}
 			view.Header("Name")
 
 			for _, ns := range namespaces {

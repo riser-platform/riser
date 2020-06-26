@@ -9,7 +9,7 @@ import (
 )
 
 func Test_RenderHuman(t *testing.T) {
-	view := NewBasicTableView()
+	view := &BasicTableView{}
 	view.Header("H1", "H2")
 	view.AddRow("h1v1", "h1v2")
 	view.AddRow("h2v1", "h2v2")
@@ -28,7 +28,7 @@ func Test_RenderHuman(t *testing.T) {
 }
 
 func Test_RenderJson(t *testing.T) {
-	view := NewBasicTableView()
+	view := &BasicTableView{}
 	view.Header("H1", "H2")
 	view.AddRow("h1v1", "h1v2")
 	view.AddRow("h2v1", "h2v2")

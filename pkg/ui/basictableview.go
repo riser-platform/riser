@@ -14,10 +14,6 @@ type BasicTableView struct {
 	rows   [][]interface{}
 }
 
-func NewBasicTableView() *BasicTableView {
-	return &BasicTableView{}
-}
-
 func (view *BasicTableView) Header(header ...string) {
 	view.header = header
 }

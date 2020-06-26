@@ -37,7 +37,7 @@ func newAppsListCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 			riserClient := getRiserClient(currentContext)
 			apps, err := riserClient.Apps.List()
 			ui.ExitIfError(err)
-			view := ui.NewBasicTableView()
+			view := &ui.BasicTableView{}
 			view.Header("Name", "Namespace", "Id")
 
 			for _, app := range apps {
