@@ -87,11 +87,15 @@ func newAppsNewCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 			appName := args[0]
 			app := createNewApp(config, appName, namespace)
 
-			fmt.Printf("App %s created. Please add the following id to your manifest: %s", app.Name, app.Id)
+			view := ui.NewMessageView(
+				fmt.Sprintf("App %s created. Please add the following id to your manifest: %s", app.Name, app.Id),
+				app)
+			ui.RenderView(view)
 		},
 	}
 
 	addNamespaceFlag(cmd.Flags(), &namespace)
+	addOutputFlag(cmd.Flags())
 
 	return cmd
 }
