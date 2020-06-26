@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"riser/pkg/logger"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
-	"riser/pkg/ui/table"
 
 	"github.com/spf13/cobra"
 )
@@ -38,7 +36,7 @@ func newNamespacesCreateCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.C
 }
 
 func newNamespacesListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List all namespaces",
 		Run: func(*cobra.Command, []string) {
@@ -47,13 +45,18 @@ func newNamespacesListCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Com
 			namespaces, err := riserClient.Namespaces.List()
 			ui.ExitIfErrorMsg(err, "error listing namespaces")
 
-			table := table.Default().Header("Name")
+			view := ui.NewBasicTableView()
+			view.Header("Name")
 
 			for _, ns := range namespaces {
-				table.AddRow(string(ns.Name))
+				view.AddRow(ns.Name)
 			}
 
-			fmt.Println(table)
+			ui.RenderView(view)
 		},
 	}
+
+	addOutputFlag(cmd.Flags())
+
+	return cmd
 }
