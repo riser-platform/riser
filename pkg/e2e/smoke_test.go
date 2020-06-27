@@ -45,11 +45,13 @@ func Test_Smoke(t *testing.T) {
 			Name:      model.AppName(appContext.Name),
 			Namespace: model.NamespaceName(namespace),
 			Image:     "tshak/testdummy",
-			Environment: map[string]intstr.IntOrString{
-				"env1": intstr.FromString("val1"),
-			},
 			Expose: &model.AppConfigExpose{
 				ContainerPort: 8000,
+			},
+			OverrideableAppConfig: model.OverrideableAppConfig{
+				Environment: map[string]intstr.IntOrString{
+					"env1": intstr.FromString("val1"),
+				},
 			},
 		}
 
@@ -191,11 +193,13 @@ func Test_Namespace(t *testing.T) {
 			Name:      model.AppName(appContext.Name),
 			Namespace: model.NamespaceName(namespace),
 			Image:     "tshak/testdummy",
-			Environment: map[string]intstr.IntOrString{
-				"env1": intstr.FromString("val1"),
-			},
 			Expose: &model.AppConfigExpose{
 				ContainerPort: 8000,
+			},
+			OverrideableAppConfig: model.OverrideableAppConfig{
+				Environment: map[string]intstr.IntOrString{
+					"env1": intstr.FromString("val1"),
+				},
 			},
 		}
 
