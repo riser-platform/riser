@@ -38,7 +38,7 @@ autoscale:
 
 # Optional. Environment variables specified in the form of "key: value". Do not put secrets here.
 environment:
-  DEBUG: true
+  DEBUG: "true"
   DEFAULT_CACHE_TIMEOUT: "1m"
   # ETC...
 
