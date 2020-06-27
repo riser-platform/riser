@@ -1,7 +1,7 @@
 FROM golang:1.14-alpine
 
 WORKDIR /app
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl git
 
 RUN curl -o /bin/kubectl -SL https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 RUN chmod +x /bin/kubectl
