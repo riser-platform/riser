@@ -1,4 +1,4 @@
-SDKVERSION ?= "master"
+SDKVERSION ?= "main"
 
 .PHONY: e2e
 
