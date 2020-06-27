@@ -21,9 +21,10 @@ The Riser demo is the easiest way to experiment with Riser. The demo is a single
 
 ### Things to try
 
+- Use `riser apps init` to create a minimal app config.
 - Check out the documented [app config](examples/app.yaml) for a full list of configuration options.
 - Use `riser help` to explore other help topics.
-- To see how app dependencies work, review the [emojivoto example](examples/emojivoto)
+- Review the [emojivoto microservices example](examples/emojivoto) 
 
 
 
