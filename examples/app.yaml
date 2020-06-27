@@ -25,8 +25,8 @@ expose:
 
 # --- Everything below this line is optional --- #
 
-# Optional. Configures the autoscaler
-autoscale:
+# Optional. Configures the autoscaler (Overrideable)
+autoscale: 
   # Optional. The default is 0, but effectively may be different per environment depending on cluster level autoscaler settings
   # and/or resource quotas (default: empty)
   # Note: A minimum means that if your app is not active there will be zero scheduled pods. This means that a "cold" request
@@ -36,7 +36,7 @@ autoscale:
   # cluster level autoscaler settings and/or resource quotas (default: empty)
   max: 1
 
-# Optional. Environment variables specified in the form of "key: value". Do not put secrets here.
+# Optional. Environment variables specified in the form of "key: value". Do not put secrets here. (Overrideable)
 environment:
   DEBUG: "true"
   DEFAULT_CACHE_TIMEOUT: "1m"
@@ -50,14 +50,14 @@ healthcheck:
   # Defaults to expose.containerPort
   port: 8000
 
-# Optional. Defaults to Kubernetes cluster/namespace defaults.
+# Optional. Defaults to Kubernetes cluster/namespace defaults. (Overrideable)
 resources:
   # Optional. This sets the maximum number of CPU cores that the app can utilize. Defaults to Kubernetes cluster/namespace defaults.
   cpuCores: 1
   # Optional. This sets the maximum amount of memory that an app can utilize. If this limit is reached the app will receive an OOM signal. Defaults to Kubernetes cluster/namespace defaults.
   memoryMB: 128
 
-# Optional. Environment specific settings. Most settings can be overridden except for "name" and "id".
+# Optional. Overrides settings for the specified environment. 
 environmentOverrides:
   # Example: for an environment named "prod" that wishes to set the environment variable "DEBUG" to "false":
   prod:
