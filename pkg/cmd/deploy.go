@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"riser/pkg/config"
+	"riser/pkg/deploy"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
 	"riser/pkg/ui/style"
+	"time"
 
 	"github.com/riser-platform/riser-server/api/v1/model"
 	"github.com/wzshiming/ctc"
@@ -19,6 +22,8 @@ func newDeployCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var dryRun bool
 	var deploymentName string
 	var manualRollout bool
+	var wait bool
+	var waitSeconds int
 	cmd := &cobra.Command{
 		Use:   "deploy (docker tag) (targetEnvironment)",
 		Short: "Creates a new deployment or revision",
@@ -27,6 +32,8 @@ func newDeployCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 			currentContext := safeCurrentContext(runtimeConfig)
 			dockerTag := args[0]
 			environment := args[1]
+
+			ui.ExitIfError(validateNewDeployCommand(manualRollout, wait))
 
 			app, err := config.LoadApp(appFilePath)
 			ui.ExitIfErrorMsg(err, "Error loading app config")
@@ -46,22 +53,42 @@ func newDeployCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 			deployResult, err := riserClient.Deployments.Save(deployment, dryRun)
 			ui.ExitIfError(err)
 
-			view := &newDeployView{
-				result:        deployResult,
-				manualRollout: manualRollout,
-				dryRun:        dryRun,
+			if wait {
+				err = deploy.WaitForReady(
+					riserClient.Apps,
+					model.App{Id: app.Id, Name: app.Name, Namespace: app.Namespace},
+					deploymentName,
+					environment,
+					deployResult.RiserRevision,
+					time.Duration(waitSeconds)*time.Second)
+				ui.ExitIfError(err)
+			} else {
+				view := &newDeployView{
+					result:        deployResult,
+					manualRollout: manualRollout,
+					dryRun:        dryRun,
+				}
+				ui.RenderView(view)
 			}
-			ui.RenderView(view)
 		},
 	}
 
 	addDeploymentNameFlag(cmd.Flags(), &deploymentName)
 	addAppFilePathFlag(cmd.Flags(), &appFilePath)
 	cmd.Flags().BoolVarP(&dryRun, "dry-run", "", false, "Prints the deployment but does not create it")
-	cmd.Flags().BoolVarP(&manualRollout, "manual-rollout", "m", false, "When set no traffic routes to the new deployment. Use \"riser rollout\" to manually route traffic.")
+	cmd.Flags().BoolVarP(&manualRollout, "manual-rollout", "m", false, "When set no traffic routes to the new deployment. Use \"riser rollout\" to manually route traffic")
+	cmd.Flags().BoolVar(&wait, "wait", false, "Blocks until the new deployment is ready to receive traffic or until --wait-seconds is reached. Cannot be used with --manual-rollout")
+	cmd.Flags().IntVar(&waitSeconds, "wait-seconds", 60, "Sets the number of seconds for --wait")
 	addOutputFlag(cmd.Flags())
 
 	return cmd
+}
+
+func validateNewDeployCommand(manualRollout, wait bool) error {
+	if manualRollout && wait {
+		return errors.New(`You cannot specify both "--wait" and "--manual-rollout"`)
+	}
+	return nil
 }
 
 type newDeployView struct {
