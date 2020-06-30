@@ -54,7 +54,7 @@ func Test_DeploymentName(t *testing.T) {
 	versionA := "0.0.15"
 	deploymentName := fmt.Sprintf("%s-alt1", appContext.Name)
 	step(fmt.Sprintf("deploy %q version %q", deploymentName, versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s --name %s", appContext.AppDir, versionA, testContext.RiserEnvironment, deploymentName)
+		riserOrFail(t, appContext.AppDir, fmt.Sprintf("deploy %s %s --name %s", versionA, testContext.RiserEnvironment, deploymentName))
 
 		err := testContext.Http.RetryGet(appContext.UrlByName("/version", deploymentName), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -63,7 +63,7 @@ func Test_DeploymentName(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", deploymentName), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, deploymentName, testContext.RiserEnvironment)
+		deleteDeploymentOrFail(t, appContext.AppDir, deploymentName, testContext.RiserEnvironment)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {

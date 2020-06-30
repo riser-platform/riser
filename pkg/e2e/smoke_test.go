@@ -64,7 +64,7 @@ func Test_Smoke(t *testing.T) {
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionA, testContext.RiserEnvironment)
+		deployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -92,7 +92,7 @@ func Test_Smoke(t *testing.T) {
 
 	versionB := "0.0.16"
 	step(fmt.Sprintf("deploy version %q", versionB), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionB, testContext.RiserEnvironment)
+		deployOrFail(t, appContext.AppDir, versionB, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionB
@@ -112,7 +112,7 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	step("rollout 50/50 with previous deployment", func() {
-		shellOrFail(t, "cd %s && riser rollout %s r1:50 r2:50", appContext.AppDir, testContext.RiserEnvironment)
+		riserOrFail(t, appContext.AppDir, fmt.Sprintf("rollout %s r1:50 r2:50", testContext.RiserEnvironment))
 		// Wait until we get one hit from versionA to ensure that the rollout is working before we start taking samples
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -137,7 +137,7 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
+		deleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
@@ -177,7 +177,7 @@ func Test_Namespace(t *testing.T) {
 	defer appContext.Cleanup()
 
 	step(fmt.Sprintf("create namespace %q", namespace), func() {
-		shellOrFail(t, "cd %s && riser namespaces create %s", appContext.AppDir, namespace)
+		riserOrFail(t, appContext.AppDir, fmt.Sprintf("namespaces create %s", namespace))
 	})
 
 	step(fmt.Sprintf("create app %q in namespace %q", appContext.Name, namespace), func() {
@@ -212,8 +212,7 @@ func Test_Namespace(t *testing.T) {
 
 	versionA := "0.0.15"
 	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		shellOrFail(t, "cd %s && riser deploy %s %s", appContext.AppDir, versionA, testContext.RiserEnvironment)
-
+		deployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
@@ -231,8 +230,7 @@ func Test_Namespace(t *testing.T) {
 	})
 
 	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
-		shellOrFail(t, "cd %s && riser deployments delete %s %s --no-prompt", appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
-
+		deleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
 			appStatus, err := testContext.Riser.Apps.GetStatus(appContext.Name, namespace)

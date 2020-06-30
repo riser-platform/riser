@@ -84,7 +84,7 @@ func main() {
 					"kubectl create secret generic riser-e2e --namespace=riser-e2e "+
 						fmt.Sprintf("--from-literal=RISER_APIKEY=%s --dry-run=client -o yaml | kubectl apply -f -", riserCtx.Apikey)).Exec()
 			}),
-			steps.NewShellExecStep("Deploy e2e tests", "kubectl delete job riser-e2e --namespace=riser-e2e --ignore-not-found=true && kubectl apply -f ./e2e/job.yaml"),
+			steps.NewShellExecStep("Deploy e2e tests", "kubectl delete job riser-e2e --namespace=riser-e2e --ignore-not-found=true --wait=true && kubectl apply -f ./e2e/job.yaml"),
 			steps.NewShellExecStep("Wait for test run to start", "kubectl wait --namespace=riser-e2e --for=condition=initialized --timeout=30s -l job-name=riser-e2e pod"),
 			steps.NewRetryStep(func() steps.Step {
 				return steps.NewFuncStep("Stream test results", func() error {
