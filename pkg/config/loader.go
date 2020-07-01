@@ -49,7 +49,7 @@ func LoadAppFromConfig(pathToAppConfig string) (*model.AppConfigWithOverrides, e
 		return nil, err
 	}
 	app := &model.AppConfigWithOverrides{}
-	err = yaml.Unmarshal(rawFile, app)
+	err = yaml.UnmarshalStrict(rawFile, app, yaml.DisallowUnknownFields)
 	if err != nil {
 		return nil, &unmarshalAppError{path: pathToAppConfig, unmarshalError: err}
 	}

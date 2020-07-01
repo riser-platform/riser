@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"os"
 	"riser/pkg/ui/style"
 )
 
@@ -34,5 +35,5 @@ func (logger *ScreenLogger) Warn(message string) {
 
 // Error logs an error message to the screen
 func (logger *ScreenLogger) Error(message string) {
-	fmt.Println(style.Bad(message))
+	fmt.Fprintf(os.Stderr, "%s\n", style.Bad(message))
 }
