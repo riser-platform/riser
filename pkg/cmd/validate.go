@@ -17,7 +17,7 @@ func newValidateCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 		Short: "Validates an app config",
 		Run: func(cmd *cobra.Command, args []string) {
 			currentContext := safeCurrentContext(runtimeConfig)
-			app, err := config.LoadApp(appFilePath)
+			app, err := config.LoadAppFromConfig(appFilePath)
 			if err == nil {
 				riserClient := getRiserClient(currentContext)
 

@@ -35,7 +35,7 @@ func newDeployCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 
 			ui.ExitIfError(validateNewDeployCommand(manualRollout, wait))
 
-			app, err := config.LoadApp(appFilePath)
+			app, err := config.LoadAppFromConfig(appFilePath)
 			ui.ExitIfErrorMsg(err, "Error loading app config")
 
 			deployment := &model.DeploymentRequest{

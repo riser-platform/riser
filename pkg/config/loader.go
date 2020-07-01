@@ -1,12 +1,14 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
-
-	"github.com/riser-platform/riser-server/api/v1/model"
+	"riser/pkg/logger"
 
 	"github.com/ghodss/yaml"
+
+	"github.com/riser-platform/riser-server/api/v1/model"
 )
 
 // DefaultNamespace is the default namespace to use when a namespace is not specified.
@@ -14,17 +16,44 @@ const DefaultNamespace = "apps"
 
 var DefaultAppConfigPaths = []string{"./app.yml", "./app.yaml"}
 
-// LoadApp loads an app yaml from a file unmarshalled into an API model.
-func LoadApp(pathToAppConfig string) (*model.AppConfigWithOverrides, error) {
+var appConfigCache = map[string]*model.AppConfigWithOverrides{}
+var alreadyWarned bool
+
+type unmarshalAppError struct {
+	path           string
+	unmarshalError error
+}
+
+func (err *unmarshalAppError) Error() string {
+	return err.unmarshalError.Error()
+}
+
+func warnIfUnmartialAppError(err error) {
+	if alreadyWarned {
+		return
+	}
+	if v, ok := err.(*unmarshalAppError); ok {
+		alreadyWarned = true
+		logger.Log().Warn(fmt.Sprintf("Error parsing app config %q: %s", v.path, err))
+	}
+}
+
+// LoadAppFromConfig loads an app yaml from a file unmarshalled into an API model.
+func LoadAppFromConfig(pathToAppConfig string) (*model.AppConfigWithOverrides, error) {
+	// This func is called from multiple cobra arguments so prevent constantly hitting the disk and unmarshalling
+	if fromCache, ok := appConfigCache[pathToAppConfig]; ok {
+		return fromCache, nil
+	}
 	rawFile, err := ioutil.ReadFile(pathToAppConfig)
 	if err != nil {
 		return nil, err
 	}
 	app := &model.AppConfigWithOverrides{}
-	err = yaml.UnmarshalStrict(rawFile, app, yaml.DisallowUnknownFields)
+	err = yaml.Unmarshal(rawFile, app)
 	if err != nil {
-		return nil, err
+		return nil, &unmarshalAppError{path: pathToAppConfig, unmarshalError: err}
 	}
+	appConfigCache[pathToAppConfig] = app
 
 	return app, nil
 }
@@ -32,10 +61,12 @@ func LoadApp(pathToAppConfig string) (*model.AppConfigWithOverrides, error) {
 // SafeLoadAppName attempts to retrieve the name of the app in the specified path.
 // An empty string is returned if the file does not exist, cannot be be parsed, or if any other error occurs.
 func SafeLoadAppName(pathToAppConfig string) string {
-	appConfig, err := LoadApp(pathToAppConfig)
+	appConfig, err := LoadAppFromConfig(pathToAppConfig)
+	warnIfUnmartialAppError(err)
 	if err == nil {
 		return string(appConfig.Name)
 	}
+
 	return ""
 }
 
@@ -56,7 +87,8 @@ func SafeLoadDefaultAppName() string {
 // Returns an empty string if the namespace is not specified, the file does not exist, cannot be be parsed,
 // or if any other error occurs.
 func SafeLoadAppNamespace(pathToAppConfig string) string {
-	appConfig, err := LoadApp(pathToAppConfig)
+	appConfig, err := LoadAppFromConfig(pathToAppConfig)
+	warnIfUnmartialAppError(err)
 	if err == nil {
 		return string(appConfig.Namespace)
 	}
