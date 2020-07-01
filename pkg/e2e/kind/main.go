@@ -97,7 +97,8 @@ func main() {
 			// The job won't terminate because of the istio sidecar (https://github.com/kubernetes/kubernetes/issues/25908)
 			// Grab the container exitCode to determine success or not.
 			steps.NewFuncStep("Check test results", func() error {
-				jobCmd := exec.Command("sh", "-c", `kubectl get po --namespace=riser-e2e -l job-name=riser-e2e -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="riser-e2e")].state.terminated.exitCode}'`)
+				// The sleep hack is here due to a race condition between the container exiting and the containerStatus being updated.
+				jobCmd := exec.Command("sh", "-c", `sleep 5 && kubectl get po --namespace=riser-e2e -l job-name=riser-e2e -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="riser-e2e")].state.terminated.exitCode}'`)
 				output, err := jobCmd.CombinedOutput()
 				if err != nil {
 					return fmt.Errorf("Error executing command: %s", string(output))
