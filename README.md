@@ -29,8 +29,7 @@ Riser interacts with Kubernetes using a strictly [GitOps](https://thenewstack.io
 
 ## Known Issues and Limitations
 
-- Docker images must be hosted on a public registry. Private registries as well as the ability for administrators to restrict the use of public registries will be supported in the future.
-- While not strictly enforced, GitHub is the only supported git provider at this time.
+- GitHub is the only validated git provider at this time. This is no GitHub specific code so it's likely that other providers will function reliably.
 - The documentation is very sparse. As features mature more documentation will be added.
 
 ## Development
