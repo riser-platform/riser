@@ -25,7 +25,7 @@ Riser is an opinionated app platform built on [Kubernetes](https://kubernetes.io
 
 ### More on GitOps
 
-Riser interacts with Kubernetes using a strictly [GitOps](https://thenewstack.io/what-is-gitops-and-why-it-might-be-the-next-big-thing-for-devops/) approach. A git repository (typically referred to as a "state repo") contains all information required to stand up an app. The riser server can be unreachable or even destroyed with no impact to your apps. It also designed so that all of the resources in your state repo can be "`kubectl apply -f`'d" to a Kubernetes cluster without any Riser infrastructure running or installed.
+Riser interacts with Kubernetes using a strictly [GitOps](https://www.weave.works/technologies/gitops/) approach. A git repository (typically referred to as a "state repo") contains all information required to stand up an app. The riser server can be unreachable or even destroyed with no impact to your apps. It also designed so that all of the resources in your state repo can be "`kubectl apply -f`'d" to a Kubernetes cluster without any Riser infrastructure running or installed.
 
 ## Known Issues and Limitations
 
