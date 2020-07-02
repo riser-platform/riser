@@ -20,7 +20,7 @@ import (
 
 const (
 	DefaultEnvironmentName = "demo"
-	DefaultServerImage     = "riserplatform/riser-server:0.0.25"
+	DefaultServerImage     = "riserplatform/riser-server:0.0.26"
 	DefaultControllerImage = "riserplatform/riser-controller:0.0.8"
 )
 
