@@ -149,10 +149,10 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v0.0.0-20151028094244-d8ed2627bdf0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/riser-platform/riser-server/api/v1/model v0.0.15 h1:rTB92RIHMemvq4nWoVDCzLJDLhfBz7o9YZqidmHCJXM=
-github.com/riser-platform/riser-server/api/v1/model v0.0.15/go.mod h1:HdFiUNYm4n3GHqcHGjHr4lr/PPlftsoJS2pQkYkiUfo=
-github.com/riser-platform/riser-server/pkg/sdk v0.0.38 h1:n6rQM0EP9LQUgi9e9ys6aCQNR4aq3MXSU+DKTe3WZ2Q=
-github.com/riser-platform/riser-server/pkg/sdk v0.0.38/go.mod h1:kkbkkqbF0IWQIDDvaOCsMryXn5+TZsuARi6wnBdg+ek=
+github.com/riser-platform/riser-server/api/v1/model v0.0.16 h1:hdTu/0287krbrtYRdzrYp2vgRQ4riRztNyTYoRbjjJs=
+github.com/riser-platform/riser-server/api/v1/model v0.0.16/go.mod h1:HdFiUNYm4n3GHqcHGjHr4lr/PPlftsoJS2pQkYkiUfo=
+github.com/riser-platform/riser-server/pkg/sdk v0.0.39 h1:B1Lxn7I/OdWSYyuxeuuFv2tccpIZS8rnlDcrR7yJPyE=
+github.com/riser-platform/riser-server/pkg/sdk v0.0.39/go.mod h1:RBdSebo5JFRXZo+zD59CsjxEcQH1gasqjcmJEttz8Ok=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 h1:bUGsEnyNbVPw06Bs80sCeARAlK8lhwqGyi6UT8ymuGk=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749/go.mod h1:ZY1cvUeJuFPAdZ/B6v7RHavJWZn2YPVFQ1OSXhCGOkg=
