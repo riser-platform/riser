@@ -34,7 +34,7 @@ func newDeploymentsDeleteCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.
 			deploymentName := args[0]
 			environmentName := args[1]
 			prompt := &survey.Confirm{
-				Message: fmt.Sprintf("Are you sure you wish to delete the deployment %q in environment %q?", deploymentName, environmentName),
+				Message: fmt.Sprintf("Are you sure you wish to delete the deployment %q in namespace %q in environment %q?", deploymentName, namespace, environmentName),
 			}
 
 			if !noPrompt {
