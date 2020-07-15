@@ -1,8 +1,9 @@
 package status
 
 import (
-	"github.com/riser-platform/riser-server/api/v1/model"
 	"sort"
+
+	"github.com/riser-platform/riser-server/api/v1/model"
 )
 
 type RevisionStatusWithTraffic struct {
@@ -18,6 +19,7 @@ An active revision is:
 */
 func GetRevisionStatus(deploymentStatus *model.DeploymentStatus, activeOnly bool) []RevisionStatusWithTraffic {
 	activeStatuses := []RevisionStatusWithTraffic{}
+
 	for _, revision := range deploymentStatus.Revisions {
 		hasTrafficStatus := false
 		for _, traffic := range deploymentStatus.Traffic {

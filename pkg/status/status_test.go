@@ -12,22 +12,22 @@ func Test_GetRevisionStatus_PercentBasedRouting(t *testing.T) {
 	deploymentStatus := &model.DeploymentStatus{
 		DeploymentStatusMutable: model.DeploymentStatusMutable{
 			Revisions: []model.DeploymentRevisionStatus{
-				model.DeploymentRevisionStatus{
+				{
 					Name: "rev0",
 				},
-				model.DeploymentRevisionStatus{
+				{
 					Name: "rev1",
 				},
-				model.DeploymentRevisionStatus{
+				{
 					Name: "rev2",
 				},
 			},
 			Traffic: []model.DeploymentTrafficStatus{
-				model.DeploymentTrafficStatus{
+				{
 					RevisionName: "rev1",
 					Percent:      util.PtrInt64(90),
 				},
-				model.DeploymentTrafficStatus{
+				{
 					RevisionName: "rev2",
 					Percent:      util.PtrInt64(10),
 				},
@@ -49,10 +49,10 @@ func Test_GetRevisionStatus_NoTraffic(t *testing.T) {
 	deploymentStatus := &model.DeploymentStatus{
 		DeploymentStatusMutable: model.DeploymentStatusMutable{
 			Revisions: []model.DeploymentRevisionStatus{
-				model.DeploymentRevisionStatus{
+				{
 					Name: "rev0",
 				},
-				model.DeploymentRevisionStatus{
+				{
 					Name: "rev1",
 				},
 			},
@@ -69,18 +69,21 @@ func Test_GetRevisionStatus_LatestCreatedNoTraffic(t *testing.T) {
 		DeploymentStatusMutable: model.DeploymentStatusMutable{
 			LatestCreatedRevisionName: "rev2",
 			Revisions: []model.DeploymentRevisionStatus{
-				model.DeploymentRevisionStatus{
-					Name: "rev0",
+				{
+					Name:          "rev0",
+					RiserRevision: 0,
 				},
-				model.DeploymentRevisionStatus{
-					Name: "rev1",
+				{
+					Name:          "rev1",
+					RiserRevision: 1,
 				},
-				model.DeploymentRevisionStatus{
-					Name: "rev2",
+				{
+					Name:          "rev2",
+					RiserRevision: 2,
 				},
 			},
 			Traffic: []model.DeploymentTrafficStatus{
-				model.DeploymentTrafficStatus{
+				{
 					RevisionName: "rev0",
 					Percent:      util.PtrInt64(100),
 				},
@@ -91,9 +94,10 @@ func Test_GetRevisionStatus_LatestCreatedNoTraffic(t *testing.T) {
 	result := GetRevisionStatus(deploymentStatus, true)
 
 	assert.Len(t, result, 2)
-	assert.Equal(t, "rev0", result[0].Name)
-	assert.Equal(t, "rev2", result[1].Name)
-	assert.Empty(t, result[1].Traffic)
+	// Results should be sorted descending
+	assert.Equal(t, "rev2", result[0].Name)
+	assert.Equal(t, "rev0", result[1].Name)
+	assert.Empty(t, result[0].Traffic)
 }
 
 func Test_GetRevisionStatus_AllRevisions(t *testing.T) {
@@ -101,18 +105,18 @@ func Test_GetRevisionStatus_AllRevisions(t *testing.T) {
 		DeploymentStatusMutable: model.DeploymentStatusMutable{
 			LatestCreatedRevisionName: "rev2",
 			Revisions: []model.DeploymentRevisionStatus{
-				model.DeploymentRevisionStatus{
+				{
 					Name: "rev0",
 				},
-				model.DeploymentRevisionStatus{
+				{
 					Name: "rev1",
 				},
-				model.DeploymentRevisionStatus{
+				{
 					Name: "rev2",
 				},
 			},
 			Traffic: []model.DeploymentTrafficStatus{
-				model.DeploymentTrafficStatus{
+				{
 					RevisionName: "rev0",
 					Percent:      util.PtrInt64(100),
 				},
@@ -129,13 +133,13 @@ func Test_GetRevisionStatus_SortsByRevision(t *testing.T) {
 	deploymentStatus := &model.DeploymentStatus{
 		DeploymentStatusMutable: model.DeploymentStatusMutable{
 			Revisions: []model.DeploymentRevisionStatus{
-				model.DeploymentRevisionStatus{
+				{
 					RiserRevision: 0,
 				},
-				model.DeploymentRevisionStatus{
+				{
 					RiserRevision: 2,
 				},
-				model.DeploymentRevisionStatus{
+				{
 					RiserRevision: 1,
 				},
 			},
