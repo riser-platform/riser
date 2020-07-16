@@ -27,6 +27,7 @@ func main() {
 	var gitUrl string
 	var gitSSHKeyPath string
 	var destroy bool
+	var riserE2EImage string
 	var riserServerImage string
 	var riserControllerImage string
 	cmd := &cobra.Command{}
@@ -35,6 +36,7 @@ func main() {
 	cmd.Flags().StringVar(&gitUrl, "git-url", "", "the git url for the state repo")
 	cmd.Flags().StringVar(&gitSSHKeyPath, "git-ssh-key-path", "", "optional path to a git ssh key.")
 	cmd.Flags().BoolVar(&destroy, "destroy", false, "destroy the cluster if it already exists")
+	cmd.Flags().StringVar(&riserE2EImage, "riser-e2e-image", "riser.dev/riser-e2e:local", "the riser E2E image (use \"make docker-e2e\" for a local version)")
 	cmd.Flags().StringVar(&riserServerImage, "riser-server-image", infra.DefaultServerImage, "the riser server image")
 	cmd.Flags().StringVar(&riserControllerImage, "riser-controller-image", infra.DefaultControllerImage, "the riser controller image")
 	err := cobra.MarkFlagRequired(cmd.Flags(), "git-url")
@@ -45,25 +47,27 @@ func main() {
 		config, err := rc.LoadRc()
 		ui.ExitIfError(err)
 
-		apiserverStep := steps.NewShellExecStep("Get apiserver IP", `kubectl get service  -l component=apiserver -l provider=kubernetes -o jsonpath="{.items[0].spec.clusterIP}"`)
-		ui.ExitIfError(apiserverStep.Exec())
-		apiserverIP := apiserverStep.State("stdout")
-		err = steps.Run(
-			steps.NewFuncStep("Deploying Kind", func() error {
-				kindDeployment := infra.NewKindDeployer(kindNodeImage, kindName)
-				if destroy {
-					err = kindDeployment.Destroy()
-					if err != nil {
-						return err
-					}
-				}
-				err = kindDeployment.Deploy()
+		err = steps.NewFuncStep("Deploying Kind", func() error {
+			kindDeployment := infra.NewKindDeployer(kindNodeImage, kindName)
+			if destroy {
+				err = kindDeployment.Destroy()
 				if err != nil {
 					return err
 				}
-				// TODO: Add support for loading a published container or a different local container name
-				return kindDeployment.LoadLocalDockerImage("riser.dev/riser-e2e:local")
-			}),
+			}
+			err = kindDeployment.Deploy()
+			if err != nil {
+				return err
+			}
+			return kindDeployment.LoadLocalDockerImage(riserE2EImage)
+		}).Exec()
+		ui.ExitIfError(err)
+
+		apiserverStep := steps.NewShellExecStep("Get apiserver IP", `kubectl get service  -l component=apiserver -l provider=kubernetes -o jsonpath="{.items[0].spec.clusterIP}"`)
+		ui.ExitIfError(apiserverStep.Exec())
+		apiserverIP := apiserverStep.State("stdout")
+
+		err = steps.Run(
 			steps.NewShellExecStep("Create riser-e2e namespace", "kubectl create namespace riser-e2e --dry-run=client -o yaml | kubectl apply -f -"),
 			steps.NewShellExecStep("Add istio-injection label", "kubectl label namespace riser-e2e istio-injection=enabled --overwrite=true"),
 			steps.NewFuncStep("Deploying Riser", func() error {
@@ -90,7 +94,10 @@ func main() {
 			steps.NewShellExecStep("Cleanup existing e2e tests",
 				"kubectl delete job riser-e2e --namespace=riser-e2e --ignore-not-found=true --wait=true"),
 			steps.NewShellExecStep("Deploy e2e tests",
-				fmt.Sprintf(`export APISERVERIP=%s && envsubst '${APISERVERIP}' < ./e2e/job.yaml |  kubectl apply -f -`, apiserverIP)),
+				fmt.Sprintf(`export APISERVERIP=%s RISERE2EIMAGE=%s && envsubst '${APISERVERIP},${RISERE2EIMAGE}' < ./e2e/job.yaml |  kubectl apply -f -`,
+					apiserverIP,
+					riserE2EImage,
+				)),
 			steps.NewShellExecStep("Wait for test run to start", "kubectl wait --namespace=riser-e2e --for=condition=initialized --timeout=30s -l job-name=riser-e2e pod"),
 			steps.NewRetryStep(func() steps.Step {
 				return steps.NewFuncStep("Stream test results", func() error {

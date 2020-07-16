@@ -50,6 +50,11 @@ If you change anything in the `assets` folder, you must run `make generate` to s
 - `envsubst` (`gettext` package for homebrew, apt, etc.)
 - A git repo with write access
 
+#### Building the E2E image
+
+- Check out this repo to the desired tag that you wish to test
+- Run `make docker-e2e`
+
 #### Running
 
 Example using a github deploy key with write access:

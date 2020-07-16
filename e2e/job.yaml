@@ -41,8 +41,7 @@ spec:
       activeDeadlineSeconds: 600
       containers:
       - name: riser-e2e
-        # TODO: Make configurable
-        image: riser.dev/riser-e2e:local
+        image: ${RISERE2EIMAGE}
         command: ["sh", "-c", "go test -count=1 -tags=e2e -v ./pkg/e2e"]
         env:
         - name: RISER_APIKEY
