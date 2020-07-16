@@ -54,7 +54,7 @@ func Test_DeploymentName(t *testing.T) {
 	versionA := "0.0.15"
 	deploymentName := fmt.Sprintf("%s-alt1", appContext.Name)
 	step(fmt.Sprintf("deploy %q version %q", deploymentName, versionA), func() {
-		riserOrFail(t, appContext.AppDir, fmt.Sprintf("deploy %s %s --name %s", versionA, testContext.RiserEnvironment, deploymentName))
+		deployArgsOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment, fmt.Sprintf("--name %s", deploymentName))
 
 		err := testContext.Http.RetryGet(appContext.UrlByName("/version", deploymentName), func(r *httpResult) bool {
 			return string(r.body) == versionA
