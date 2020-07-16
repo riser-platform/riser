@@ -23,15 +23,14 @@ type httpResult struct {
 
 type ShouldRetryHttpFunc func(result *httpResult) bool
 
-func NewIngressClient(ingressIP string) *ingressClient {
+func NewIngressClient(ingressIP string, domain string) *ingressClient {
 	dialer := &net.Dialer{
 		Timeout: 5 * time.Second,
 	}
 	transport := &http.Transport{
 		// Since we don't necessarily have DNS setup for the cluster
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			// TODO: Make the domain configurable
-			if regexp.MustCompile(".+demo.riser:443$").Match([]byte(addr)) {
+			if regexp.MustCompile(fmt.Sprintf(".+%s:443$", domain)).Match([]byte(addr)) {
 				return dialer.DialContext(ctx, network, fmt.Sprintf("%s:443", ingressIP))
 			}
 			return dialer.DialContext(ctx, network, addr)

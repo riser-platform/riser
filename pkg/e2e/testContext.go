@@ -69,7 +69,7 @@ func SetupSingleEnvTestContext(t *testing.T) *SingleEnvTestContext {
 		t.Fatal("RISER_ENVIRONMENT not specified in riser-controller")
 	}
 
-	ctx.Http = NewIngressClient(ctx.IngressIP)
+	ctx.Http = NewIngressClient(ctx.IngressIP, ctx.IngressDomain)
 	currentTestContext = ctx
 
 	// Validate riser environment is setup
