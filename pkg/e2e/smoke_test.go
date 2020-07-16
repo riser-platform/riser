@@ -24,7 +24,7 @@ import (
 func Test_Smoke(t *testing.T) {
 	var testContext *SingleEnvTestContext
 
-	Step("setup test context", func() {
+	Step(t, "setup test context", func() {
 		testContext = SetupSingleEnvTestContext(t)
 	})
 
@@ -32,7 +32,7 @@ func Test_Smoke(t *testing.T) {
 	appContext := NewRandomAppContext(t, namespace, testContext.IngressDomain)
 	defer appContext.Cleanup()
 
-	Step(fmt.Sprintf("create app %q", appContext.Name), func() {
+	Step(t, fmt.Sprintf("create app %q", appContext.Name), func() {
 		var err error
 
 		shellOrFail(t, "riser apps new %s", appContext.Name)
@@ -63,7 +63,7 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	versionA := "0.0.15"
-	Step(fmt.Sprintf("deploy version %q", versionA), func() {
+	Step(t, fmt.Sprintf("deploy version %q", versionA), func() {
 		DeployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
@@ -84,14 +84,14 @@ func Test_Smoke(t *testing.T) {
 
 	secretName := "secret1"
 	secretValue := "secretVal1"
-	Step("create secret", func() {
+	Step(t, "create secret", func() {
 		shellOrFail(t, "cd %s && riser secrets save %s %s %s", appContext.AppDir, secretName, secretValue, testContext.RiserEnvironment)
 		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
 		// not become available until the secret is present.
 	})
 
 	versionB := "0.0.16"
-	Step(fmt.Sprintf("deploy version %q", versionB), func() {
+	Step(t, fmt.Sprintf("deploy version %q", versionB), func() {
 		DeployOrFail(t, appContext.AppDir, versionB, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
@@ -111,7 +111,7 @@ func Test_Smoke(t *testing.T) {
 		require.Equal(t, secretValue, envMap[strings.ToUpper(secretName)])
 	})
 
-	Step("rollout 50/50 with previous deployment", func() {
+	Step(t, "rollout 50/50 with previous deployment", func() {
 		riserOrFail(t, appContext.AppDir, fmt.Sprintf("rollout %s r1:50 r2:50", testContext.RiserEnvironment))
 		// Wait until we get one hit from versionA to ensure that the rollout is working before we start taking samples
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
@@ -136,7 +136,7 @@ func Test_Smoke(t *testing.T) {
 		assert.InDelta(t, 0.5, mean, 0.2, "%v")
 	})
 
-	Step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
+	Step(t, fmt.Sprintf("delete deployment %q", appContext.Name), func() {
 		DeleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
 
 		// Wait until no deployments in status
@@ -168,7 +168,7 @@ func Test_Smoke(t *testing.T) {
 func Test_Namespace(t *testing.T) {
 	var testContext *SingleEnvTestContext
 
-	Step("setup test context", func() {
+	Step(t, "setup test context", func() {
 		testContext = SetupSingleEnvTestContext(t)
 	})
 
@@ -176,11 +176,11 @@ func Test_Namespace(t *testing.T) {
 	appContext := NewRandomAppContext(t, namespace, testContext.IngressDomain)
 	defer appContext.Cleanup()
 
-	Step(fmt.Sprintf("create namespace %q", namespace), func() {
+	Step(t, fmt.Sprintf("create namespace %q", namespace), func() {
 		riserOrFail(t, appContext.AppDir, fmt.Sprintf("namespaces create %s", namespace))
 	})
 
-	Step(fmt.Sprintf("create app %q in namespace %q", appContext.Name, namespace), func() {
+	Step(t, fmt.Sprintf("create app %q in namespace %q", appContext.Name, namespace), func() {
 		var err error
 
 		shellOrFail(t, "riser apps new %s -n %s", appContext.Name, namespace)
@@ -211,7 +211,7 @@ func Test_Namespace(t *testing.T) {
 	})
 
 	versionA := "0.0.15"
-	Step(fmt.Sprintf("deploy version %q", versionA), func() {
+	Step(t, fmt.Sprintf("deploy version %q", versionA), func() {
 		DeployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -229,7 +229,7 @@ func Test_Namespace(t *testing.T) {
 		require.Equal(t, "val1", envMap["ENV1"])
 	})
 
-	Step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
+	Step(t, fmt.Sprintf("delete deployment %q", appContext.Name), func() {
 		DeleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {

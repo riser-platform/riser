@@ -18,7 +18,7 @@ import (
 func Test_DeploymentName(t *testing.T) {
 	var testContext *SingleEnvTestContext
 
-	Step("setup test context", func() {
+	Step(t, "setup test context", func() {
 		testContext = SetupSingleEnvTestContext(t)
 	})
 
@@ -26,7 +26,7 @@ func Test_DeploymentName(t *testing.T) {
 	appContext := NewRandomAppContext(t, namespace, testContext.IngressDomain)
 	defer appContext.Cleanup()
 
-	Step(fmt.Sprintf("create app %q", appContext.Name), func() {
+	Step(t, fmt.Sprintf("create app %q", appContext.Name), func() {
 		var err error
 
 		shellOrFail(t, "riser apps new %s", appContext.Name)
@@ -53,7 +53,7 @@ func Test_DeploymentName(t *testing.T) {
 
 	versionA := "0.0.15"
 	deploymentName := fmt.Sprintf("%s-alt1", appContext.Name)
-	Step(fmt.Sprintf("deploy %q version %q", deploymentName, versionA), func() {
+	Step(t, fmt.Sprintf("deploy %q version %q", deploymentName, versionA), func() {
 		DeployArgsOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment, fmt.Sprintf("--name %s", deploymentName))
 
 		err := testContext.Http.RetryGet(appContext.UrlByName("/version", deploymentName), func(r *httpResult) bool {
@@ -62,7 +62,7 @@ func Test_DeploymentName(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	Step(fmt.Sprintf("delete deployment %q", deploymentName), func() {
+	Step(t, fmt.Sprintf("delete deployment %q", deploymentName), func() {
 		DeleteDeploymentOrFail(t, appContext.AppDir, deploymentName, testContext.RiserEnvironment)
 
 		// Wait until no deployments in status
