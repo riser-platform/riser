@@ -6,6 +6,7 @@ import (
 	"os"
 	"riser/pkg/rc"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/riser-platform/riser-server/pkg/sdk"
@@ -19,6 +20,7 @@ const (
 )
 
 var currentTestContext *SingleEnvTestContext
+var testContextMux sync.Mutex
 
 type SingleEnvTestContext struct {
 	KubeContext      string
@@ -31,10 +33,14 @@ type SingleEnvTestContext struct {
 }
 
 func SetupSingleEnvTestContext(t *testing.T) *SingleEnvTestContext {
+	testContextMux.Lock()
+	defer testContextMux.Unlock()
+
 	// Cache since this must not change between tests
 	if currentTestContext != nil {
 		return currentTestContext
 	}
+
 	// Use riser context current by default. If it doesn't exist, construct one
 	// TODO: Allow alternate riserrc file
 	riserContext := shellOrFail(t, "riser context current")
