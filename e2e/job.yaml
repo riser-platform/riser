@@ -34,8 +34,8 @@ spec:
       labels:
         app: riser-e2e
       annotations:
-        # TODO: Make this dynamic as this won't work everywhere
-        traffic.sidecar.istio.io/excludeOutboundIPRanges: "10.96.0.1/32"
+        # Required for access to the apiserver in strict istio configurations
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "${APISERVERIP}/32"
     spec:
       serviceAccountName: riser-e2e
       activeDeadlineSeconds: 600

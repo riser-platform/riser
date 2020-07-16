@@ -102,7 +102,7 @@ func Test_Smoke(t *testing.T) {
 
 		envResponse, err := testContext.Http.Get(appContext.Url("/env"))
 		require.NoError(t, err)
-		assert.Equal(t, envResponse.StatusCode, http.StatusOK)
+		require.Equal(t, http.StatusOK, envResponse.StatusCode)
 
 		envBody, err := ioutil.ReadAll(envResponse.Body)
 		require.NoError(t, err)

@@ -40,6 +40,26 @@ Riser interacts with Kubernetes using a strictly [GitOps](https://www.weave.work
 
 If you change anything in the `assets` folder, you must run `make generate` to statically bundle them inside the riser binary.
 
+### E2E Tests using Kind
+
+#### Prequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- `envsubst` (`gettext` package for homebrew, apt, etc.)
+- A git repo with write access
+
+#### Running
+
+Example using a github deploy key with write access:
+```
+go run pkg/e2e/kind/main.go --git-url git@github.com:me/riser-state --git-ssh-key-path=/Users/me/.ssh/id_rsa
+```
+
+Run `go run pkg/e2e/kind/main.go` for additional options
+
+
 ### Supporting projects
 
 - [Riser Server](https://github.com/riser-platform/riser-server)

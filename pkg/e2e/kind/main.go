@@ -45,6 +45,9 @@ func main() {
 		config, err := rc.LoadRc()
 		ui.ExitIfError(err)
 
+		apiserverStep := steps.NewShellExecStep("Get apiserver IP", `kubectl get service  -l component=apiserver -l provider=kubernetes -o jsonpath="{.items[0].spec.clusterIP}"`)
+		ui.ExitIfError(apiserverStep.Exec())
+		apiserverIP := apiserverStep.State("stdout")
 		err = steps.Run(
 			steps.NewFuncStep("Deploying Kind", func() error {
 				kindDeployment := infra.NewKindDeployer(kindNodeImage, kindName)
@@ -84,7 +87,10 @@ func main() {
 					"kubectl create secret generic riser-e2e --namespace=riser-e2e "+
 						fmt.Sprintf("--from-literal=RISER_APIKEY=%s --dry-run=client -o yaml | kubectl apply -f -", riserCtx.Apikey)).Exec()
 			}),
-			steps.NewShellExecStep("Deploy e2e tests", "kubectl delete job riser-e2e --namespace=riser-e2e --ignore-not-found=true --wait=true && kubectl apply -f ./e2e/job.yaml"),
+			steps.NewShellExecStep("Cleanup existing e2e tests",
+				"kubectl delete job riser-e2e --namespace=riser-e2e --ignore-not-found=true --wait=true"),
+			steps.NewShellExecStep("Deploy e2e tests",
+				fmt.Sprintf(`export APISERVERIP=%s && envsubst '${APISERVERIP}' < ./e2e/job.yaml |  kubectl apply -f -`, apiserverIP)),
 			steps.NewShellExecStep("Wait for test run to start", "kubectl wait --namespace=riser-e2e --for=condition=initialized --timeout=30s -l job-name=riser-e2e pod"),
 			steps.NewRetryStep(func() steps.Step {
 				return steps.NewFuncStep("Stream test results", func() error {
