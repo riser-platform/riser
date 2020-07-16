@@ -22,6 +22,7 @@ import (
 // Initial attempt at e2e testing. Just run through a smoke test of a simple happy path. Lots of refactoring to do as we add more tests.
 // Kube and Riser context must be pointing to the correct location
 func Test_Smoke(t *testing.T) {
+	t.Parallel()
 	var testContext *SingleEnvTestContext
 
 	Step(t, "setup test context", func() {
@@ -166,6 +167,7 @@ func Test_Smoke(t *testing.T) {
 }
 
 func Test_Namespace(t *testing.T) {
+	t.Parallel()
 	var testContext *SingleEnvTestContext
 
 	Step(t, "setup test context", func() {

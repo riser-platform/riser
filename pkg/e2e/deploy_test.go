@@ -16,6 +16,7 @@ import (
 
 // See smoke_test for common paths. These tests are for less common paths
 func Test_DeploymentName(t *testing.T) {
+	t.Parallel()
 	var testContext *SingleEnvTestContext
 
 	Step(t, "setup test context", func() {
