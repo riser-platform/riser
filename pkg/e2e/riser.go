@@ -1,5 +1,3 @@
-// +build e2e
-
 package e2e
 
 import (
@@ -11,19 +9,19 @@ import (
 
 const deployTimeoutSeconds = 60
 
-// deployOrFail calls riser deploy with --wait
-func deployOrFail(t *testing.T, appDir, dockerTag, environment string) {
-	deployArgsOrFail(t, appDir, dockerTag, environment)
+// DeployOrFail calls riser deploy with --wait
+func DeployOrFail(t *testing.T, appDir, dockerTag, environment string) {
+	DeployArgsOrFail(t, appDir, dockerTag, environment)
 }
 
-func deployArgsOrFail(t *testing.T, appDir, dockerTag, environment string, args ...string) {
+func DeployArgsOrFail(t *testing.T, appDir, dockerTag, environment string, args ...string) {
 	// Wait one second less than the timeout so that we can get any possible error output from the deploy command before the command times out
 	waitSeconds := deployTimeoutSeconds - 2
 	joinedArgs := strings.Join(args, " ")
 	riserOrFail(t, appDir, fmt.Sprintf("deploy %s %s --wait --wait-seconds=%d %s", dockerTag, environment, waitSeconds, joinedArgs))
 }
 
-func deleteDeploymentOrFail(t *testing.T, appDir, deploymentName, environment string) {
+func DeleteDeploymentOrFail(t *testing.T, appDir, deploymentName, environment string) {
 	riserOrFail(t, appDir, fmt.Sprintf("deployments delete %s %s --no-prompt", deploymentName, environment))
 }
 

@@ -1,5 +1,3 @@
-// +build e2e
-
 package e2e
 
 import (
@@ -12,20 +10,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type appContext struct {
+type AppContext struct {
 	Name          string
 	Namespace     string
 	AppDir        string
 	IngressDomain string
 }
 
-func newRandomAppContext(t *testing.T, namespace string, ingressDomain string) *appContext {
-	appName := fmt.Sprintf("e2e-app-%s", randomString(6))
+func NewRandomAppContext(t *testing.T, namespace string, ingressDomain string) *AppContext {
+	appName := fmt.Sprintf("e2e-app-%s", RandomString(6))
 
 	tmpDir, err := ioutil.TempDir(os.TempDir(), "riser-e2e-")
 	require.NoError(t, err)
 
-	return &appContext{
+	return &AppContext{
 		Name:          appName,
 		Namespace:     namespace,
 		IngressDomain: ingressDomain,
@@ -33,17 +31,17 @@ func newRandomAppContext(t *testing.T, namespace string, ingressDomain string) *
 	}
 }
 
-func (ctx *appContext) Url(pathAndQuery string) string {
+func (ctx *AppContext) Url(pathAndQuery string) string {
 	return ctx.UrlByName(pathAndQuery, ctx.Name)
 }
 
-func (ctx *appContext) UrlByName(pathAndQuery, deploymentName string) string {
+func (ctx *AppContext) UrlByName(pathAndQuery, deploymentName string) string {
 	pqParsed, _ := url.Parse(pathAndQuery)
 	baseUrl, _ := url.Parse(fmt.Sprintf("https://%s.%s.%s", deploymentName, ctx.Namespace, ctx.IngressDomain))
 	return baseUrl.ResolveReference(pqParsed).String()
 }
 
 // Cleanup currently only cleans up temporary file system resources used. It does not clean up any riser resources (e.g. deployments)
-func (ctx *appContext) Cleanup() {
+func (ctx *AppContext) Cleanup() {
 	os.RemoveAll(ctx.AppDir)
 }

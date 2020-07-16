@@ -16,17 +16,17 @@ import (
 
 // See smoke_test for common paths. These tests are for less common paths
 func Test_DeploymentName(t *testing.T) {
-	var testContext *singleEnvTestContext
+	var testContext *SingleEnvTestContext
 
-	step("setup test context", func() {
-		testContext = setupSingleEnvTestContext(t)
+	Step("setup test context", func() {
+		testContext = SetupSingleEnvTestContext(t)
 	})
 
 	namespace := "apps"
-	appContext := newRandomAppContext(t, namespace, testContext.IngressDomain)
+	appContext := NewRandomAppContext(t, namespace, testContext.IngressDomain)
 	defer appContext.Cleanup()
 
-	step(fmt.Sprintf("create app %q", appContext.Name), func() {
+	Step(fmt.Sprintf("create app %q", appContext.Name), func() {
 		var err error
 
 		shellOrFail(t, "riser apps new %s", appContext.Name)
@@ -53,8 +53,8 @@ func Test_DeploymentName(t *testing.T) {
 
 	versionA := "0.0.15"
 	deploymentName := fmt.Sprintf("%s-alt1", appContext.Name)
-	step(fmt.Sprintf("deploy %q version %q", deploymentName, versionA), func() {
-		deployArgsOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment, fmt.Sprintf("--name %s", deploymentName))
+	Step(fmt.Sprintf("deploy %q version %q", deploymentName, versionA), func() {
+		DeployArgsOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment, fmt.Sprintf("--name %s", deploymentName))
 
 		err := testContext.Http.RetryGet(appContext.UrlByName("/version", deploymentName), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -62,8 +62,8 @@ func Test_DeploymentName(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	step(fmt.Sprintf("delete deployment %q", deploymentName), func() {
-		deleteDeploymentOrFail(t, appContext.AppDir, deploymentName, testContext.RiserEnvironment)
+	Step(fmt.Sprintf("delete deployment %q", deploymentName), func() {
+		DeleteDeploymentOrFail(t, appContext.AppDir, deploymentName, testContext.RiserEnvironment)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {

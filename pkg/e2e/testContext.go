@@ -1,5 +1,3 @@
-// +build e2e
-
 package e2e
 
 import (
@@ -20,9 +18,9 @@ const (
 	DefaultRiserContextName = "e2e"
 )
 
-var currentTestContext *singleEnvTestContext
+var currentTestContext *SingleEnvTestContext
 
-type singleEnvTestContext struct {
+type SingleEnvTestContext struct {
 	KubeContext      string
 	RiserContext     string
 	RiserEnvironment string
@@ -32,7 +30,7 @@ type singleEnvTestContext struct {
 	Http             *ingressClient
 }
 
-func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
+func SetupSingleEnvTestContext(t *testing.T) *SingleEnvTestContext {
 	// Cache since this must not change between tests
 	if currentTestContext != nil {
 		return currentTestContext
@@ -53,7 +51,7 @@ func setupSingleEnvTestContext(t *testing.T) *singleEnvTestContext {
 		t.Log("Warning: istio gateway loadbalancer IP not found. Proceeding with clusterIP.")
 	}
 
-	ctx := &singleEnvTestContext{
+	ctx := &SingleEnvTestContext{
 		RiserContext:     riserContext,
 		RiserEnvironment: shellOrFail(t, `kubectl get cm riser-controller -n riser-system -o jsonpath="{.data['RISER_ENVIRONMENT']}"`),
 		IngressIP:        ingressIp,

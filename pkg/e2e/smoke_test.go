@@ -22,17 +22,17 @@ import (
 // Initial attempt at e2e testing. Just run through a smoke test of a simple happy path. Lots of refactoring to do as we add more tests.
 // Kube and Riser context must be pointing to the correct location
 func Test_Smoke(t *testing.T) {
-	var testContext *singleEnvTestContext
+	var testContext *SingleEnvTestContext
 
-	step("setup test context", func() {
-		testContext = setupSingleEnvTestContext(t)
+	Step("setup test context", func() {
+		testContext = SetupSingleEnvTestContext(t)
 	})
 
 	namespace := "apps"
-	appContext := newRandomAppContext(t, namespace, testContext.IngressDomain)
+	appContext := NewRandomAppContext(t, namespace, testContext.IngressDomain)
 	defer appContext.Cleanup()
 
-	step(fmt.Sprintf("create app %q", appContext.Name), func() {
+	Step(fmt.Sprintf("create app %q", appContext.Name), func() {
 		var err error
 
 		shellOrFail(t, "riser apps new %s", appContext.Name)
@@ -63,8 +63,8 @@ func Test_Smoke(t *testing.T) {
 	})
 
 	versionA := "0.0.15"
-	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		deployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
+	Step(fmt.Sprintf("deploy version %q", versionA), func() {
+		DeployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
@@ -78,21 +78,21 @@ func Test_Smoke(t *testing.T) {
 		envBody, err := ioutil.ReadAll(envResponse.Body)
 		require.NoError(t, err)
 
-		envMap := parseTestDummyEnv(envBody)
+		envMap := ParseTestDummyEnv(envBody)
 		require.Equal(t, "val1", envMap["ENV1"])
 	})
 
 	secretName := "secret1"
 	secretValue := "secretVal1"
-	step("create secret", func() {
+	Step("create secret", func() {
 		shellOrFail(t, "cd %s && riser secrets save %s %s %s", appContext.AppDir, secretName, secretValue, testContext.RiserEnvironment)
 		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
 		// not become available until the secret is present.
 	})
 
 	versionB := "0.0.16"
-	step(fmt.Sprintf("deploy version %q", versionB), func() {
-		deployOrFail(t, appContext.AppDir, versionB, testContext.RiserEnvironment)
+	Step(fmt.Sprintf("deploy version %q", versionB), func() {
+		DeployOrFail(t, appContext.AppDir, versionB, testContext.RiserEnvironment)
 
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionB
@@ -106,12 +106,12 @@ func Test_Smoke(t *testing.T) {
 		envBody, err := ioutil.ReadAll(envResponse.Body)
 		require.NoError(t, err)
 
-		envMap := parseTestDummyEnv(envBody)
+		envMap := ParseTestDummyEnv(envBody)
 		require.Equal(t, "val1", envMap["ENV1"])
 		require.Equal(t, secretValue, envMap[strings.ToUpper(secretName)])
 	})
 
-	step("rollout 50/50 with previous deployment", func() {
+	Step("rollout 50/50 with previous deployment", func() {
 		riserOrFail(t, appContext.AppDir, fmt.Sprintf("rollout %s r1:50 r2:50", testContext.RiserEnvironment))
 		// Wait until we get one hit from versionA to ensure that the rollout is working before we start taking samples
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
@@ -136,8 +136,8 @@ func Test_Smoke(t *testing.T) {
 		assert.InDelta(t, 0.5, mean, 0.2, "%v")
 	})
 
-	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
-		deleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
+	Step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
+		DeleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
 
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
@@ -166,21 +166,21 @@ func Test_Smoke(t *testing.T) {
 }
 
 func Test_Namespace(t *testing.T) {
-	var testContext *singleEnvTestContext
+	var testContext *SingleEnvTestContext
 
-	step("setup test context", func() {
-		testContext = setupSingleEnvTestContext(t)
+	Step("setup test context", func() {
+		testContext = SetupSingleEnvTestContext(t)
 	})
 
-	namespace := fmt.Sprintf("e2e-ns-%s", randomString(6))
-	appContext := newRandomAppContext(t, namespace, testContext.IngressDomain)
+	namespace := fmt.Sprintf("e2e-ns-%s", RandomString(6))
+	appContext := NewRandomAppContext(t, namespace, testContext.IngressDomain)
 	defer appContext.Cleanup()
 
-	step(fmt.Sprintf("create namespace %q", namespace), func() {
+	Step(fmt.Sprintf("create namespace %q", namespace), func() {
 		riserOrFail(t, appContext.AppDir, fmt.Sprintf("namespaces create %s", namespace))
 	})
 
-	step(fmt.Sprintf("create app %q in namespace %q", appContext.Name, namespace), func() {
+	Step(fmt.Sprintf("create app %q in namespace %q", appContext.Name, namespace), func() {
 		var err error
 
 		shellOrFail(t, "riser apps new %s -n %s", appContext.Name, namespace)
@@ -211,8 +211,8 @@ func Test_Namespace(t *testing.T) {
 	})
 
 	versionA := "0.0.15"
-	step(fmt.Sprintf("deploy version %q", versionA), func() {
-		deployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
+	Step(fmt.Sprintf("deploy version %q", versionA), func() {
+		DeployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
 		err := testContext.Http.RetryGet(appContext.Url("/version"), func(r *httpResult) bool {
 			return string(r.body) == versionA
 		})
@@ -225,12 +225,12 @@ func Test_Namespace(t *testing.T) {
 		envBody, err := ioutil.ReadAll(envResponse.Body)
 		require.NoError(t, err)
 
-		envMap := parseTestDummyEnv(envBody)
+		envMap := ParseTestDummyEnv(envBody)
 		require.Equal(t, "val1", envMap["ENV1"])
 	})
 
-	step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
-		deleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
+	Step(fmt.Sprintf("delete deployment %q", appContext.Name), func() {
+		DeleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
 		// Wait until no deployments in status
 		err := Retry(func() (bool, error) {
 			appStatus, err := testContext.Riser.Apps.GetStatus(appContext.Name, namespace)
