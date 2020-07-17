@@ -19,7 +19,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/riser-platform/riser-server/api/v1/model v0.0.16
-	github.com/riser-platform/riser-server/pkg/sdk v0.0.39
+	github.com/riser-platform/riser-server/pkg/sdk v0.0.40
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
