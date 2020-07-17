@@ -158,7 +158,7 @@ func (deployment *RiserDeployment) Deploy() error {
 			fmt.Sprintf("kubectl create secret generic flux-git-deploy %s --namespace=flux --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
 		steps.NewShellExecStep("Install flux",
 			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(assetPath, "flux"))),
-		steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "kube-resources"))),
+		steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "--validate=false", "-R", "-f", path.Join(assetPath, "kube-resources"))),
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
 			func() error {
 				secure := false
