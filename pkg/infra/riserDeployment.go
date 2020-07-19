@@ -100,8 +100,10 @@ func (deployment *RiserDeployment) Deploy() error {
 			180, steps.AlwaysRetry()),
 		steps.NewExecStep("Apply knative resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "knative"))),
 		// Due to race condition with applying ksvc too early: https://github.com/knative/serving/issues/7576
+		// Also, on slower systems the cert-manager-webhook may not be available yet which causes problems down the line
 		steps.NewShellExecStep("Wait for knative",
-			"kubectl wait --timeout=300s --for=condition=available --namespace knative-serving deployment --all"),
+			`kubectl wait --timeout=300s --for=condition=available --namespace knative-serving deployment --all && \
+			kubectl wait --for condition=available deployment/cert-manager-webhook -n cert-manager`),
 	)
 	ui.ExitIfError(err)
 
