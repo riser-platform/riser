@@ -25,19 +25,16 @@ func (view *statusView) RenderHuman(writer io.Writer) error {
 	} else {
 
 		statusTable := table.Default().Header("Deployment", "Env", "Traffic", "Rev", "Docker Tag", "Pods", "Status", "Reason")
-		deploymentsPendingObservation := false
-		for _, deploymentStatus := range view.status.Deployments {
-			if !view.deploymentObserved(deploymentStatus) {
-				deploymentsPendingObservation = true
-			}
 
+		for _, deploymentStatus := range view.status.Deployments {
 			revisions := status.GetRevisionStatus(&deploymentStatus, view.activeRevisionsOnly)
+
 			if len(revisions) > 0 {
 				first := true
 				for _, activeRevision := range revisions {
 					if first {
 						statusTable.AddRow(
-							view.formatDeploymentName(deploymentStatus),
+							deploymentStatus.DeploymentName,
 							deploymentStatus.EnvironmentName,
 							view.formatTraffic(&activeRevision.Traffic),
 							fmt.Sprintf("%d", activeRevision.RiserRevision),
@@ -65,10 +62,6 @@ func (view *statusView) RenderHuman(writer io.Writer) error {
 		outStr += statusTable.String()
 		outStr += "\n\n"
 
-		if deploymentsPendingObservation {
-			outStr += style.Emphasis("* This deployment has changes that have not yet been observed.\n")
-		}
-
 		for _, environmentStatus := range view.status.Environments {
 			if !environmentStatus.Healthy {
 				outStr += style.Warn(fmt.Sprintf("Warning: environment %q is not healthy. %s\n", environmentStatus.EnvironmentName, environmentStatus.Reason))
@@ -81,10 +74,6 @@ func (view *statusView) RenderHuman(writer io.Writer) error {
 
 func (view *statusView) RenderJson(writer io.Writer) error {
 	return ui.RenderJson(view.status, writer)
-}
-
-func (view *statusView) deploymentObserved(deploymentStatus model.DeploymentStatus) bool {
-	return deploymentStatus.RiserRevision <= deploymentStatus.ObservedRiserRevision
 }
 
 func (view *statusView) formatTraffic(traffic *model.DeploymentTrafficStatus) string {
@@ -104,14 +93,6 @@ func (view *statusView) formatDockerTag(dockerImage string) string {
 	return dockerImage[idx+1:]
 }
 
-func (view *statusView) formatDeploymentName(deploymentStatus model.DeploymentStatus) string {
-	name := deploymentStatus.DeploymentName
-	if !view.deploymentObserved(deploymentStatus) {
-		name = style.Emphasis("*") + name
-	}
-	return name
-}
-
 func (view *statusView) formatRevisionStatus(rolloutStatus string) string {
 	formatted := rolloutStatus
 	switch rolloutStatus {
@@ -122,7 +103,7 @@ func (view *statusView) formatRevisionStatus(rolloutStatus string) string {
 	case model.RevisionStatusUnhealthy:
 		formatted = style.Bad(rolloutStatus)
 	case model.RevisionStatusUnknown:
-		formatted = style.Warn(rolloutStatus)
+		formatted = style.Emphasis(rolloutStatus)
 	}
 
 	return formatted

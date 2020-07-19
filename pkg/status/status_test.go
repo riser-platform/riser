@@ -153,3 +153,34 @@ func Test_GetRevisionStatus_SortsByRevision(t *testing.T) {
 	assert.EqualValues(t, 1, result[1].RiserRevision)
 	assert.EqualValues(t, 0, result[2].RiserRevision)
 }
+
+func Test_GetRevisionStatus_UnobservedStatus(t *testing.T) {
+	deploymentStatus := &model.DeploymentStatus{
+		RiserRevision: 1,
+		DeploymentStatusMutable: model.DeploymentStatusMutable{
+			ObservedRiserRevision:     0,
+			LatestCreatedRevisionName: "rev2",
+			Revisions: []model.DeploymentRevisionStatus{
+				{
+					Name:          "rev0",
+					RiserRevision: 0,
+				},
+			},
+			Traffic: []model.DeploymentTrafficStatus{
+				{
+					RevisionName: "rev0",
+					Percent:      util.PtrInt64(100),
+				},
+			},
+		},
+	}
+
+	result := GetRevisionStatus(deploymentStatus, true)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, deploymentStatus.RiserRevision, result[0].RiserRevision)
+	assert.Equal(t, model.RevisionStatusWaiting, result[0].RevisionStatus)
+	assert.Equal(t, "This revision has not yet been observed", result[0].RevisionStatusReason)
+	assert.Equal(t, "rev0", result[1].Name)
+	assert.Empty(t, result[0].Traffic)
+}

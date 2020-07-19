@@ -19,7 +19,16 @@ An active revision is:
 */
 func GetRevisionStatus(deploymentStatus *model.DeploymentStatus, activeOnly bool) []RevisionStatusWithTraffic {
 	activeStatuses := []RevisionStatusWithTraffic{}
-
+	// Create a placeholder revision until it's observed
+	if deploymentStatus.RiserRevision > deploymentStatus.ObservedRiserRevision {
+		activeStatuses = []RevisionStatusWithTraffic{{
+			DeploymentRevisionStatus: model.DeploymentRevisionStatus{
+				RiserRevision:        deploymentStatus.RiserRevision,
+				RevisionStatus:       model.RevisionStatusWaiting,
+				RevisionStatusReason: "This revision has not yet been observed",
+			},
+		}}
+	}
 	for _, revision := range deploymentStatus.Revisions {
 		hasTrafficStatus := false
 		for _, traffic := range deploymentStatus.Traffic {
