@@ -26,7 +26,7 @@ func main() {
 	var kindName string
 	var gitUrl string
 	var gitSSHKeyPath string
-	var destroy bool
+	var keep bool
 	var riserE2EImage string
 	var riserServerImage string
 	var riserControllerImage string
@@ -35,7 +35,7 @@ func main() {
 	cmd.Flags().StringVar(&kindName, "name", DefaultKindName, "cluster context and riser context name")
 	cmd.Flags().StringVar(&gitUrl, "git-url", "", "the git url for the state repo")
 	cmd.Flags().StringVar(&gitSSHKeyPath, "git-ssh-key-path", "", "optional path to a git ssh key.")
-	cmd.Flags().BoolVar(&destroy, "destroy", false, "destroy the cluster if it already exists")
+	cmd.Flags().BoolVar(&keep, "keep", false, "keep the cluster if it already exists")
 	cmd.Flags().StringVar(&riserE2EImage, "riser-e2e-image", "riser.dev/riser-e2e:local", "the riser E2E image (use \"make docker-e2e\" for a local version)")
 	cmd.Flags().StringVar(&riserServerImage, "riser-server-image", infra.DefaultServerImage, "the riser server image")
 	cmd.Flags().StringVar(&riserControllerImage, "riser-controller-image", infra.DefaultControllerImage, "the riser controller image")
@@ -49,7 +49,7 @@ func main() {
 
 		err = steps.NewFuncStep("Deploying Kind", func() error {
 			kindDeployment := infra.NewKindDeployer(kindNodeImage, kindName)
-			if destroy {
+			if !keep {
 				err = kindDeployment.Destroy()
 				if err != nil {
 					return err
