@@ -36,7 +36,7 @@ func main() {
 	cmd.Flags().StringVar(&gitUrl, "git-url", "", "the git url for the state repo")
 	cmd.Flags().StringVar(&gitSSHKeyPath, "git-ssh-key-path", "", "optional path to a git ssh key.")
 	cmd.Flags().BoolVar(&keep, "keep", false, "keep the cluster if it already exists")
-	cmd.Flags().StringVar(&riserE2EImage, "riser-e2e-image", "riser.dev/riser-e2e:local", "the riser E2E image (use \"make docker-e2e\" for a local version)")
+	cmd.Flags().StringVar(&riserE2EImage, "riser-e2e-image", "riserplatform/riser-e2e:local", "the riser E2E image (use \"make docker-e2e\")")
 	cmd.Flags().StringVar(&riserServerImage, "riser-server-image", infra.DefaultServerImage, "the riser server image")
 	cmd.Flags().StringVar(&riserControllerImage, "riser-controller-image", infra.DefaultControllerImage, "the riser controller image")
 	err := cobra.MarkFlagRequired(cmd.Flags(), "git-url")
@@ -46,21 +46,30 @@ func main() {
 		// TODO: Add support for alternate rc path
 		config, err := rc.LoadRc()
 		ui.ExitIfError(err)
-
-		err = steps.NewFuncStep("Deploying Kind", func() error {
-			kindDeployment := infra.NewKindDeployer(kindNodeImage, kindName)
-			if !keep {
-				err = kindDeployment.Destroy()
-				if err != nil {
-					return err
+		kindDeployment := infra.NewKindDeployer(kindNodeImage, kindName)
+		err = steps.Run(
+			steps.NewFuncStep("Deploying Kind", func() error {
+				if !keep {
+					err = kindDeployment.Destroy()
+					if err != nil {
+						return err
+					}
 				}
-			}
-			err = kindDeployment.Deploy()
-			if err != nil {
-				return err
-			}
-			return kindDeployment.LoadLocalDockerImage(riserE2EImage)
-		}).Exec()
+				return kindDeployment.Deploy()
+			}),
+			steps.NewFuncStep("Load local images", func() error {
+				// Attempt to load the riser images locally
+				// This is useful for local dev testing as well as caching between runs
+				for _, dockerImg := range []string{riserE2EImage, riserServerImage, riserControllerImage} {
+					err = kindDeployment.LoadLocalDockerImage(dockerImg)
+					if err != nil {
+						fmt.Printf("Image %q not found locally. Will attempt to load from source.\n", dockerImg)
+					}
+				}
+
+				return nil
+			}),
+		)
 		ui.ExitIfError(err)
 
 		apiserverStep := steps.NewShellExecStep("Get apiserver IP", `kubectl get service  -l component=apiserver -l provider=kubernetes -o jsonpath="{.items[0].spec.clusterIP}"`)

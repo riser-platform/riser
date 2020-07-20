@@ -10,17 +10,16 @@ require (
 	github.com/go-ozzo/ozzo-validation/v3 v3.8.1
 	github.com/google/go-cmp v0.5.0 // indirect
 	github.com/hashicorp/go-version v1.2.1
-	github.com/imdario/mergo v0.3.10 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
-	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.16
-	github.com/riser-platform/riser-server/pkg/sdk v0.0.41
+	github.com/riser-platform/riser-server/api/v1/model v0.0.17
+	github.com/riser-platform/riser-server/pkg/sdk v0.0.42
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
+	github.com/shurcooL/vfsgen v0.0.0-20200627165143-92b8a710ab6c // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.6.1
