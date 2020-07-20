@@ -24,7 +24,7 @@ func (view *statusView) RenderHuman(writer io.Writer) error {
 		outStr += fmt.Sprintf("There are no deployments for the app %q. Use \"riser deploy\" to make your first deployment.\n", view.appName)
 	} else {
 
-		statusTable := table.Default().Header("Deployment", "Env", "Traffic", "Rev", "Docker Tag", "Pods", "Status", "Reason")
+		statusTable := table.Default().Header("Deployment", "Env", "Traffic", "Rev", "Docker Tag", "Status", "Reason")
 
 		for _, deploymentStatus := range view.status.Deployments {
 			revisions := status.GetRevisionStatus(&deploymentStatus, view.activeRevisionsOnly)
@@ -39,7 +39,6 @@ func (view *statusView) RenderHuman(writer io.Writer) error {
 							view.formatTraffic(&activeRevision.Traffic),
 							fmt.Sprintf("%d", activeRevision.RiserRevision),
 							view.formatDockerTag(activeRevision.DockerImage),
-							fmt.Sprintf("%d", activeRevision.AvailableReplicas),
 							view.formatRevisionStatus(activeRevision.RevisionStatus),
 							activeRevision.RevisionStatusReason,
 						)
@@ -49,7 +48,6 @@ func (view *statusView) RenderHuman(writer io.Writer) error {
 							view.formatTraffic(&activeRevision.Traffic),
 							fmt.Sprintf("%d", activeRevision.RiserRevision),
 							view.formatDockerTag(activeRevision.DockerImage),
-							fmt.Sprintf("%d", activeRevision.AvailableReplicas),
 							view.formatRevisionStatus(activeRevision.RevisionStatus),
 							activeRevision.RevisionStatusReason,
 						)
