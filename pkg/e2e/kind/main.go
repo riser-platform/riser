@@ -16,7 +16,7 @@ import (
 
 const (
 	// DefaultKindNodeImage should roughly match the latest stable kubernetes version provided by GKE/AKS/EKS
-	DefaultKindNodeImage = "kindest/node:v1.16.9"
+	DefaultKindNodeImage = "kindest/node:v1.17.5"
 	// DefaultKindName is the name of the kind cluster as well as the riser context by convention
 	DefaultKindName = "riser-e2e"
 )
