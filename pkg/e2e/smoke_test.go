@@ -49,6 +49,9 @@ func Test_Smoke(t *testing.T) {
 			Expose: &model.AppConfigExpose{
 				ContainerPort: 8000,
 			},
+			HealthCheck: &model.AppConfigHealthCheck{
+				Path: "/health",
+			},
 			OverrideableAppConfig: model.OverrideableAppConfig{
 				Environment: map[string]intstr.IntOrString{
 					"env1": intstr.FromString("val1"),
@@ -71,6 +74,10 @@ func Test_Smoke(t *testing.T) {
 			return string(r.body) == versionA
 		})
 		require.NoError(t, err)
+
+		healthResponse, err := testContext.Http.Get(appContext.Url("/health"))
+		require.NoError(t, err)
+		assert.Equal(t, healthResponse.StatusCode, http.StatusForbidden)
 
 		envResponse, err := testContext.Http.Get(appContext.Url("/env"))
 		require.NoError(t, err)
