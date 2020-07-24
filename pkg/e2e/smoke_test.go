@@ -87,7 +87,12 @@ func Test_Smoke(t *testing.T) {
 		require.NoError(t, err)
 
 		envMap := ParseTestDummyEnv(envBody)
-		require.Equal(t, "val1", envMap["ENV1"])
+		assert.Equal(t, "val1", envMap["ENV1"])
+		// Platform env vars
+		assert.Equal(t, appContext.Name, envMap["RISER_APP"])
+		assert.Equal(t, appContext.Name, envMap["RISER_DEPLOYMENT"])
+		assert.Equal(t, testContext.RiserEnvironment, envMap["RISER_ENVIRONMENT"])
+		assert.Equal(t, appContext.Namespace, envMap["RISER_NAMESPACE"])
 	})
 
 	secretName := "secret1"
