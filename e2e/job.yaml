@@ -37,7 +37,7 @@ spec:
       containers:
       - name: riser-e2e
         image: ${RISERE2EIMAGE}
-        command: ["sh", "-c", "go test -count=1 -tags=e2e -v ./pkg/e2e"]
+        command: ["sh", "-c", "go test -count=1 -parallel=2 -tags=e2e -v ./pkg/e2e"]
         env:
         - name: RISER_APIKEY
           valueFrom:

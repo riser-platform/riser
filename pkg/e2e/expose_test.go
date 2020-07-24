@@ -5,7 +5,6 @@ package e2e
 import (
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"path"
 	"testing"
 
@@ -65,9 +64,9 @@ func Test_ExposeClusterOnly(t *testing.T) {
 	versionA := "0.0.15"
 	Step(t, fmt.Sprintf("deploy version %q", versionA), func() {
 		DeployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
-		response, err := testContext.Http.Get(appContext.Url("/"))
+		_, err := testContext.Http.Get(appContext.Url("/"))
 		require.Error(t, err)
-		assert.Equal(t, response.StatusCode, http.NotFound)
+
 		// TODO: Test cluster.local URL.
 		// We must first setup a second service to prove that cluster local routing is working as we can't guarantee that
 		// the test runner is running on the mesh
