@@ -22,6 +22,9 @@ expose:
   # Note: External traffic is always TLS. HTTP will auto redirect to HTTPS.
   # Note: Traffic will attempt to auto-upgrade to http2. Specifying "http2" adds the "h2c" token, required for protocols like grpc
   protocol: http
+  # Optional: The scope (external|cluster) (default: external)
+  # When set to "cluster" only the cluster URL (http://<deploymentName>.<namespace>.svc.cluster.local) will be active
+  scope: external
 
 # --- Everything below this line is optional --- #
 

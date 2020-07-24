@@ -16,8 +16,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.17
-	github.com/riser-platform/riser-server/pkg/sdk v0.0.42
+	github.com/riser-platform/riser-server/api/v1/model v0.0.18
+	github.com/riser-platform/riser-server/pkg/sdk v0.0.43
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
@@ -27,5 +27,5 @@ require (
 	golang.org/x/tools v0.0.0-20200717024301-6ddee64345a6 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.3.0
-	k8s.io/apimachinery v0.18.5
+	k8s.io/apimachinery v0.18.6
 )

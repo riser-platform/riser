@@ -188,10 +188,10 @@ github.com/prometheus/common v0.4.0/go.mod h1:TNfzLD0ON7rHzMJeJkieUDPYmFC7Snx/y8
 github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
 github.com/prometheus/procfs v0.0.0-20190507164030-5867b95ac084/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsTZCD3I8kEA=
 github.com/prometheus/tsdb v0.7.1/go.mod h1:qhTCs0VvXwvX/y3TZrWD7rabWM+ijKTux40TwIPHuXU=
-github.com/riser-platform/riser-server/api/v1/model v0.0.17 h1:I2+a6Rd7R29guWrpLJSSwgPIGWUtzlwxsw0wLd5wJwA=
-github.com/riser-platform/riser-server/api/v1/model v0.0.17/go.mod h1:DuFkMnR9oOZX33ag4aX+aHf6aIwPM8wEtGCPM8CoKjE=
-github.com/riser-platform/riser-server/pkg/sdk v0.0.42 h1:FPQQvkt3tT8r4iiJLX1xDnA2qO4u88HY/A1cr7IRJG0=
-github.com/riser-platform/riser-server/pkg/sdk v0.0.42/go.mod h1:8V3WUsi9WAb0My4OfboCciXoXDZpmhdmQvvGgXztJR0=
+github.com/riser-platform/riser-server/api/v1/model v0.0.18 h1:eQWl12SvTupsFpnD84q293pb/9e54eGtkmOHUieXvg0=
+github.com/riser-platform/riser-server/api/v1/model v0.0.18/go.mod h1:DuFkMnR9oOZX33ag4aX+aHf6aIwPM8wEtGCPM8CoKjE=
+github.com/riser-platform/riser-server/pkg/sdk v0.0.43 h1:EwxYtrPenCJyUsQljnB5JgFLKgmmrdalhIZI76x0cig=
+github.com/riser-platform/riser-server/pkg/sdk v0.0.43/go.mod h1:x9yTEF0b0x6+c5zMOefBaWQAhFOvEXUyponqJ5J2QTM=
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 h1:bUGsEnyNbVPw06Bs80sCeARAlK8lhwqGyi6UT8ymuGk=
@@ -340,8 +340,8 @@ gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
 k8s.io/apimachinery v0.17.9/go.mod h1:Lg8zZ5iC/O8UjCqW6DNhcQG2m4TdjF9kwG3891OWbbA=
-k8s.io/apimachinery v0.18.5 h1:Lh6tgsM9FMkC12K5T5QjRm7rDs6aQN5JHkA0JomULDM=
-k8s.io/apimachinery v0.18.5/go.mod h1:OaXp26zu/5J7p0f92ASynJa1pZo06YlV9fG7BoWbCko=
+k8s.io/apimachinery v0.18.6 h1:RtFHnfGNfd1N0LeSrKCUznz5xtUP1elRGvHJbL3Ntag=
+k8s.io/apimachinery v0.18.6/go.mod h1:OaXp26zu/5J7p0f92ASynJa1pZo06YlV9fG7BoWbCko=
 k8s.io/gengo v0.0.0-20190128074634-0689ccc1d7d6/go.mod h1:ezvh/TsK7cY6rbqRK0oQQ8IAqLxYwwyPxAX1Pzy0ii0=
 k8s.io/klog v0.0.0-20181102134211-b9b56d5dfc92/go.mod h1:Gq+BEi5rUBO/HRz0bTSXDUcqjScdoY3a9IHpCEIOOfk=
 k8s.io/klog v1.0.0 h1:Pt+yjF5aB1xDSVbau4VsWe+dQNzA0qv1LlXdC2dF6Q8=
