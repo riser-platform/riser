@@ -88,9 +88,11 @@ func Test_Smoke(t *testing.T) {
 
 		envMap := ParseTestDummyEnv(envBody)
 		assert.Equal(t, "val1", envMap["ENV1"])
+
 		// Platform env vars
 		assert.Equal(t, appContext.Name, envMap["RISER_APP"])
 		assert.Equal(t, appContext.Name, envMap["RISER_DEPLOYMENT"])
+		assert.Equal(t, "1", envMap["RISER_DEPLOYMENT_REVISION"])
 		assert.Equal(t, testContext.RiserEnvironment, envMap["RISER_ENVIRONMENT"])
 		assert.Equal(t, appContext.Namespace, envMap["RISER_NAMESPACE"])
 	})
