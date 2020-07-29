@@ -24,8 +24,8 @@ func newSecretsSaveCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Comman
 	var namespace string
 	cmd := &cobra.Command{
 		Use:   "save (name) (plaintextsecret) (targetEnvironment)",
-		Short: "Creates a new secret or updates an existing one",
-		Long:  "Creates a new secret or updates an existing one. Secrets are stored seperately per app and environment.",
+		Short: "Creates or updates a secret",
+		Long:  "Creates or updates a secret. Secrets are stored seperately per app and environment.",
 		Args:  cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
 			currentContext := safeCurrentContext(runtimeConfig)
