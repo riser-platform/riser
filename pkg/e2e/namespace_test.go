@@ -29,7 +29,7 @@ func Test_Namespace(t *testing.T) {
 	defer appContext.Cleanup()
 
 	Step(t, fmt.Sprintf("create namespace %q", namespace), func() {
-		riserOrFail(t, appContext.AppDir, fmt.Sprintf("namespaces create %s", namespace))
+		riserOrFail(t, appContext.AppDir, fmt.Sprintf("namespaces new %s", namespace))
 	})
 
 	Step(t, fmt.Sprintf("create app %q in namespace %q", appContext.Name, namespace), func() {

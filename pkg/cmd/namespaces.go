@@ -21,7 +21,7 @@ func newNamespacesCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command
 
 func newNamespacesCreateCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	return &cobra.Command{
-		Use:   "create (namespace name)",
+		Use:   "new (namespace name)",
 		Short: "Create a new namespace",
 		Args:  cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
