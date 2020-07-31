@@ -10,8 +10,6 @@ Riser is an opinionated app platform built on [Kubernetes](https://kubernetes.io
 
 > :warning: This is an experimental project with the goal of improving how we deploy and manage common application workloads. You're invited to look around and provide feedback. It is not yet advised to use Riser in production. Breaking changes may occur frequently and without warning.
 
-**[Check out the quickstart!](quickstart.md)**
-
 ## Key Features
 
 - Radically simplified deployment and management of [12 factor apps](https://12factor.net/)
@@ -21,16 +19,7 @@ Riser is an opinionated app platform built on [Kubernetes](https://kubernetes.io
 - GitOps: All state changes happen through git
 - App developers only need access to Riser. Kubernetes cluster access is optional for advanced debugging or operational tasks
 
-**[Check out the quickstart!](quickstart.md)**
-
-### More on GitOps
-
-Riser interacts with Kubernetes using a strictly [GitOps](https://www.weave.works/technologies/gitops/) approach. A git repository (typically referred to as a "state repo") contains all information required to stand up an app. The riser server can be unreachable or even destroyed with no impact to your apps. It also designed so that all of the resources in your state repo can be "`kubectl apply -f`'d" to a Kubernetes cluster without any Riser infrastructure running or installed.
-
-## Known Issues and Limitations
-
-- GitHub is the only validated git provider at this time. This is no GitHub specific code so it's likely that other providers will function reliably.
-- The documentation is very sparse. As features mature more documentation will be added.
+**[Check out the quickstart!](https://docs.riser.dev/docs/quickstart/)**
 
 ## Development
 
