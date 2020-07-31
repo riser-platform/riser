@@ -6,7 +6,7 @@
 
 Riser is an opinionated app platform built on [Kubernetes](https://kubernetes.io/) and [Knative](https://knative.dev). It provides a radically simplified application deployment and management experience without vendor lock-in.
 
-[![asciicast](https://asciinema.org/a/277448.svg)](https://asciinema.org/a/277448?autoplay=1&cols=160&rows=40)
+[![asciicast](https://asciinema.org/a/350860.svg)](https://asciinema.org/a/350860?autoplay=1&cols=160&rows=40)
 
 > :warning: This is an experimental project with the goal of improving how we deploy and manage common application workloads. You're invited to look around and provide feedback. It is not yet advised to use Riser in production. Breaking changes may occur frequently and without warning.
 
