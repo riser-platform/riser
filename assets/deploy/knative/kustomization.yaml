@@ -1160,6 +1160,7 @@ data:
     # See the algorithm here: http://bit.ly/38XiCZ3.
     # TODO(vagababov): tune after actual benchmarking.
     activator-capacity: "100.0"
+  scale-to-zero-pod-retention-period: 10m
 kind: ConfigMap
 metadata:
   annotations:
