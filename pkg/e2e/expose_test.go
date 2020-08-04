@@ -49,7 +49,7 @@ func Test_ExposeClusterOnly(t *testing.T) {
 			},
 			OverrideableAppConfig: model.OverrideableAppConfig{
 				Environment: map[string]intstr.IntOrString{
-					"env1": intstr.FromString("val1"),
+					"ENV1": intstr.FromString("val1"),
 				},
 			},
 		}
