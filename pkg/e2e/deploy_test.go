@@ -10,7 +10,6 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/riser-platform/riser-server/api/v1/model"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,8 +22,7 @@ func Test_DeploymentName(t *testing.T) {
 		testContext = SetupSingleEnvTestContext(t)
 	})
 
-	namespace := "apps"
-	appContext := NewRandomAppContext(t, namespace, testContext.IngressDomain)
+	appContext := NewRandomAppContext(t, "apps", testContext.IngressDomain)
 	defer appContext.Cleanup()
 
 	Step(t, fmt.Sprintf("create app %q", appContext.Name), func() {
@@ -32,13 +30,13 @@ func Test_DeploymentName(t *testing.T) {
 
 		shellOrFail(t, "riser apps new %s", appContext.Name)
 
-		app, err := testContext.Riser.Apps.Get(appContext.Name, namespace)
+		app, err := testContext.Riser.Apps.Get(appContext.Name, appContext.Namespace)
 		require.NoError(t, err)
 
 		appCfg := model.AppConfig{
 			Id:        app.Id,
 			Name:      model.AppName(appContext.Name),
-			Namespace: model.NamespaceName(namespace),
+			Namespace: model.NamespaceName(appContext.Namespace),
 			Image:     "tshak/testdummy",
 			Expose: &model.AppConfigExpose{
 				ContainerPort: 8000,
@@ -65,29 +63,6 @@ func Test_DeploymentName(t *testing.T) {
 
 	Step(t, fmt.Sprintf("delete deployment %q", deploymentName), func() {
 		DeleteDeploymentOrFail(t, appContext.AppDir, deploymentName, testContext.RiserEnvironment)
-
-		// Wait until no deployments in status
-		err := Retry(func() (bool, error) {
-			appStatus, err := testContext.Riser.Apps.GetStatus(appContext.Name, namespace)
-			if err != nil {
-				return true, err
-			}
-
-			return len(appStatus.Deployments) == 0, err
-		})
-		require.NoError(t, err)
-
-		// Check kube resources
-		err = Retry(func() (bool, error) {
-			configResult := shellOrFail(t, fmt.Sprintf("kubectl get config %s -n %s --ignore-not-found", appContext.Name, namespace))
-			return configResult == "", nil
-		})
-		assert.NoError(t, err)
-
-		err = Retry(func() (bool, error) {
-			routeResult := shellOrFail(t, fmt.Sprintf("kubectl get route %s -n %s --ignore-not-found", appContext.Name, namespace))
-			return routeResult == "", nil
-		})
-		assert.NoError(t, err)
+		AssertDeploymentDeleted(t, testContext, appContext, deploymentName)
 	})
 }

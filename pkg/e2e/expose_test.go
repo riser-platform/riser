@@ -10,7 +10,6 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/riser-platform/riser-server/api/v1/model"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -74,28 +73,6 @@ func Test_ExposeClusterOnly(t *testing.T) {
 
 	Step(t, fmt.Sprintf("delete deployment %q", appContext.Name), func() {
 		DeleteDeploymentOrFail(t, appContext.AppDir, appContext.Name, testContext.RiserEnvironment)
-		// Wait until no deployments in status
-		err := Retry(func() (bool, error) {
-			appStatus, err := testContext.Riser.Apps.GetStatus(appContext.Name, namespace)
-			if err != nil {
-				return true, err
-			}
-
-			return len(appStatus.Deployments) == 0, err
-		})
-		require.NoError(t, err)
-
-		// Check kube resources
-		err = Retry(func() (bool, error) {
-			configResult := shellOrFail(t, fmt.Sprintf("kubectl get config %s -n %s --ignore-not-found", appContext.Name, namespace))
-			return configResult == "", nil
-		})
-		assert.NoError(t, err)
-
-		err = Retry(func() (bool, error) {
-			routeResult := shellOrFail(t, fmt.Sprintf("kubectl get route %s -n %s --ignore-not-found", appContext.Name, namespace))
-			return routeResult == "", nil
-		})
-		assert.NoError(t, err)
+		AssertDeploymentDeleted(t, testContext, appContext, appContext.Name)
 	})
 }
