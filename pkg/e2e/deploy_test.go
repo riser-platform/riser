@@ -52,7 +52,23 @@ func Test_DeploymentName(t *testing.T) {
 
 	versionA := "0.0.15"
 	deploymentName := fmt.Sprintf("%s-alt1", appContext.Name)
+
 	Step(t, fmt.Sprintf("deploy %q version %q", deploymentName, versionA), func() {
+		DeployArgsOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment, fmt.Sprintf("--name %s", deploymentName))
+
+		err := testContext.Http.RetryGet(appContext.UrlByName("/version", deploymentName), func(r *httpResult) bool {
+			return string(r.body) == versionA
+		})
+		require.NoError(t, err)
+	})
+
+	Step(t, fmt.Sprintf("delete deployment %q", deploymentName), func() {
+		DeleteDeploymentOrFail(t, appContext.AppDir, deploymentName, testContext.RiserEnvironment)
+		AssertDeploymentDeleted(t, testContext, appContext, deploymentName)
+	})
+
+	// Ensure that we can deploy a deleted deployment again
+	Step(t, fmt.Sprintf("redeploy %q version %q", deploymentName, versionA), func() {
 		DeployArgsOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment, fmt.Sprintf("--name %s", deploymentName))
 
 		err := testContext.Http.RetryGet(appContext.UrlByName("/version", deploymentName), func(r *httpResult) bool {
