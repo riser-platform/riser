@@ -17,7 +17,41 @@ func newDeploymentsCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Comman
 	}
 
 	cmd.AddCommand(newDeploymentsDeleteCommand(runtimeConfig))
+	cmd.AddCommand(newDeploymentsDescribeCommand(runtimeConfig))
 
+	return cmd
+}
+
+func newDeploymentsDescribeCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
+	var appName string
+	var namespace string
+	cmd := &cobra.Command{
+		Use:   "describe (deploymentName) (targetEnvironment)",
+		Short: "Display details of a deployment in a specific environment",
+		Long:  "Display details of a deployment in a specific environment. Use \"riser status\" to display a summary of all deployments in all environments for an app",
+		Args:  cobra.ExactArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
+			deploymentName := args[0]
+			environmentName := args[1]
+			currentContext := safeCurrentContext(runtimeConfig)
+			riserClient := getRiserClient(currentContext)
+
+			app, err := riserClient.Apps.Get(appName, namespace)
+			ui.ExitIfErrorMsg(err, "Error getting App")
+			status, err := riserClient.Apps.GetStatus(appName, namespace)
+			ui.ExitIfErrorMsg(err, "Error getting App status")
+			envConfig, err := riserClient.Environments.GetConfig(environmentName)
+			ui.ExitIfErrorMsg(err, "Error getting Environment config")
+
+			view, err := newDeploymentsDescribeView(app, status, deploymentName, environmentName, envConfig.PublicGatewayHost)
+			ui.ExitIfError(err)
+
+			ui.RenderView(view)
+		},
+	}
+	addAppFlag(cmd.Flags(), &appName)
+	addNamespaceFlag(cmd.Flags(), &namespace)
+	addOutputFlag(cmd.Flags())
 	return cmd
 }
 

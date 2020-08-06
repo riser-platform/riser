@@ -36,19 +36,19 @@ func (view *statusView) RenderHuman(writer io.Writer) error {
 						statusTable.AddRow(
 							deploymentStatus.DeploymentName,
 							deploymentStatus.EnvironmentName,
-							view.formatTraffic(&activeRevision.Traffic),
+							formatTraffic(&activeRevision.Traffic),
 							fmt.Sprintf("%d", activeRevision.RiserRevision),
-							view.formatDockerTag(activeRevision.DockerImage),
-							view.formatRevisionStatus(activeRevision.RevisionStatus),
+							formatDockerTag(activeRevision.DockerImage),
+							formatRevisionStatus(activeRevision.RevisionStatus),
 							activeRevision.RevisionStatusReason,
 						)
 					} else {
 						statusTable.AddRow(
 							"", "",
-							view.formatTraffic(&activeRevision.Traffic),
+							formatTraffic(&activeRevision.Traffic),
 							fmt.Sprintf("%d", activeRevision.RiserRevision),
-							view.formatDockerTag(activeRevision.DockerImage),
-							view.formatRevisionStatus(activeRevision.RevisionStatus),
+							formatDockerTag(activeRevision.DockerImage),
+							formatRevisionStatus(activeRevision.RevisionStatus),
 							activeRevision.RevisionStatusReason,
 						)
 					}
@@ -74,7 +74,7 @@ func (view *statusView) RenderJson(writer io.Writer) error {
 	return ui.RenderJson(view.status, writer)
 }
 
-func (view *statusView) formatTraffic(traffic *model.DeploymentTrafficStatus) string {
+func formatTraffic(traffic *model.DeploymentTrafficStatus) string {
 	// TODO: Determine if % is ever nil in practice and display as 100% if latest and only active revision
 	if traffic.Percent != nil {
 		return fmt.Sprintf("%d%%", *traffic.Percent)
@@ -83,7 +83,7 @@ func (view *statusView) formatTraffic(traffic *model.DeploymentTrafficStatus) st
 	return "0%"
 }
 
-func (view *statusView) formatDockerTag(dockerImage string) string {
+func formatDockerTag(dockerImage string) string {
 	idx := strings.Index(dockerImage, ":")
 	if idx == -1 {
 		return style.Warn("Unknown")
@@ -91,7 +91,7 @@ func (view *statusView) formatDockerTag(dockerImage string) string {
 	return dockerImage[idx+1:]
 }
 
-func (view *statusView) formatRevisionStatus(rolloutStatus string) string {
+func formatRevisionStatus(rolloutStatus string) string {
 	formatted := rolloutStatus
 	switch rolloutStatus {
 	case model.RevisionStatusReady:

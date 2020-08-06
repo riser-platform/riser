@@ -16,8 +16,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/riser-platform/riser-server/api/v1/model v0.0.19
-	github.com/riser-platform/riser-server/pkg/sdk v0.0.44
+	github.com/riser-platform/riser-server/api/v1/model v0.0.20
+	github.com/riser-platform/riser-server/pkg/sdk v0.0.45
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5

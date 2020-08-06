@@ -33,10 +33,8 @@ func Test_formatDockerTag(t *testing.T) {
 		{"foo", style.Warn("Unknown")},
 	}
 
-	view := statusView{}
-
 	for _, tt := range tests {
-		result := view.formatDockerTag(tt.dockerImage)
+		result := formatDockerTag(tt.dockerImage)
 		assert.Equal(t, tt.expected, result)
 	}
 }
@@ -56,10 +54,8 @@ func Test_formatTraffic(t *testing.T) {
 		},
 	}
 
-	view := statusView{}
-
 	for _, tt := range tests {
-		result := view.formatTraffic(&model.DeploymentTrafficStatus{Percent: tt.percent})
+		result := formatTraffic(&model.DeploymentTrafficStatus{Percent: tt.percent})
 		assert.Equal(t, tt.expected, result)
 	}
 }
