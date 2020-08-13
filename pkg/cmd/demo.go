@@ -146,7 +146,7 @@ It's recommended that you use a deploy key (e.g. git@github.com:your/repo) with 
 				return validation.Validate(ans,
 					validation.Required,
 					validation.By(func(v interface{}) error {
-						_, err := os.Stat(v.(string))
+						_, err := os.Stat(expandTildeInPath(v.(string)))
 						return err
 					}))
 			}))
@@ -162,7 +162,8 @@ It's recommended that you use a deploy key (e.g. git@github.com:your/repo) with 
 	logger.Log().Info("Installing demo")
 
 	deployment := infra.NewRiserDeployment(assets, config, gitUrl)
-	deployment.GitSSHKeyPath = gitSshKeyPath
+
+	deployment.GitSSHKeyPath = expandTildeInPath(gitSshKeyPath)
 	err = deployment.Deploy()
 	ui.ExitIfError(err)
 

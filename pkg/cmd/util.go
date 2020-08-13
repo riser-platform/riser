@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"os"
+	"path"
 	"riser/pkg/rc"
 	"riser/pkg/ui"
+	"strings"
 
 	"github.com/riser-platform/riser-server/pkg/sdk"
 )
@@ -22,4 +25,13 @@ func getRiserClient(c *rc.Context) *sdk.Client {
 		client.MakeInsecure()
 	}
 	return client
+}
+
+// expandTildeInPath expands the tilde to the user's home dir if specified. Whereever possible, use the
+// underlying OS's shell to do this. This has not been tested against Windows.
+func expandTildeInPath(pathToExpand string) string {
+	if strings.HasPrefix(pathToExpand, "~") {
+		pathToExpand = path.Join(os.Getenv("HOME"), pathToExpand[1:])
+	}
+	return pathToExpand
 }
