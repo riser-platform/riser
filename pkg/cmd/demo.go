@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -17,12 +18,22 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	validation "github.com/go-ozzo/ozzo-validation/v3"
+	"github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 	giturls "github.com/whilp/git-urls"
 )
 
 const ApiKeySizeBytes = 20
 const demoEnvironmentName = "demo"
+const kubectlVersionConstraint = ">=1.18"
+
+type kubectlVersion struct {
+	ClientVersion kubectlClientVersion `json:"clientVersion"`
+}
+
+type kubectlClientVersion struct {
+	GitVersion string `json:"gitVersion"`
+}
 
 func newDemoCommand(config *rc.RuntimeConfiguration, assets http.FileSystem) *cobra.Command {
 	cmd := &cobra.Command{
@@ -60,9 +71,24 @@ func newDemoStatusCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 }
 
 func demoInstall(config *rc.RuntimeConfiguration, assets http.FileSystem) {
-	_, err := exec.LookPath("kubectl")
-	ui.ExitIfErrorMsg(err, "kubectl must exist in path")
+	out, err := exec.Command("kubectl", "version", "--client=true", "-o=json").Output()
+	ui.ExitIfErrorMsg(err, "Error validating kubectl")
 
+	versionOutput := kubectlVersion{}
+	err = json.Unmarshal(out, &versionOutput)
+	ui.ExitIfErrorMsg(err, "Unable to parse kubectl version")
+
+	parsedVersion, err := version.NewVersion(versionOutput.ClientVersion.GitVersion)
+	ui.ExitIfErrorMsg(err, "Unable to parse kubectl version")
+
+	constraint, err := version.NewConstraint(kubectlVersionConstraint)
+	ui.ExitIfErrorMsg(err, "Invalid kubectl version constraint")
+
+	if !constraint.Check(parsedVersion) {
+		ui.ExitErrorMsg(fmt.Sprintf("Invalid kubectl version. Must be %q", kubectlVersionConstraint))
+	}
+
+	ui.ExitIfError(err)
 	_, err = exec.LookPath("git")
 	ui.ExitIfErrorMsg(err, "git must exist in path")
 
