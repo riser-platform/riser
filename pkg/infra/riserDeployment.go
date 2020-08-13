@@ -25,11 +25,11 @@ const (
 )
 
 type RiserDeployment struct {
-	Assets        http.FileSystem
-	GitUrl        string
-	GitSSHKeyPath string
-	RiserConfig   *rc.RuntimeConfiguration
+	Assets      http.FileSystem
+	GitUrl      string
+	RiserConfig *rc.RuntimeConfiguration
 	// Optional
+	GitSSHKeyPath   string
 	EnvironmentName string
 	KubeDeployer    KubeDeployer
 	ServerImage     string
@@ -67,7 +67,6 @@ func (deployment *RiserDeployment) Deploy() error {
 		"kubectl get secret riser-server -n riser-system -o jsonpath='{.data.RISER_BOOTSTRAP_APIKEY}' || echo ''")
 	apiKeyGenStep := steps.NewExecStep("Generate Riser API key", exec.Command("riser", "ops", "generate-apikey"))
 	err = steps.Run(
-		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", deployment.GitUrl, "HEAD")),
 		// Install namespaces and some CRDs separately due to ordering issues (declarative infra... not quite!)
 		steps.NewExecStep("Apply prerequisites", exec.Command("kubectl", "apply",
 			"-f", path.Join(assetPath, "kube-resources/istio/istio_operator.yaml"),
@@ -76,11 +75,12 @@ func (deployment *RiserDeployment) Deploy() error {
 			"-f", path.Join(assetPath, "cert-manager/cert-manager.yaml"),
 			"-f", path.Join(assetPath, "flux/namespace.yaml"),
 		)),
+		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", deployment.GitUrl, "HEAD")),
 		steps.NewRetryStep(
 			func() steps.Step {
 				// We don't wait for each specific CRD. In testing we've found these are the most common ones that aren't immediately ready
 				// May have to adjust over time.
-				return steps.NewShellExecStep("Wait for CRDs",
+				return steps.NewShellExecStep("Wait for resources",
 					`kubectl wait --for condition=established crd/clusterissuers.cert-manager.io && \
 					kubectl wait --for condition=established crd/istiooperators.install.istio.io
 					`)

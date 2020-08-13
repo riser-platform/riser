@@ -111,7 +111,7 @@ func demoInstall(config *rc.RuntimeConfiguration, assets http.FileSystem) {
 	var gitUrl string
 	var gitUrlParsed *url.URL
 	gitUrlPrompt := &survey.Input{
-		Message: "Enter the GitHub URL for the Riser state repo. Riser requires write access to this repo. If using an HTTPS url, you must include auth.",
+		Message: "Enter the GitHub URL for the Riser state repo. Riser requires write access to this repo. If using an HTTPS url, you must include auth.\n",
 		Help: ui.StripNewLines(`
 The Riser state repo contains all kubernetes state for Riser apps and infrastructure.
 It's recommended that you use a deploy key (e.g. git@github.com:your/repo) with write access. You may also use a Personal Access Token with repo write access (e.g. https://YOUR-TOKEN@github.com/your/repo).
