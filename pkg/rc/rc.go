@@ -20,11 +20,16 @@ type RuntimeConfiguration struct {
 
 // Context represents all configuration related to a particular environment
 type Context struct {
-	Name      string `yaml:"name"`
+	// Name is the name of the context
+	Name string `yaml:"name"`
+	// ServerURL is the URL of the Riser server
 	ServerURL string `yaml:"serverUrl"`
 	// TODO: Consider introducing an "auth" section to better support other auth methods in the future (e.g. OIDC, LDAP)
 	Apikey string `yaml:"apikey,omitempty"`
-	Secure *bool  `yaml:"secure,omitempty"`
+	// Secure determines if TLS verification is used for the Server URL (default: true)
+	Secure *bool `yaml:"secure,omitempty"`
+	// DemoGatewayIP is used by the demo to facilitate local installations without DNS
+	DemoGatewayIP string `yaml:"demoGatewayIp,omitempty"`
 }
 
 // SaveRc saves a runtime configuration
@@ -121,9 +126,8 @@ func (rc *RuntimeConfiguration) GetContexts() []Context {
 	return values
 }
 
-// TODO: Rename to SetContext
-// SaveContext adds or updates a context and sets the current context to the recently saved context
-func (rc *RuntimeConfiguration) SaveContext(context *Context) {
+// SetContext adds or updates a context and sets the current context to the recently saved context
+func (rc *RuntimeConfiguration) SetContext(context *Context) {
 	if rc.contextMap == nil {
 		rc.contextMap = map[string]Context{}
 	}

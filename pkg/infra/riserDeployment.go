@@ -164,8 +164,12 @@ func (deployment *RiserDeployment) Deploy() error {
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
 			func() error {
 				secure := false
-				newRiserContext := &rc.Context{Name: deployment.EnvironmentName, ServerURL: "https://riser-server.riser-system.demo.riser", Apikey: apiKey, Secure: &secure}
-				deployment.RiserConfig.SaveContext(newRiserContext)
+				newRiserContext := &rc.Context{
+					Name:      deployment.EnvironmentName,
+					ServerURL: "https://riser-server.riser-system.demo.riser",
+					Apikey:    apiKey,
+					Secure:    &secure}
+				deployment.RiserConfig.SetContext(newRiserContext)
 				return rc.SaveRc(deployment.RiserConfig)
 			}),
 		steps.NewShellExecStep("Wait for riser-server", "kubectl wait --for=condition=ready --timeout=120s ksvc/riser-server -n riser-system"),

@@ -129,7 +129,7 @@ func Test_loadAndParse_ReturnsEmptyIfRcFileIsMissing(t *testing.T) {
 func Test_SaveContext_AddsNewContext(t *testing.T) {
 	rc := &RuntimeConfiguration{}
 
-	rc.SaveContext(&Context{Name: "a"})
+	rc.SetContext(&Context{Name: "a"})
 
 	assert.Equal(t, "a", rc.contextMap["a"].Name)
 	assert.Equal(t, "a", rc.Contexts[0].Name)
@@ -144,7 +144,7 @@ func Test_SaveContext_SavesIfContextExists(t *testing.T) {
 		CurrentContextName: "a",
 	}
 
-	rc.SaveContext(&Context{Name: "a", ServerURL: "modified"})
+	rc.SetContext(&Context{Name: "a", ServerURL: "modified"})
 
 	assert.Equal(t, "a", rc.contextMap["a"].Name)
 	assert.Equal(t, "a", rc.Contexts[0].Name)
@@ -155,7 +155,7 @@ func Test_SaveContext_SavesIfContextExists(t *testing.T) {
 func Test_SaveContext_SetsCurrentContext(t *testing.T) {
 	rc := &RuntimeConfiguration{CurrentContextName: "b"}
 
-	rc.SaveContext(&Context{Name: "a"})
+	rc.SetContext(&Context{Name: "a"})
 
 	assert.Equal(t, "a", rc.CurrentContextName)
 }
@@ -163,7 +163,7 @@ func Test_SaveContext_SetsCurrentContext(t *testing.T) {
 func Test_SaveContext_SetsCurrentContext_WhenNotSet(t *testing.T) {
 	rc := &RuntimeConfiguration{}
 
-	rc.SaveContext(&Context{Name: "a"})
+	rc.SetContext(&Context{Name: "a"})
 
 	assert.Equal(t, "a", rc.CurrentContextName)
 }

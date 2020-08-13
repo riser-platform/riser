@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"riser/pkg/config"
 	"riser/pkg/infra"
 	"riser/pkg/logger"
 	"riser/pkg/rc"
@@ -43,7 +44,61 @@ func newDemoCommand(config *rc.RuntimeConfiguration, assets http.FileSystem) *co
 
 	cmd.AddCommand(newInstallDemoCommand(config, assets))
 	cmd.AddCommand(newDemoStatusCommand(config))
+	cmd.AddCommand(newCurlCommand(config))
 
+	return cmd
+}
+
+func newCurlCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
+	var deploymentName string
+	var appFilePath string
+	cmd := &cobra.Command{
+		Use:   "curl [path]",
+		Short: "Generates a curl command for access to demo deployments",
+		Long:  "Generates a curl command for access to demo deployments. This is helpful as typical demo environments don't have DNS servers or valid certificates, requiring more complicated curl commands.",
+		Example: `
+All examples assume that you are in the same directory of your app.yaml.
+
+Print the curl command for the default deployment of your app:
+  riser demo curl
+curl the default deployment for your app:
+  riser demo curl | sh
+curl the /version path:
+  riser demo curl /version | sh
+curl a named deployment:
+  riser demo curl --name mydeployment | sh`,
+		Run: func(cmd *cobra.Command, args []string) {
+			path := "/"
+
+			if len(args) > 0 {
+				path = args[0]
+			}
+
+			if runtimeConfig.CurrentContextName != demoEnvironmentName {
+				ui.ExitErrorMsg(fmt.Sprintf("This command is only supported with the Riser context %q", demoEnvironmentName))
+			}
+
+			riserContext, err := runtimeConfig.CurrentContext()
+			ui.ExitIfError(err)
+
+			if riserContext.DemoGatewayIP == "" {
+				ui.ExitErrorMsg("The Gateway IP has not been found. Use \"riser demo status\" to ensure that the demo is running properly.")
+			}
+
+			app, err := config.LoadAppFromConfig(appFilePath)
+			ui.ExitIfErrorMsg(err, "Error loading app config")
+
+			if deploymentName == "" {
+				deploymentName = string(app.Name)
+			}
+
+			hostName := fmt.Sprintf("%s.%s.demo.riser", deploymentName, app.Namespace)
+
+			fmt.Printf("curl -k https://%s%s --resolve %s:443:%s", hostName, path, hostName, riserContext.DemoGatewayIP)
+		},
+	}
+	addDeploymentNameFlag(cmd.Flags(), &deploymentName)
+	addAppFilePathFlag(cmd.Flags(), &appFilePath)
 	return cmd
 }
 
@@ -222,25 +277,29 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 
 	gatewayIp := strings.TrimSpace(ui.StripNewLines(ingressGatewayStep.State("stdout").(string)))
 
+	riserContext, err := config.CurrentContext()
+	ui.ExitIfError(err)
+	riserContext.DemoGatewayIP = gatewayIp
+	config.SetContext(riserContext)
+	err = rc.SaveRc(config)
+	ui.ExitIfErrorMsg(err, "Error saving Riser config")
+
 	logger.Log().Info("\n" + style.Good("🚀 Everything checks out!") + "\n")
 
+	logger.Log().Info("Environment:\t" + style.Emphasis(demoEnvironmentName))
 	logger.Log().Info("Gateway IP:\t" + style.Emphasis(gatewayIp))
 	logger.Log().Info("API Host:\t" + style.Emphasis("riser-server.riser-system.demo.riser"))
-	logger.Log().Info("Apps host:\t" + style.Emphasis("*.apps.demo.riser"))
 
 	logger.Log().Info("\nInstructions:")
 	logger.Log().Info(fmt.Sprintf("• In your hosts file (e.g. /etc/hosts on OSX) or local DNS server set the IP for the host %s to the gateway IP: %s", style.Emphasis("riser-server.riser-system.demo.riser"), style.Emphasis(gatewayIp)))
 	logger.Log().Info(fmt.Sprintf("  Example /etc/hosts entry:\n  %s", style.Muted(fmt.Sprintf("%s riser-server.riser-system.demo.riser", gatewayIp))))
 	logger.Log().Info("• For easier access to your apps, you may wish to add additional host entries for each app using the format <YOUR-APP>.apps.demo.riser to the same gateway IP, or create a wildcard DNS record for *.apps.demo.riser.")
-	logger.Log().Info("• If you do not have a DNS server, you may access your apps with curl using the following:")
-	logger.Log().Info(style.Muted(fmt.Sprintf("  curl -k https://<YOUR-APP>.apps.demo.riser --resolve \"<YOUR-APP>.apps.demo.riser:443:%s\"", gatewayIp)))
 	logger.Log().Info(`• Try out the testdummy app!
   - In an empty folder create the app with a default config using "riser apps init testdummy"
   - Edit "app.yaml" and specify "tshak/testdummy" as the docker image
   - Deploy using "riser deploy latest demo"
   - Use "riser status" to check the status of your deployment
-  - Once deployed access using "curl -k https://testdummy.apps.demo.riser". If all went well you should receive a HTTP 200 response with the text "pong".`)
-	// TODO: Link to docs for further info
+  - Once deployed access using "riser demo curl | sh" (or "curl -k https://testdummy.apps.demo.riser" if you have your own DNS server). If all went well you should receive a HTTP 200 response with the text "pong".`)
 
 	logger.Log().Info("\nExecute \"riser demo status\" to see this message again.")
 }
