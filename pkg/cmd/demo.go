@@ -85,10 +85,10 @@ func demoInstall(config *rc.RuntimeConfiguration, assets http.FileSystem) {
 	var gitUrl string
 	var gitUrlParsed *url.URL
 	gitUrlPrompt := &survey.Input{
-		Message: "Enter the GitHub URL (including auth if private) for the riser state repo.",
+		Message: "Enter the GitHub URL for the Riser state repo. Riser requires write access to this repo. If using an HTTPS url, you must include auth.",
 		Help: ui.StripNewLines(`
-The riser state repo contains all kubernetes state for riser apps and infrastructure. Riser never stores plaintext secrets, but you may still wish for the repo to be private.
-For private repos it's recommended that you use a deploy key (e.g. git@github.com:your/repo) or a Personal Access Token with repo write access (e.g. https://YOUR-TOKEN@github.com/your/repo).
+The Riser state repo contains all kubernetes state for Riser apps and infrastructure.
+It's recommended that you use a deploy key (e.g. git@github.com:your/repo) with write access. You may also use a Personal Access Token with repo write access (e.g. https://YOUR-TOKEN@github.com/your/repo).
 `),
 	}
 
@@ -147,7 +147,7 @@ For private repos it's recommended that you use a deploy key (e.g. git@github.co
 }
 
 func demoStatus(config *rc.RuntimeConfiguration) {
-	logger.Log().Warn(`If you're using minikube be sure that "minikube tunnel" is running.`)
+	logger.Log().Warn(`If you're using minikube be sure that "minikube tunnel" is running (Note: minikube tunnel may ask for password).`)
 	err := config.SetCurrentContext(demoEnvironmentName)
 	ui.ExitIfErrorMsg(err, "Error loading demo config. Please run \"riser demo install\".")
 
@@ -164,7 +164,8 @@ func demoStatus(config *rc.RuntimeConfiguration) {
 	if err != nil {
 		logger.Log().Error(err.Error())
 		ui.ExitErrorMsg(`Tips:
-• If you're using minikube be sure that "minikube tunnel" is running and run "riser demo status" again.
+• You may run "riser demo status" at any time to check if the issue is resolved.
+• If you're using minikube be sure that "minikube tunnel" is running (Note: minikube tunnel may ask for password).
 • Ensure that your kubernetes context is set to the cluster with the demo installed.
 • Check the service status and pod logs for "istio-ingressgateway" in the "istio-system" namespace.
 		`)
