@@ -12,11 +12,14 @@ func newRolloutCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 	var deploymentName string
 	var namespace string
 	cmd := &cobra.Command{
-		Use:     "rollout (targetEnvironment) (trafficRule0) [trafficRuleN...]",
-		Short:   "Manually controls traffic for a deployment's rollout",
-		Long:    "Manually controls traffic for a deployment's rollout. Typically only used when a deployment is deployed with the \"--manual-rollout\" flag. Traffic rules are in the format \"r(rev#):(traffic%)\" where \"rev\" is the riser revision as shown in \"riser status\"",
-		Args:    cobra.MinimumNArgs(2),
-		Example: "  riser rollout prod r1:90 r2:10 // Canary routing 10% of traffic to a new revision \n  riser rollout prod r2:100 // Route all traffic to rev 2",
+		Use:   "rollout (targetEnvironment) (trafficRule0) [trafficRuleN...]",
+		Short: "Manually controls traffic for a deployment's rollout",
+		Long:  "Manually controls traffic for a deployment's rollout. Typically only used when a deployment is deployed with the \"--manual-rollout\" flag. Traffic rules are in the format \"r(rev#):(traffic%)\" where \"rev\" is the riser revision as shown in \"riser status\"",
+		Args:  cobra.MinimumNArgs(2),
+		Example: `  riser rollout prod r1:90 r2:10	// Canary routing 10% of traffic to a new revision
+  riser rollout prod r2:100		// Route all traffic to rev 2
+  riser rollout prod r2:10 r1:*		// Route 10% of traffic to r2, and the rest to r1
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			currentContext := safeCurrentContext(runtimeConfig)
 			environmentName := args[0]
