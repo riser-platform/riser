@@ -38,7 +38,7 @@ func newDeployCommand(runtimeConfig *rc.RuntimeConfiguration) *cobra.Command {
 			app, err := config.LoadAppFromConfig(appFilePath)
 			ui.ExitIfErrorMsg(err, "Error loading app config")
 
-			deployment := &model.DeploymentRequest{
+			deployment := &model.SaveDeploymentRequest{
 				DeploymentMeta: model.DeploymentMeta{
 					Name:          deploymentName,
 					Environment:   environment,
@@ -92,7 +92,7 @@ func validateNewDeployCommand(manualRollout, wait bool) error {
 }
 
 type newDeployView struct {
-	result        *model.DeploymentResponse
+	result        *model.SaveDeploymentResponse
 	manualRollout bool
 	dryRun        bool
 }
