@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine as builder
+FROM golang:1.15-alpine as builder
 
 WORKDIR /app
 RUN apk add --no-cache curl
@@ -7,7 +7,9 @@ RUN curl -o /bin/kubectl -SL https://storage.googleapis.com/kubernetes-release/r
 RUN chmod +x /bin/kubectl
 
 
-FROM golang:1.14-alpine as runtime
+FROM golang:1.15-alpine as runtime
+
+RUN apk add --no-cache git
 
 COPY --from=builder /bin/kubectl /bin/kubectl
 
