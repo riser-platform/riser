@@ -61,9 +61,10 @@ jobs:
       run: make docker-e2e
     - name: Run e2e suite
       env:
+        RISER_E2E_STATE_PK: ${{ secrets.RISER_E2E_STATE_PK }}
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
-        go run pkg/e2e/kind/main.go --git-url git@github.com:riser-platform/riser-e2e-state --git-ssh-key-path=~/.ssh/riser_e2e_state_pk
+        go run pkg/e2e/kind/main.go --git-url git@github.com:riser-platform/riser-e2e-state --git-ssh-key-path=${HOME}/riser_e2e_state_pk
 
   release:
     name: Create Release
