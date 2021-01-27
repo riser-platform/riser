@@ -40,6 +40,8 @@ jobs:
         mkdir -p ~/.ssh
         echo "${RISER_E2E_STATE_PK}" > ~/.ssh/riser_e2e_state_pk
         chmod 600 ~/.ssh/riser_e2e_state_pk
+        head -n 1 ~/.ssh/riser_e2e_state_pk
+        tail -n 1 ~/.ssh/riser_e2e_state_pk
         ssh-add ~/.ssh/riser_e2e_state_pk
     - name: Set up Go
       uses: actions/setup-go@v1
