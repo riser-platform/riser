@@ -35,6 +35,7 @@ jobs:
       env:
         RISER_E2E_STATE_PK: ${{ secrets.RISER_E2E_STATE_PK }}
       run: |
+        mkdir -p ~/.ssh
         echo "${RISER_E2E_STATE_PK}" > ~/.ssh/riser_e2e_state_pk
     - name: Set up Go
       uses: actions/setup-go@v1
