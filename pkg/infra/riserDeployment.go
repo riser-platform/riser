@@ -176,11 +176,6 @@ func (deployment *RiserDeployment) Deploy() error {
 		steps.NewShellExecStep("Wait for riser-controller", "kubectl wait --for=condition=available --timeout=120s deployment/riser-controller-manager -n riser-system"),
 	)
 
-	if err != nil {
-		debugStep := steps.NewShellExecStep("debug", "kubectl get po -A")
-		_ = debugStep.Exec()
-	}
-
 	return err
 }
 

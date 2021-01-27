@@ -133,7 +133,15 @@ func main() {
 			}),
 		)
 
-		ui.ExitIfError(err)
+		var debugOutput string
+		if err != nil {
+			debugStep := steps.NewShellExecStep("debug", "kubectl get po -A")
+			_ = debugStep.Exec()
+
+			debugOutput = debugStep.State("stdout").(string)
+		}
+
+		ui.ExitIfErrorMsg(err, fmt.Sprintf("Debug output:\n\n%s", debugOutput))
 	}
 
 	err = cmd.Execute()
