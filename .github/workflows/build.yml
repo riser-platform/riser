@@ -51,7 +51,7 @@ jobs:
     - name: Make Riser binary
       run: |
         make build
-        echo "::add-path::$GITHUB_WORKSPACE/bin"
+        echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
     - name: Setup KiND
       uses: engineerd/setup-kind@v0.5.0
       with:
