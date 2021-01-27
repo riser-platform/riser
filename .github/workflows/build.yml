@@ -37,7 +37,9 @@ jobs:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
         ssh-agent -a ${SSH_AUTH_SOCK} > /dev/null
-        ssh-add - <<< "${RISER_E2E_STATE_PK}"
+        mkdir -p ~/.ssh
+        echo "${RISER_E2E_STATE_PK}" > ~/.ssh/riser_e2e_state_pk
+        ssh-add ~/.ssh/riser_e2e_state_pk
     - name: Set up Go
       uses: actions/setup-go@v1
       with:
