@@ -31,6 +31,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+    - name: Install riser-e2e-state SSH key
+      env:
+        RISER_E2E_STATE_PK: ${{ secrets.RISER_E2E_STATE_PK }}
+      run: |
+        echo "${RISER_E2E_STATE_PK}" > ~/.ssh/riser_e2e_state_pk
     - name: Set up Go
       uses: actions/setup-go@v1
       with:
@@ -46,12 +51,8 @@ jobs:
     - name: Build e2e container
       run: make docker-e2e
     - name: Run e2e suite
-      env:
-        RISER_E2E_STATE_PK: ${secrets.RISER_E2E_STATE_PK}
       run: |
-        echo $RISER_E2E_STATE_PK > ./riser_e2e_state_pk
-        go run pkg/e2e/kind/main.go --git-url git@github.com:riser-platform/riser-e2e-state --git-ssh-key-path=./riser_e2e_state_pk
-        rm riser_e2e_state_pk
+        go run pkg/e2e/kind/main.go --git-url git@github.com:riser-platform/riser-e2e-state --git-ssh-key-path=~/.ssh/riser_e2e_state_pk
 
   release:
     name: Create Release
