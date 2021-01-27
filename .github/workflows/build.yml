@@ -49,7 +49,9 @@ jobs:
 
   release:
     name: Create Release
-    needs: build, test
+    needs:
+    - build
+    - test
     if: contains(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
