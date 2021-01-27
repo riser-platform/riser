@@ -26,9 +26,30 @@ jobs:
     - name: Test
       run: go test ./...
 
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.15.7
+      id: go
+    - name: Check out code
+      uses: actions/checkout@v2.3.4
+    - name: Setup KiND
+      uses: engineerd/setup-kind@v0.5.0
+    - name: Run e2e suite
+      env:
+        RISER_E2E_STATE_PK: ${secrets.RISER_E2E_STATE_PK}
+      run: |
+        echo $RISER_E2E_STATE_PK > /riser_e2e_state
+        go run pkg/e2e/kind/main.go --git-url git@github.com:riser-platform/riser-e2e-state --git-ssh-key-path=/riser_e2e_state
+
   release:
     name: Create Release
-    needs: build
+    needs: build, test
     if: contains(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
