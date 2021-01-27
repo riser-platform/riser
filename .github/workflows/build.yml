@@ -43,6 +43,8 @@ jobs:
       with:
           version: v0.9.0
           skipClusterCreation: true
+    - name: Build e2e container
+      run: make docker-e2e
     - name: Run e2e suite
       env:
         RISER_E2E_STATE_PK: ${secrets.RISER_E2E_STATE_PK}
