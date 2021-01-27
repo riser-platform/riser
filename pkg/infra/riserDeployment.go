@@ -172,8 +172,8 @@ func (deployment *RiserDeployment) Deploy() error {
 				deployment.RiserConfig.SetContext(newRiserContext)
 				return rc.SaveRc(deployment.RiserConfig)
 			}),
-		steps.NewShellExecStep("Wait for riser-server", "kubectl wait --for=condition=ready --timeout=180s ksvc/riser-server -n riser-system"),
-		steps.NewShellExecStep("Wait for riser-controller", "kubectl wait --for=condition=available --timeout=180s deployment/riser-controller-manager -n riser-system"),
+		steps.NewShellExecStep("Wait for riser-server", "kubectl wait --for=condition=ready --timeout=300s ksvc/riser-server -n riser-system"),
+		steps.NewShellExecStep("Wait for riser-controller", "kubectl wait --for=condition=available --timeout=300s deployment/riser-controller-manager -n riser-system"),
 	)
 
 	return err
