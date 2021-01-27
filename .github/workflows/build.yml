@@ -34,9 +34,10 @@ jobs:
     - name: Install riser-e2e-state SSH key
       env:
         RISER_E2E_STATE_PK: ${{ secrets.RISER_E2E_STATE_PK }}
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
-        mkdir -p ~/.ssh
-        echo "${RISER_E2E_STATE_PK}" > ~/.ssh/riser_e2e_state_pk
+        ssh-agent -a ${SSH_AUTH_SOCK} > /dev/null
+        ssh-add - <<< "${RISER_E2E_STATE_PK}"
     - name: Set up Go
       uses: actions/setup-go@v1
       with:
@@ -52,6 +53,8 @@ jobs:
     - name: Build e2e container
       run: make docker-e2e
     - name: Run e2e suite
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
         go run pkg/e2e/kind/main.go --git-url git@github.com:riser-platform/riser-e2e-state --git-ssh-key-path=~/.ssh/riser_e2e_state_pk
 
