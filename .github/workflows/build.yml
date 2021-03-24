@@ -1,5 +1,8 @@
 name: Build
 on: [push, pull_request]
+env:
+  GO_VERSION: 1.16
+
 jobs:
 
   build:
@@ -7,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go
-      uses: actions/setup-go@v1
+      uses: actions/setup-go@v2
       with:
-        go-version: 1.15.7
+        go-version: ${{ env.GO_VERSION }}
       id: go
 
     - name: Check out code
@@ -20,7 +23,7 @@ jobs:
 
     - name: Lint
       run: |
-        curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
+        curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.38.0
         $(go env GOPATH)/bin/golangci-lint run
 
     - name: Test
@@ -33,9 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go
-      uses: actions/setup-go@v1
+      uses: actions/setup-go@v2
       with:
-        go-version: 1.15.7
+        go-version: ${{ env.GO_VERSION }}
       id: go
 
     - name: Checkout code
