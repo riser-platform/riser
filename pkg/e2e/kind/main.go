@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"riser/pkg/assets"
+	"riser/assets"
 	"riser/pkg/infra"
 	"riser/pkg/rc"
 	"riser/pkg/steps"

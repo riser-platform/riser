@@ -16,10 +16,6 @@ endif
 tidy:
 	go mod tidy
 
-# Bundle static assets
-generate:
-	go run asset_generator.go
-
 build:
 	go build -o bin/riser
 

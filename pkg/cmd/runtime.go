@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"net/http"
+	"io/fs"
 	"riser/pkg/rc"
 
 	version "github.com/hashicorp/go-version"
@@ -11,5 +11,5 @@ import (
 type Runtime struct {
 	Version       *version.Version
 	Configuration *rc.RuntimeConfiguration
-	Assets        http.FileSystem
+	Assets        fs.FS
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -25,7 +26,7 @@ const (
 )
 
 type RiserDeployment struct {
-	Assets      http.FileSystem
+	Assets      fs.FS
 	GitUrl      string
 	RiserConfig *rc.RuntimeConfiguration
 	// Optional
@@ -36,7 +37,7 @@ type RiserDeployment struct {
 	ControllerImage string
 }
 
-func NewRiserDeployment(assets http.FileSystem, riserConfig *rc.RuntimeConfiguration, gitUrl string) *RiserDeployment {
+func NewRiserDeployment(assets fs.FS, riserConfig *rc.RuntimeConfiguration, gitUrl string) *RiserDeployment {
 	return &RiserDeployment{
 		Assets:          assets,
 		RiserConfig:     riserConfig,
@@ -54,7 +55,7 @@ func (deployment *RiserDeployment) Deploy() error {
 		"RISER_SERVER_IMAGE":     deployment.ServerImage,
 		"RISER_CONTROLLER_IMAGE": deployment.ControllerImage,
 	}
-	assetPath, err := outputDeployAssetsToTempDir(deployment.Assets, templateVars)
+	assetPath, err := outputDeployAssetsToTempDir(http.FS(deployment.Assets), templateVars)
 	if err != nil {
 		return errors.Wrap(err, "Error writing assets to temp dir")
 	}

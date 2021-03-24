@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
+	"io/fs"
 	"net/url"
 	"os"
 	"os/exec"
@@ -36,7 +36,7 @@ type kubectlClientVersion struct {
 	GitVersion string `json:"gitVersion"`
 }
 
-func newDemoCommand(config *rc.RuntimeConfiguration, assets http.FileSystem) *cobra.Command {
+func newDemoCommand(config *rc.RuntimeConfiguration, assets fs.FS) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "demo",
 		Short: "Commands for the riser demo",
@@ -102,7 +102,7 @@ curl a named deployment:
 	return cmd
 }
 
-func newInstallDemoCommand(config *rc.RuntimeConfiguration, assets http.FileSystem) *cobra.Command {
+func newInstallDemoCommand(config *rc.RuntimeConfiguration, assets fs.FS) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "install",
 		Short: "Installs a self-contained riser demo to a k8s cluster (minikube recommended)",
@@ -125,7 +125,7 @@ func newDemoStatusCommand(config *rc.RuntimeConfiguration) *cobra.Command {
 	}
 }
 
-func demoInstall(config *rc.RuntimeConfiguration, assets http.FileSystem) {
+func demoInstall(config *rc.RuntimeConfiguration, assets fs.FS) {
 	out, err := exec.Command("kubectl", "version", "--client=true", "-o=json").Output()
 	ui.ExitIfErrorMsg(err, "Error validating kubectl")
 

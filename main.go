@@ -1,7 +1,7 @@
 package main
 
 import (
-	"riser/pkg/assets"
+	"riser/assets"
 	"riser/pkg/cmd"
 	"riser/pkg/rc"
 	"riser/pkg/ui"

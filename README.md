@@ -25,10 +25,6 @@ Riser is an opinionated app platform built on [Kubernetes](https://kubernetes.io
 
 > Note: We are not currently accepting PRs. As the project matures this section will contain more details.
 
-### Assets
-
-If you change anything in the `assets` folder, you must run `make generate` to statically bundle them inside the riser binary.
-
 ### E2E Tests using Kind
 
 #### Prequisites
