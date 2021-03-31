@@ -21,8 +21,8 @@ import (
 
 const (
 	DefaultEnvironmentName = "demo"
-	DefaultServerImage     = "riserplatform/riser-server:0.0.40"
-	DefaultControllerImage = "riserplatform/riser-controller:0.0.16"
+	DefaultServerImage     = "ghcr.io/riser-platform/riser-server:v0.0.41"
+	DefaultControllerImage = "ghcr.io/riser-platform/riser-controller:v0.0.17"
 )
 
 type RiserDeployment struct {
