@@ -75,6 +75,7 @@ func main() {
 		apiserverStep := steps.NewShellExecStep("Get apiserver IP", `kubectl get service  -l component=apiserver -l provider=kubernetes -o jsonpath="{.items[0].spec.clusterIP}"`)
 		ui.ExitIfError(apiserverStep.Exec())
 		apiserverIP := apiserverStep.State("stdout")
+		environmentName := kindName
 
 		err = steps.Run(
 			steps.NewShellExecStep("Create riser-e2e namespace", "kubectl create namespace riser-e2e --dry-run=client -o yaml | kubectl apply -f -"),
@@ -83,8 +84,10 @@ func main() {
 				riserDeployment := infra.NewRiserDeployment(
 					assets.Assets,
 					config,
-					gitUrl)
-				riserDeployment.EnvironmentName = kindName
+					gitUrl,
+					environmentName, // gitBranch
+				)
+				riserDeployment.EnvironmentName = environmentName
 				riserDeployment.ServerImage = riserServerImage
 				riserDeployment.ControllerImage = riserControllerImage
 				riserDeployment.GitSSHKeyPath = gitSSHKeyPath

@@ -216,7 +216,7 @@ It's recommended that you use a deploy key (e.g. git@github.com:your/repo) with 
 
 	logger.Log().Info("Installing demo")
 
-	deployment := infra.NewRiserDeployment(assets, config, gitUrl)
+	deployment := infra.NewRiserDeployment(assets, config, gitUrl, demoEnvironmentName)
 
 	deployment.GitSSHKeyPath = expandTildeInPath(gitSshKeyPath)
 	err = deployment.Deploy()

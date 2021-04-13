@@ -175,7 +175,7 @@ spec:
           - --sync-state=git
           - --memcached-service=
           - --git-url=$(GIT_URL)
-          - --git-branch=main
+          - --git-branch=$(GIT_BRANCH)
           - --git-path=$(GIT_PATH)
           - --git-readonly=true
           - --git-user=Weave Flux

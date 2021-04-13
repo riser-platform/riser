@@ -28,6 +28,7 @@ const (
 type RiserDeployment struct {
 	Assets      fs.FS
 	GitUrl      string
+	GitBranch   string
 	RiserConfig *rc.RuntimeConfiguration
 	// Optional
 	GitSSHKeyPath   string
@@ -37,11 +38,12 @@ type RiserDeployment struct {
 	ControllerImage string
 }
 
-func NewRiserDeployment(assets fs.FS, riserConfig *rc.RuntimeConfiguration, gitUrl string) *RiserDeployment {
+func NewRiserDeployment(assets fs.FS, riserConfig *rc.RuntimeConfiguration, gitUrl string, gitBranch string) *RiserDeployment {
 	return &RiserDeployment{
 		Assets:          assets,
 		RiserConfig:     riserConfig,
 		GitUrl:          gitUrl,
+		GitBranch:       gitBranch,
 		EnvironmentName: DefaultEnvironmentName,
 		KubeDeployer:    &NoopDeployer{},
 		ServerImage:     DefaultServerImage,
@@ -155,6 +157,7 @@ func (deployment *RiserDeployment) Deploy() error {
 		steps.NewShellExecStep("Create secret for flux",
 			"kubectl create secret generic flux-git --namespace=flux "+
 				fmt.Sprintf("--from-literal=GIT_URL=%s ", deployment.GitUrl)+
+				fmt.Sprintf("--from-literal=GIT_BRANCH=%s ", deployment.GitBranch)+
 				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", deployment.EnvironmentName)+
 				" --dry-run=client -o yaml | kubectl apply -f -"),
 		steps.NewShellExecStep("Create flux git key secret",
