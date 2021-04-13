@@ -66,6 +66,14 @@ func Test_Smoke(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	secretName := "secret1"
+	secretValue := "secretVal1"
+	Step(t, "create secret", func() {
+		shellOrFail(t, "cd %s && riser secrets save %s %s %s", appContext.AppDir, secretName, secretValue, testContext.RiserEnvironment)
+		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
+		// not become available until the secret is present.
+	})
+
 	versionA := "0.0.15"
 	Step(t, fmt.Sprintf("deploy version %q", versionA), func() {
 		DeployOrFail(t, appContext.AppDir, versionA, testContext.RiserEnvironment)
@@ -77,7 +85,7 @@ func Test_Smoke(t *testing.T) {
 
 		healthResponse, err := testContext.Http.Get(appContext.Url("/health"))
 		require.NoError(t, err)
-		assert.Equal(t, healthResponse.StatusCode, http.StatusForbidden)
+		assert.Equal(t, http.StatusForbidden, healthResponse.StatusCode)
 
 		envResponse, err := testContext.Http.Get(appContext.Url("/env"))
 		require.NoError(t, err)
@@ -88,6 +96,7 @@ func Test_Smoke(t *testing.T) {
 
 		envMap := ParseTestDummyEnv(envBody)
 		assert.Equal(t, "val1", envMap["ENV1"])
+		require.Equal(t, secretValue, envMap[strings.ToUpper(secretName)])
 
 		// Platform env vars
 		assert.Equal(t, appContext.Name, envMap["RISER_APP"])
@@ -95,14 +104,6 @@ func Test_Smoke(t *testing.T) {
 		assert.Equal(t, "1", envMap["RISER_DEPLOYMENT_REVISION"])
 		assert.Equal(t, testContext.RiserEnvironment, envMap["RISER_ENVIRONMENT"])
 		assert.Equal(t, appContext.Namespace, envMap["RISER_NAMESPACE"])
-	})
-
-	secretName := "secret1"
-	secretValue := "secretVal1"
-	Step(t, "create secret", func() {
-		shellOrFail(t, "cd %s && riser secrets save %s %s %s", appContext.AppDir, secretName, secretValue, testContext.RiserEnvironment)
-		// We do not wait for the secret to be available in k8s. The next deployment should have the secret ref and
-		// not become available until the secret is present.
 	})
 
 	versionB := "0.0.16"
@@ -123,7 +124,6 @@ func Test_Smoke(t *testing.T) {
 
 		envMap := ParseTestDummyEnv(envBody)
 		require.Equal(t, "val1", envMap["ENV1"])
-		require.Equal(t, secretValue, envMap[strings.ToUpper(secretName)])
 	})
 
 	Step(t, "rollout 50/50 with previous deployment", func() {
