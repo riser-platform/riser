@@ -103,7 +103,7 @@ func (deployment *RiserDeployment) Deploy() error {
 			180, steps.AlwaysRetry()),
 		steps.NewExecStep("Apply knative resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "knative"))),
 		// Due to race condition with applying ksvc too early: https://github.com/knative/serving/issues/7576
-		// Also, on slower systems the cert-manager-webhook may not be available yet which causes problems down the line
+		// Also ensure that the the cert-manager-webhook is available before we proceed.
 		steps.NewShellExecStep("Wait for knative",
 			`kubectl wait --timeout=300s --for=condition=available --namespace knative-serving deployment --all && \
 			kubectl wait --for condition=available deployment/cert-manager-webhook -n cert-manager`),
@@ -164,7 +164,16 @@ func (deployment *RiserDeployment) Deploy() error {
 			fmt.Sprintf("kubectl create secret generic flux-git-deploy %s --namespace=flux --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
 		steps.NewShellExecStep("Install flux",
 			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(assetPath, "flux"))),
-		steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "--validate=false", "-R", "-f", path.Join(assetPath, "kube-resources"))),
+		// Added this retry due to frequent failures caused by the knative admission webhook not actually being available, even though we
+		// wait for availability in a previous step. Revisit after we move to the knative operator.
+		steps.NewRetryStep(
+			func() steps.Step {
+				return steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "--validate=false", "-R", "-f", path.Join(assetPath, "kube-resources")))
+			},
+			60,
+			// Ideally we'd test for the specific webhook issue that we're seeing, but the hope is that we won't need to retry after we move to the knative operator
+			steps.AlwaysRetry(),
+		),
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
 			func() error {
 				secure := false
