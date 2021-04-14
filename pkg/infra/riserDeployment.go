@@ -158,7 +158,7 @@ func (deployment *RiserDeployment) Deploy() error {
 			"kubectl create secret generic flux-git --namespace=flux "+
 				fmt.Sprintf("--from-literal=GIT_URL=%s ", deployment.GitUrl)+
 				fmt.Sprintf("--from-literal=GIT_BRANCH=%s ", deployment.GitBranch)+
-				fmt.Sprintf("--from-literal=GIT_PATH=state/%s ", deployment.EnvironmentName)+
+				"--from-literal=GIT_PATH=state "+
 				" --dry-run=client -o yaml | kubectl apply -f -"),
 		steps.NewShellExecStep("Create flux git key secret",
 			fmt.Sprintf("kubectl create secret generic flux-git-deploy %s --namespace=flux --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
