@@ -67,6 +67,6 @@ e2e-smoke:
 	go test -count=1 -tags=e2e -run Test_Smoke -v ./pkg/e2e
 
 docker-e2e:
-	docker build -f e2e/Dockerfile . -t riser-platform/riser-e2e:local
+	docker build -f e2e/Dockerfile . -t riser-e2e:local
 
 

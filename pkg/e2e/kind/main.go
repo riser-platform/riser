@@ -16,7 +16,7 @@ import (
 
 const (
 	// DefaultKindNodeImage should roughly match the latest stable kubernetes version provided by GKE/AKS/EKS
-	DefaultKindNodeImage = "kindest/node:v1.17.5"
+	DefaultKindNodeImage = "kindest/node:v1.18.15"
 	// DefaultKindName is the name of the kind cluster as well as the riser context by convention
 	DefaultKindName = "riser-e2e"
 )
@@ -36,7 +36,7 @@ func main() {
 	cmd.Flags().StringVar(&gitUrl, "git-url", "", "the git url for the state repo")
 	cmd.Flags().StringVar(&gitSSHKeyPath, "git-ssh-key-path", "", "optional path to a git ssh key.")
 	cmd.Flags().BoolVar(&keep, "keep", false, "keep the cluster if it already exists")
-	cmd.Flags().StringVar(&riserE2EImage, "riser-e2e-image", "riser-platform/riser-e2e:local", "the riser E2E image (use \"make docker-e2e\")")
+	cmd.Flags().StringVar(&riserE2EImage, "riser-e2e-image", "riser-e2e:local", "the riser E2E image (use \"make docker-e2e\")")
 	cmd.Flags().StringVar(&riserServerImage, "riser-server-image", infra.DefaultServerImage, "the riser server image")
 	cmd.Flags().StringVar(&riserControllerImage, "riser-controller-image", infra.DefaultControllerImage, "the riser controller image")
 	err := cobra.MarkFlagRequired(cmd.Flags(), "git-url")
