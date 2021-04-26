@@ -21,7 +21,7 @@ import (
 
 const (
 	DefaultEnvironmentName = "demo"
-	DefaultServerImage     = "ghcr.io/riser-platform/riser-server:v0.0.41"
+	DefaultServerImage     = "ghcr.io/riser-platform/riser-server:v0.0.44"
 	DefaultControllerImage = "ghcr.io/riser-platform/riser-controller:v0.0.17"
 )
 
