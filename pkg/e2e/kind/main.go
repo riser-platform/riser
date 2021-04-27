@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
 	"riser/assets"
@@ -9,6 +10,7 @@ import (
 	"riser/pkg/rc"
 	"riser/pkg/steps"
 	"riser/pkg/ui"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -22,6 +24,7 @@ const (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	var kindNodeImage string
 	var kindName string
 	var gitUrl string
@@ -75,7 +78,7 @@ func main() {
 		apiserverStep := steps.NewShellExecStep("Get apiserver IP", `kubectl get service  -l component=apiserver -l provider=kubernetes -o jsonpath="{.items[0].spec.clusterIP}"`)
 		ui.ExitIfError(apiserverStep.Exec())
 		apiserverIP := apiserverStep.State("stdout")
-		environmentName := kindName
+		environmentName := fmt.Sprintf("%s-%s", kindName, randomString(8))
 
 		err = steps.Run(
 			steps.NewShellExecStep("Create riser-e2e namespace", "kubectl create namespace riser-e2e --dry-run=client -o yaml | kubectl apply -f -"),
@@ -141,4 +144,14 @@ func main() {
 
 	err = cmd.Execute()
 	ui.ExitIfError(err)
+}
+
+const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+func randomString(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(b)
 }
