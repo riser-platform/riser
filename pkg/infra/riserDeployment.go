@@ -93,6 +93,7 @@ func (deployment *RiserDeployment) Deploy() error {
 				return strings.Contains(stepErr.Error(), "Error from server (NotFound)")
 			}),
 		getApiKeyFromRiserSecretStep,
+		steps.NewShellExecStep("Apply postgres", "kubectl apply -f"+path.Join(assetPath, "kube-resources/postgresql")),
 		// Knative installation is very order dependant, must install istio first.
 		steps.NewExecStep("Apply istio resources", exec.Command("kubectl", "apply",
 			"-f", path.Join(assetPath, "kube-resources/istio"),
@@ -162,6 +163,8 @@ func (deployment *RiserDeployment) Deploy() error {
 				" --dry-run=client -o yaml | kubectl apply -f -"),
 		steps.NewShellExecStep("Create flux git key secret",
 			fmt.Sprintf("kubectl create secret generic flux-git-deploy %s --namespace=flux --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
+		// Apply demo config otherwise knative will race against the riser-server ksvc
+		steps.NewShellExecStep("Configure knative", "kubectl apply -f"+path.Join(assetPath, "kube-resources/riser-server/demo.yaml")),
 		steps.NewShellExecStep("Install flux",
 			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(assetPath, "flux"))),
 		// Added this retry due to frequent failures caused by the knative admission webhook not actually being available, even though we
