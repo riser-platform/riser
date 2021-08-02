@@ -15,7 +15,7 @@ metadata:
   namespace: istio-operator
   name: istio-operator
 ---
-# Source: istio-operator/templates/crd-operator.yaml
+# Source: istio-operator/templates/crds.yaml
 # SYNC WITH manifests/charts/base/files
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -95,12 +95,6 @@ rules:
   verbs:
   - '*'
 - apiGroups:
-  - rbac.istio.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
   - security.istio.io
   resources:
   - '*'
@@ -128,9 +122,7 @@ rules:
   - daemonsets
   - deployments
   - deployments/finalizers
-  - ingresses
   - replicasets
-  - statefulsets
   verbs:
   - '*'
 - apiGroups:
@@ -146,6 +138,7 @@ rules:
   verbs:
   - get
   - create
+  - update
 - apiGroups:
   - policy
   resources:
@@ -162,6 +155,14 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - create
+  - update
+- apiGroups:
   - ""
   resources:
   - configmaps
@@ -169,6 +170,7 @@ rules:
   - events
   - namespaces
   - pods
+  - pods/proxy
   - persistentvolumeclaims
   - secrets
   - services
@@ -203,6 +205,7 @@ spec:
   - name: http-metrics
     port: 8383
     targetPort: 8383
+    protocol: TCP
   selector:
     name: istio-operator
 ---
@@ -225,10 +228,20 @@ spec:
       serviceAccountName: istio-operator
       containers:
         - name: istio-operator
-          image: docker.io/istio/operator:1.6.1
+          image: docker.io/istio/operator:1.9.7
           command:
           - operator
           - server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1337
+            runAsUser: 1337
+            runAsNonRoot: true
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -239,12 +252,16 @@ spec:
               memory: 128Mi
           env:
             - name: WATCH_NAMESPACE
-              value: istio-system
+              value: "istio-system"
             - name: LEADER_ELECTION_NAMESPACE
-              value: istio-operator
+              value: "istio-operator"
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: istio-operator
+              value: "istio-operator"
+            - name: WAIT_FOR_RESOURCES_TIMEOUT
+              value: "300s"
+            - name: REVISION
+              value: ""

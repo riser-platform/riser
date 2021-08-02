@@ -33,21 +33,5 @@ spec:
           requests:
             cpu: 50m
             memory: 128Mi
-    telemetry:
-      enabled: false
-  values:
-    gateways:
-      istio-ingressgateway:
-        sds:
-          enabled: true
-    global:
-      controlPlaneSecurityEnabled: true
-      defaultPodDisruptionBudget:
-        enabled: false
-      proxy:
-        resources:
-          requests:
-            cpu: 10m
-    tracing:
-      enabled: false
+
 
