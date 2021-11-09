@@ -133,8 +133,10 @@ func getRiserDomain(t *testing.T) string {
 	require.NoError(t, err)
 	var domain string
 	for key := range domainConfigMap.Data {
-		domain = key
-		break
+		if key != "_example" {
+			domain = key
+			break
+		}
 	}
 	require.NotEmpty(t, domain)
 	return domain

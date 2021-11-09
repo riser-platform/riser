@@ -13,7 +13,6 @@ import (
 	"riser/pkg/rc"
 	"riser/pkg/steps"
 	"riser/pkg/ui"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/shurcooL/httpfs/vfsutil"
@@ -72,42 +71,25 @@ func (deployment *RiserDeployment) Deploy() error {
 	err = steps.Run(
 		// Install namespaces and some CRDs separately due to ordering issues (declarative infra... not quite!)
 		steps.NewExecStep("Apply prerequisites", exec.Command("kubectl", "apply",
-			"-f", path.Join(assetPath, "kube-resources/istio/istio_operator.yaml"),
 			"-f", path.Join(assetPath, "kube-resources/riser-server/namespaces.yaml"),
-			"-f", path.Join(assetPath, "knative/serving-crds.yaml"),
-			"-f", path.Join(assetPath, "cert-manager/cert-manager.yaml"),
+			// "-f", path.Join(assetPath, "cert-manager/cert-manager.yaml"),
 			"-f", path.Join(assetPath, "flux/namespace.yaml"),
 		)),
 		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", deployment.GitUrl, "HEAD")),
-		steps.NewRetryStep(
-			func() steps.Step {
-				// We don't wait for each specific CRD. In testing we've found these are the most common ones that aren't immediately ready
-				// May have to adjust over time.
-				return steps.NewShellExecStep("Wait for resources",
-					`kubectl wait --for condition=established crd/clusterissuers.cert-manager.io && \
-					kubectl wait --for condition=established crd/istiooperators.install.istio.io
-					`)
-			},
-			120,
-			func(stepErr error) bool {
-				return strings.Contains(stepErr.Error(), "Error from server (NotFound)")
-			}),
+		// steps.NewRetryStep(
+		// 	func() steps.Step {
+		// 		// We don't wait for each specific CRD. In testing we've found these are the most common ones that aren't immediately ready
+		// 		// May have to adjust over time.
+		// 		return steps.NewShellExecStep("Wait for resources",
+		// 			`kubectl wait --for condition=established crd/clusterissuers.cert-manager.io
+		// 			`)
+		// 	},
+		// 	120,
+		// 	func(stepErr error) bool {
+		// 		return strings.Contains(stepErr.Error(), "Error from server (NotFound)")
+		// 	}),
 		getApiKeyFromRiserSecretStep,
-		steps.NewShellExecStep("Apply postgres", "kubectl apply -f"+path.Join(assetPath, "kube-resources/postgresql")),
-		// Knative installation is very order dependant, must install istio first.
-		steps.NewExecStep("Apply istio resources", exec.Command("kubectl", "apply",
-			"-f", path.Join(assetPath, "kube-resources/istio"),
-		)),
-		steps.NewRetryStep(func() steps.Step {
-			return steps.NewShellExecStep("Wait for istio", "kubectl get deployment istiod -n istio-system -o jsonpath='{.status.availableReplicas}' | grep ^1$")
-		},
-			180, steps.AlwaysRetry()),
-		steps.NewExecStep("Apply knative resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "knative"))),
-		// Due to race condition with applying ksvc too early: https://github.com/knative/serving/issues/7576
-		// Also ensure that the the cert-manager-webhook is available before we proceed.
-		steps.NewShellExecStep("Wait for knative",
-			`kubectl wait --timeout=300s --for=condition=available --namespace knative-serving deployment --all && \
-			kubectl wait --for condition=available deployment/cert-manager-webhook -n cert-manager`),
+		// steps.NewShellExecStep("Apply postgres", "kubectl apply -f"+path.Join(assetPath, "kube-resources/postgresql")),
 	)
 	ui.ExitIfError(err)
 
@@ -148,7 +130,7 @@ func (deployment *RiserDeployment) Deploy() error {
 			fmt.Sprintf("kubectl create secret generic riser-git-deploy %s --namespace=riser-system --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
 		steps.NewShellExecStep("Configure riser-controller", fmt.Sprintf(
 			`kubectl create configmap riser-controller --namespace=riser-system \
-					--from-literal=RISER_SERVER_URL=http://riser-server.riser-system.svc.cluster.local \
+					--from-literal=RISER_SERVER_URL=http://riser-server.riser-system.svc.cluster.local  \
 					--from-literal=RISER_ENVIRONMENT=%s \
 					--dry-run=client -o yaml | kubectl apply -f -`, deployment.EnvironmentName)),
 		steps.NewShellExecStep("Create secret for riser-controller",
@@ -164,17 +146,15 @@ func (deployment *RiserDeployment) Deploy() error {
 		steps.NewShellExecStep("Create flux git key secret",
 			fmt.Sprintf("kubectl create secret generic flux-git-deploy %s --namespace=flux --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
 		// Apply demo config otherwise knative will race against the riser-server ksvc
-		steps.NewShellExecStep("Configure knative", "kubectl apply -f"+path.Join(assetPath, "kube-resources/riser-server/demo.yaml")),
+		// steps.NewShellExecStep("Configure knative", "kubectl apply -f"+path.Join(assetPath, "kube-resources/riser-server/demo.yaml")),
 		steps.NewShellExecStep("Install flux",
 			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(assetPath, "flux"))),
-		// Added this retry due to frequent failures caused by the knative admission webhook not actually being available, even though we
-		// wait for availability in a previous step. Revisit after we move to the knative operator.
 		steps.NewRetryStep(
 			func() steps.Step {
-				return steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "--validate=false", "-R", "-f", path.Join(assetPath, "kube-resources")))
+				return steps.NewExecStep("Apply other resources", exec.Command("kubectl", "apply", "-R", "-f", path.Join(assetPath, "kube-resources")))
 			},
-			60,
-			// Ideally we'd test for the specific webhook issue that we're seeing, but the hope is that we won't need to retry after we move to the knative operator
+			180,
+			// Eventually CRDs will converge. Hopefully kubectl apply will handle this in the future.
 			steps.AlwaysRetry(),
 		),
 		steps.NewFuncStep(fmt.Sprintf("Save riser context %q", deployment.EnvironmentName),
@@ -189,6 +169,9 @@ func (deployment *RiserDeployment) Deploy() error {
 				return rc.SaveRc(deployment.RiserConfig)
 			}),
 		steps.NewShellExecStep("Wait for riser-server", "kubectl wait --for=condition=ready --timeout=120s ksvc/riser-server -n riser-system"),
+		// This allows for faster e2e runs as the crash backoff is too slow. Init containers could be used here too.
+		steps.NewShellExecStep("Install riser-controller",
+			fmt.Sprintf("kubectl apply -f %s", path.Join(assetPath, "riser-controller"))),
 		steps.NewShellExecStep("Wait for riser-controller", "kubectl wait --for=condition=available --timeout=120s deployment/riser-controller-manager -n riser-system"),
 	)
 

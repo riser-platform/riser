@@ -18,7 +18,7 @@ import (
 
 const (
 	// DefaultKindNodeImage should roughly match the latest stable kubernetes version provided by GKE/AKS/EKS
-	DefaultKindNodeImage = "kindest/node:v1.19.11"
+	DefaultKindNodeImage = "kindest/node:v1.20.7"
 	// DefaultKindName is the name of the kind cluster as well as the riser context by convention
 	DefaultKindName = "riser-e2e"
 )
@@ -66,7 +66,7 @@ func main() {
 				for _, dockerImg := range []string{riserE2EImage, riserServerImage, riserControllerImage} {
 					err = kindDeployment.LoadLocalDockerImage(dockerImg)
 					if err != nil {
-						fmt.Printf("Image %q not found locally. Will attempt to load from source.\n", dockerImg)
+						fmt.Printf("Image %q not loaded locally. Will attempt to load from source.\n", dockerImg)
 					}
 				}
 

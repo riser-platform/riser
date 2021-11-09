@@ -44,7 +44,7 @@ func (deployer *KindDeployer) Destroy() error {
 }
 
 func (deployer *KindDeployer) LoadLocalDockerImage(imageName string) error {
-	args := []string{"load", "docker-image", fmt.Sprintf("--name=%s", deployer.Name), imageName}
+	args := []string{"load", "docker-image", "-q", fmt.Sprintf("--name=%s", deployer.Name), imageName}
 	return execStreamOutput("kind", args...)
 }
 

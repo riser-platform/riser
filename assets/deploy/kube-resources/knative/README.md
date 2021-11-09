@@ -1,0 +1,1 @@
+`kustomized.yaml` is provided by the knative kustomization in the riser-server repo.
