@@ -72,24 +72,10 @@ func (deployment *RiserDeployment) Deploy() error {
 		// Install namespaces and some CRDs separately due to ordering issues (declarative infra... not quite!)
 		steps.NewExecStep("Apply prerequisites", exec.Command("kubectl", "apply",
 			"-f", path.Join(assetPath, "kube-resources/riser-server/namespaces.yaml"),
-			// "-f", path.Join(assetPath, "cert-manager/cert-manager.yaml"),
 			"-f", path.Join(assetPath, "flux/namespace.yaml"),
 		)),
 		steps.NewExecStep("Validate Git remote", exec.Command("git", "ls-remote", deployment.GitUrl, "HEAD")),
-		// steps.NewRetryStep(
-		// 	func() steps.Step {
-		// 		// We don't wait for each specific CRD. In testing we've found these are the most common ones that aren't immediately ready
-		// 		// May have to adjust over time.
-		// 		return steps.NewShellExecStep("Wait for resources",
-		// 			`kubectl wait --for condition=established crd/clusterissuers.cert-manager.io
-		// 			`)
-		// 	},
-		// 	120,
-		// 	func(stepErr error) bool {
-		// 		return strings.Contains(stepErr.Error(), "Error from server (NotFound)")
-		// 	}),
 		getApiKeyFromRiserSecretStep,
-		// steps.NewShellExecStep("Apply postgres", "kubectl apply -f"+path.Join(assetPath, "kube-resources/postgresql")),
 	)
 	ui.ExitIfError(err)
 
@@ -145,8 +131,6 @@ func (deployment *RiserDeployment) Deploy() error {
 				" --dry-run=client -o yaml | kubectl apply -f -"),
 		steps.NewShellExecStep("Create flux git key secret",
 			fmt.Sprintf("kubectl create secret generic flux-git-deploy %s --namespace=flux --dry-run=client -o yaml | kubectl apply -f -", gitDeployKeyArg)),
-		// Apply demo config otherwise knative will race against the riser-server ksvc
-		// steps.NewShellExecStep("Configure knative", "kubectl apply -f"+path.Join(assetPath, "kube-resources/riser-server/demo.yaml")),
 		steps.NewShellExecStep("Install flux",
 			fmt.Sprintf("kubectl apply -f %s --namespace flux", path.Join(assetPath, "flux"))),
 		steps.NewRetryStep(
